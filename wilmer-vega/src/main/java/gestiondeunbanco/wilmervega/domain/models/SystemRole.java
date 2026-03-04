@@ -1,13 +1,13 @@
-package gestiondeunbanco.wilmervega.domain.enums;
+package gestiondeunbanco.wilmervega.domain.models;
 
 public enum SystemRole {
-    NATURAL_PERSON_CLIENT("Natural Person Client"),
+    NATURAL_CLIENT("Natural Person Client"),
     COMPANY_CLIENT("Company Client"),
     TELLER_EMPLOYEE("Teller Employee"),
     COMMERCIAL_EMPLOYEE("Commercial Employee"),
     COMPANY_EMPLOYEE("Company Employee"),
     COMPANY_SUPERVISOR("Company Supervisor"),
-    INTERNAL_ANALYST("Internal Bank Analyst");
+    INTERNAL_ANALYST("Internal Bank Analyst"), ;
 
     private final String description;
 

@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.domain.enums;
+package gestiondeunbanco.wilmervega.domain.models;
 
 public enum AccountType {
     SAVINGS("Savings"),

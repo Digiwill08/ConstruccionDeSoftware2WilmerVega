@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.domain.enums;
+package gestiondeunbanco.wilmervega.domain.models;
 
 /**
  * Low amount flow:  PENDING → EXECUTED
@@ -7,7 +7,7 @@ package gestiondeunbanco.wilmervega.domain.enums;
  */
 public enum TransferStatus {
     PENDING("Pending"),
-    AWAITING_APPROVAL("Awaiting Approval"),
+    AWAITING_APPROVAL("Awaiting approval"),
     APPROVED("Approved"),
     EXECUTED("Executed"),
     REJECTED("Rejected"),

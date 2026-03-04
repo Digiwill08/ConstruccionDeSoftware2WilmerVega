@@ -1,18 +1,18 @@
-package gestiondeunbanco.wilmervega.domain.enums;
+package gestiondeunbanco.wilmervega.domain.models;
 
 /**
  * Allowed flow:
  *   UNDER_REVIEW → APPROVED | REJECTED
  *   APPROVED     → DISBURSED
- *   DISBURSED    → DEFAULTED | PAID_OFF
+ *   DISBURSED    → OVERDUE | CANCELLED
  */
 public enum LoanStatus {
-    UNDER_REVIEW("Under Review"),
+    UNDER_REVIEW("Under review"),
     APPROVED("Approved"),
     REJECTED("Rejected"),
     DISBURSED("Disbursed"),
-    DEFAULTED("Defaulted"),
-    PAID_OFF("Paid Off");
+    OVERDUE("Overdue"),
+    CANCELLED("Cancelled");
 
     private final String description;
 
