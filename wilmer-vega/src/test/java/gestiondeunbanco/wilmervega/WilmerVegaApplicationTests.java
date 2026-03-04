@@ -1,9 +1,9 @@
-package gestiondeunbanco.wilmer_vega;
+package gestiondeunbanco.wilmervega;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = WilmerVegaApplication.class)
 class WilmerVegaApplicationTests {
 
 	@Test

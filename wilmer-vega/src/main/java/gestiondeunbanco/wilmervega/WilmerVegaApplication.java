@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmer_vega;
+package gestiondeunbanco.wilmervega;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
