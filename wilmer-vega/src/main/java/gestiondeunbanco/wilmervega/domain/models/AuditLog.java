@@ -3,7 +3,9 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import java.sql.Timestamp;
+
+import java.sql.Date;
+
 import java.util.Map;
 
 
@@ -14,11 +16,10 @@ public class AuditLog {
     private Long auditLogId;
 
     private OperationType operationType;
-    private Timestamp operationDateTime;
-    private Long userId;
+    private Date operationDateTime;
+    private String userId;
     private String userRole;
     private String affectedProductId;
-    private Map<String, Object> detailData;
 
 
 }
