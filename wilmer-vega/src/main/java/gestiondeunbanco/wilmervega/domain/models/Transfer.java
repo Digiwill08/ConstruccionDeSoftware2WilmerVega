@@ -3,19 +3,18 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class Transfer {
-    private Long transferId;
+    private int transferId;
     private BankAccount sourceAccount;
     private BankAccount destinationAccount;
-    private BigDecimal amount;
-    private LocalDateTime creationDateTime;
-    private LocalDateTime approvalDateTime;
+    private double amount;
+    private Date creationDateTime;
+    private Date approvalDateTime;
     private TransferStatus transferStatus;
     private SystemUser creatorUser;
     private SystemUser approverUser;
