@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class BankAccount {
-
+    
 }
