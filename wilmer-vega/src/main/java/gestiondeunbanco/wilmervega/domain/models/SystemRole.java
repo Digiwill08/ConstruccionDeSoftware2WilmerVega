@@ -7,7 +7,7 @@ public enum SystemRole {
     COMMERCIAL_EMPLOYEE("Commercial Employee"),
     COMPANY_EMPLOYEE("Company Employee"),
     COMPANY_SUPERVISOR("Company Supervisor"),
-    INTERNAL_ANALYST("Internal Bank Analyst"), ;
+    INTERNAL_ANALYST("Internal Bank Analyst");
 
     private final String description;
 

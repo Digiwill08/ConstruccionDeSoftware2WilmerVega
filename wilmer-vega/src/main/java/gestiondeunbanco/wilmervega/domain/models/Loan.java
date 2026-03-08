@@ -54,6 +54,4 @@ public class Loan {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "disbursement_account_id")
     private BankAccount disbursementAccount;
-
-
 }

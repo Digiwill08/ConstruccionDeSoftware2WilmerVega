@@ -59,6 +59,4 @@ public class SystemUser {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditLog> auditLogs;
-
-
 }

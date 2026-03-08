@@ -47,6 +47,4 @@ public class CompanyClient {
 
     @OneToMany(mappedBy = "companyClient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SystemUser> systemUsers;
-
-
 }

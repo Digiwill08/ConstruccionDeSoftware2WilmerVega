@@ -50,6 +50,4 @@ public class NaturalClient {
 
     @OneToMany(mappedBy = "legalRepresentative", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CompanyClient> representedCompanies;
-
-
 }

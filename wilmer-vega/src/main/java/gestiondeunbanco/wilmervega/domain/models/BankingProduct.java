@@ -27,6 +27,4 @@ public class BankingProduct {
 
     @Column(nullable = false)
     private Boolean requiresApproval;
-
-
 }
