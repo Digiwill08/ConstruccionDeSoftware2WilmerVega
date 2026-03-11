@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
-    List<AuditLog> findByUserId(Long userId);
+public interface AuditLogRepository extends MongoRepository<AuditLog, Long> {
+    List<AuditLog> findByUser_Id(Long userId);
     List<AuditLog> findByAffectedProductId(String productId);
 }

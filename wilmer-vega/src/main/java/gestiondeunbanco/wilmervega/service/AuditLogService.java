@@ -22,7 +22,7 @@ public class AuditLogService {
     }
 
     public List<AuditLog> findByUserId(Long userId) {
-        return auditLogRepository.findByUserId(userId);
+        return auditLogRepository.findByUser_Id(userId);
     }
 
     public List<AuditLog> findByAffectedProductId(String productId) {

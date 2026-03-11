@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface NaturalClientRepository extends JpaRepository<NaturalClient, Long> {
-    Optional<NaturalClient> findByIdentificationNumber(String identificationNumber);
-    boolean existsByIdentificationNumber(String identificationNumber);
+    Optional<NaturalClient> findByDocumentNumber(String documentNumber);
+    boolean existsByDocumentNumber(String documentNumber);
 }
