@@ -11,7 +11,6 @@ public class CompanyClient extends NaturalClient {
 
     private String businessName;
 
-    private String taxId;
     private NaturalClient legalRepresentative;
 
     private SystemRole role;
