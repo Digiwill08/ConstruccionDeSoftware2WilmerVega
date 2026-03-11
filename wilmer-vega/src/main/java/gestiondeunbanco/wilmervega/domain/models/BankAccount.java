@@ -13,6 +13,8 @@ import java.util.List;
 public class BankAccount {
     private Long id;
 
+    private BankingProduct bankingProduct;
+
     private String accountNumber;
 
     private AccountType accountType;

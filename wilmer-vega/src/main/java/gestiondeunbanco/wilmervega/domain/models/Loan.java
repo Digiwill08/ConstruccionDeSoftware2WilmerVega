@@ -14,6 +14,8 @@ public class Loan {
 
     private Long loanId;
 
+    private BankingProduct bankingProduct;
+
     private LoanType loanType;
 
     private NaturalClient naturalClientApplicant;
