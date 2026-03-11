@@ -12,9 +12,15 @@ public class AuditLog {
     private Long auditLogId;
 
     private OperationType operationType;
+
     private Date operationDateTime;
-    private String userId;
+
+    private SystemUser user;
+
     private String userRole;
+
     private String affectedProductId;
+
+    private String detailDataJson;
 }
 

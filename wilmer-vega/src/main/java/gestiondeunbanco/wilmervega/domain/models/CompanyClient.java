@@ -4,21 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class CompanyClient {
-    private Long id;
+public class CompanyClient extends NaturalClient {
 
     private String businessName;
 
-    private String email;
-
-    private String phone;
-
-    private String address;
-
+    private String taxId;
     private NaturalClient legalRepresentative;
 
     private SystemRole role;
