@@ -3,31 +3,25 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.sql.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class SystemUser {
 
-<<<<<<< Updated upstream
     private Long id;
 
     private String relatedId;
 
-    private String fullName;
-
-    private String identificationId;
-=======
     private NaturalClient naturalClient;
 
     private CompanyClient companyClient;
 
     private String fullName;
 
-    private String identificationNumber;
->>>>>>> Stashed changes
+    private String identificationId;
 
     private String email;
 
@@ -37,12 +31,7 @@ public class SystemUser {
 
     private String address;
 
-<<<<<<< Updated upstream
     private SystemRole role;
-
-    private UserStatus userStatus;
-=======
-    private SystemRole systemRole;
 
     private UserStatus userStatus;
 
@@ -52,6 +41,4 @@ public class SystemUser {
 
     private List<AuditLog> auditLogs;
 
-
->>>>>>> Stashed changes
 }

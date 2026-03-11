@@ -3,30 +3,19 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.sql.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class NaturalClient {
-
-    private Long id;
+public class NaturalClient extends Usuario {
 
     private String fullName;
 
     private String documentNumber;
 
-    private String email;
-
-    private String phone;
-
-    private String address;
-
     private Date birthDate;
-<<<<<<< Updated upstream
-}
-=======
 
     private SystemRole role;
 
@@ -36,9 +25,6 @@ public class NaturalClient {
 
     private List<Loan> loans;
 
-    @OneToMany(mappedBy = "legalRepresentative", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CompanyClient> representedCompanies;
 
-
 }
->>>>>>> Stashed changes

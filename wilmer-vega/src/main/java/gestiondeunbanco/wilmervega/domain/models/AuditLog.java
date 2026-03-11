@@ -12,14 +12,8 @@ public class AuditLog {
     private Long auditLogId;
 
     private OperationType operationType;
-<<<<<<< Updated upstream
-    private Date operationDateTime;
-    private String userId;
-    private String userRole;
-    private String affectedProductId;
-=======
 
-    private Timestamp operationDateTime;
+    private Date operationDateTime;
 
     private SystemUser user;
 
@@ -28,8 +22,5 @@ public class AuditLog {
     private String affectedProductId;
 
     private String detailDataJson;
-
-
->>>>>>> Stashed changes
 }
 
