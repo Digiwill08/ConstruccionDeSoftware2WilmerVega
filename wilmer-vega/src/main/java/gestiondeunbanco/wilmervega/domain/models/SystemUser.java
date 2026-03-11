@@ -11,6 +11,7 @@ import java.sql.Date;
 @NoArgsConstructor
 public class SystemUser {
 
+<<<<<<< Updated upstream
     private Long id;
 
     private String relatedId;
@@ -18,6 +19,15 @@ public class SystemUser {
     private String fullName;
 
     private String identificationId;
+=======
+    private NaturalClient naturalClient;
+
+    private CompanyClient companyClient;
+
+    private String fullName;
+
+    private String identificationNumber;
+>>>>>>> Stashed changes
 
     private String email;
 
@@ -27,7 +37,21 @@ public class SystemUser {
 
     private String address;
 
+<<<<<<< Updated upstream
     private SystemRole role;
 
     private UserStatus userStatus;
+=======
+    private SystemRole systemRole;
+
+    private UserStatus userStatus;
+
+    private List<Transfer> createdTransfers;
+
+    private List<Transfer> approvedTransfers;
+
+    private List<AuditLog> auditLogs;
+
+
+>>>>>>> Stashed changes
 }

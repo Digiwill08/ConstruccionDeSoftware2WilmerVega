@@ -24,4 +24,21 @@ public class NaturalClient {
     private String address;
 
     private Date birthDate;
+<<<<<<< Updated upstream
 }
+=======
+
+    private SystemRole role;
+
+    private List<SystemUser> systemUsers;
+
+    private List<BankAccount> bankAccounts;
+
+    private List<Loan> loans;
+
+    @OneToMany(mappedBy = "legalRepresentative", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompanyClient> representedCompanies;
+
+
+}
+>>>>>>> Stashed changes
