@@ -7,7 +7,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CompanyClient extends NaturalClient {
+public class CompanyClient extends GeneralInformation {
 
     private String businessName;
 
