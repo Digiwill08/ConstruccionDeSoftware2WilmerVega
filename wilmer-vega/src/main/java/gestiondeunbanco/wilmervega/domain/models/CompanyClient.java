@@ -13,8 +13,6 @@ public class CompanyClient {
 
     private String businessName;
 
-    private String taxId;
-
     private String email;
 
     private String phone;

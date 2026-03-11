@@ -1,8 +1,9 @@
 package gestiondeunbanco.wilmervega.domain.models;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.sql.Date;
 
 @Getter

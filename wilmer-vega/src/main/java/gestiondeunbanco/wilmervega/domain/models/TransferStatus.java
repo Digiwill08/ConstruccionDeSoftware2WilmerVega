@@ -1,9 +1,9 @@
 package gestiondeunbanco.wilmervega.domain.models;
 
 /**
- * Low amount flow:  PENDING → EXECUTED
- * High amount flow: AWAITING_APPROVAL → APPROVED → EXECUTED
- *                   AWAITING_APPROVAL → REJECTED | EXPIRED (60 min)
+ * Low amount flow:  PENDING -> EXECUTED
+ * High amount flow: AWAITING_APPROVAL -> APPROVED -> EXECUTED
+ *                   AWAITING_APPROVAL -> REJECTED | EXPIRED (60 min)
  */
 public enum TransferStatus {
     PENDING("Pending"),

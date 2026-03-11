@@ -1,15 +1,16 @@
 package gestiondeunbanco.wilmervega.domain.models;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.sql.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class NaturalClient {
-  
+
     private Long id;
 
     private String fullName;
@@ -23,5 +24,4 @@ public class NaturalClient {
     private String address;
 
     private Date birthDate;
-
 }

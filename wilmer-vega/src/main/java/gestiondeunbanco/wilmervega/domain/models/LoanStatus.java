@@ -2,9 +2,9 @@ package gestiondeunbanco.wilmervega.domain.models;
 
 /**
  * Allowed flow:
- *   UNDER_REVIEW → APPROVED | REJECTED
- *   APPROVED     → DISBURSED
- *   DISBURSED    → OVERDUE | CANCELLED
+ *   UNDER_REVIEW -> APPROVED | REJECTED
+ *   APPROVED     -> DISBURSED
+ *   DISBURSED    -> OVERDUE | CANCELLED
  */
 public enum LoanStatus {
     UNDER_REVIEW("Under review"),
