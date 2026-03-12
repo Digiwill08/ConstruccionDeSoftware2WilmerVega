@@ -29,15 +29,16 @@ public class CompanyClientService {
     }
 
     public CompanyClient save(CompanyClient companyClient) {
-        if (companyClientRepository.existsByTaxId(companyClient())) {
+        String taxId = companyClient.getTaxId();
+        if (taxId == null || taxId.isBlank()) {
+            throw new IllegalArgumentException("Tax ID is required");
+        }
+
+        if (companyClientRepository.existsByTaxId(taxId)) {
             throw new IllegalArgumentException("Tax ID already exists");
         }
-        return companyClientRepository.save(companyClient);
-    }
 
-    private String companyClient() {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'companyClient'");
+        return companyClientRepository.save(companyClient);
     }
 
     public void deleteById(Long id) {
