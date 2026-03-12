@@ -16,32 +16,23 @@ public class CompanyClientService {
 
     private final CompanyClientRepository companyClientRepository;
 
-    public List<CompanyClient> findAll() {
-        return companyClientRepository.findAll();
-    }
-
-    public Optional<CompanyClient> findById(Long id) {
-        return companyClientRepository.findById(id);
-    }
-
-    public Optional<CompanyClient> findByTaxId(String taxId) {
-        return companyClientRepository.findByTaxId(taxId);
-    }
-
-    public CompanyClient save(CompanyClient companyClient) {
-        String taxId = companyClient.getTaxId();
-        if (taxId == null || taxId.isBlank()) {
-            throw new IllegalArgumentException("Tax ID is required");
-        }
-
-        if (companyClientRepository.existsByTaxId(taxId)) {
-            throw new IllegalArgumentException("Tax ID already exists");
-        }
-
+    public CompanyClient createCompanyClient(CompanyClient companyClient) {
         return companyClientRepository.save(companyClient);
     }
 
-    public void deleteById(Long id) {
+    public Optional<CompanyClient> getCompanyClientById(Long id) {
+        return companyClientRepository.findById(id);
+    }
+
+    public List<CompanyClient> getAllCompanyClients() {
+        return companyClientRepository.findAll();
+    }
+
+    public CompanyClient updateCompanyClient(CompanyClient companyClient) {
+        return companyClientRepository.save(companyClient);
+    }
+
+    public void deleteCompanyClient(Long id) {
         companyClientRepository.deleteById(id);
     }
 }
