@@ -35,4 +35,16 @@ public class CompanyClientService {
     public void deleteCompanyClient(Long id) {
         companyClientRepository.deleteById(id);
     }
+
+    public void deleteById(Long id) {
+        companyClientRepository.deleteById(id);
+    }
+
+    public Optional<CompanyClient> findById(Long id) {
+        return companyClientRepository.findById(id);
+    }
+
+    public CompanyClient save(CompanyClient companyClient) {
+        return companyClientRepository.save(companyClient);
+    }
 }

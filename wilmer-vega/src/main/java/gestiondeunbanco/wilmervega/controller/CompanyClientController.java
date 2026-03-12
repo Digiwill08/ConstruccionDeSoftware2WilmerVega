@@ -17,12 +17,12 @@ public class CompanyClientController {
 
     @GetMapping
     public ResponseEntity<List<CompanyClient>> getAll() {
-        return ResponseEntity.ok(companyClientService.findAll());
+        return ResponseEntity.ok(companyClientService.getAllCompanyClients());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CompanyClient> getById(@PathVariable Long id) {
-        return companyClientService.findById(id)
+        return companyClientService.getCompanyClientById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -30,7 +30,7 @@ public class CompanyClientController {
     @PostMapping
     public ResponseEntity<CompanyClient> create(@RequestBody CompanyClient companyClient) {
         try {
-            CompanyClient saved = companyClientService.save(companyClient);
+            CompanyClient saved = companyClientService.createCompanyClient(companyClient);
             return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -39,7 +39,7 @@ public class CompanyClientController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        companyClientService.deleteById(id);
+        companyClientService.deleteCompanyClient(id);
         return ResponseEntity.noContent().build();
     }
 }

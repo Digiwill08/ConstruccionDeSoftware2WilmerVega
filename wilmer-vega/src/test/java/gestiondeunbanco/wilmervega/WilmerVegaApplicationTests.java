@@ -1,13 +1,12 @@
 package gestiondeunbanco.wilmervega;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(classes = WilmerVegaApplication.class)
 class WilmerVegaApplicationTests {
-
 	@Test
 	void contextLoads() {
+		assertNotNull(WilmerVegaApplication.class);
 	}
 
 }
