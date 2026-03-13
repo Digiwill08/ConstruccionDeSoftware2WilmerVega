@@ -9,7 +9,7 @@ import java.sql.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Usuario extends Persona {
+public class User extends Person {
 
 	private Long userId;
 

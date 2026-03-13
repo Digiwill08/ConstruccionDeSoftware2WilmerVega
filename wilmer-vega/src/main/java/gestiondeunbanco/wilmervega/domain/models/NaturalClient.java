@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class NaturalClient extends Persona {
+public class NaturalClient extends Person {
 
     private String fullName;
 

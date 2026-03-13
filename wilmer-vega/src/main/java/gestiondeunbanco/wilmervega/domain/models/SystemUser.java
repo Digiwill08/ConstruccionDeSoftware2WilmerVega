@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SystemUser extends Persona {
+public class SystemUser extends Person {
 
     private String relatedId;
 
