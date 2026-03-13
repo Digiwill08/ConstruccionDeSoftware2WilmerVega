@@ -3,13 +3,12 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.sql.Date;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class SystemUser extends Person {
+public class SystemUser extends UserManager {
 
     private String relatedId;
 
@@ -17,15 +16,9 @@ public class SystemUser extends Person {
 
     private CompanyClient companyClient;
 
-    private String fullName;
-
     private String identificationId;
 
-    private Date birthDate;
-
     private SystemRole role;
-
-    private UserStatus userStatus;
 
     private List<Transfer> createdTransfers;
 

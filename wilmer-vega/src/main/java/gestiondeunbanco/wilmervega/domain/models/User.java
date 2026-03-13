@@ -4,26 +4,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class User extends Person {
+public class User extends UserManager {
 
 	private Long userId;
 
 	private NaturalClient relatedClient;
 
-	private String fullName;
-
 	private String documentNumber;
 
-	private Date birthDate;
-
 	private SystemRole systemRole;
-
-	private UserStatus userStatus;
 
 	private String username;
 
