@@ -3,7 +3,7 @@ package gestiondeunbanco.wilmervega.domain.models;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,7 +13,9 @@ public class AuditLog {
 
     private OperationType operationType;
 
-    private Date operationDateTime;
+    private LocalDateTime operationDateTime;
+
+    private Long userId;
 
     private SystemUser user;
 
