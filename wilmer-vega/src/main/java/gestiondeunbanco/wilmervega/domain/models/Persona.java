@@ -7,5 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Usuario extends Persona {
+public class Persona {
+
+    private Long id;
+
+    private String email;
+
+    private String phone;
+
+    private String address;
 }
