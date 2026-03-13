@@ -9,9 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SystemUser {
-
-    private Long id;
+public class SystemUser extends Persona {
 
     private String relatedId;
 
@@ -23,13 +21,7 @@ public class SystemUser {
 
     private String identificationId;
 
-    private String email;
-
-    private String phone;
-
     private Date birthDate;
-
-    private String address;
 
     private SystemRole role;
 
