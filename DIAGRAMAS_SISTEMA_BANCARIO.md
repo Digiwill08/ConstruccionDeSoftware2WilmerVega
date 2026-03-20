@@ -1,7 +1,7 @@
 # 📊 DIAGRAMAS DEL SISTEMA BANCARIO - GESTIÓN DE UN BANCO
 
 > **Proyecto:** Gestión de un Banco - Wilmer Vega  
-> **Fecha:** 2 de marzo de 2026  
+> **Fecha:** 12 de marzo de 2026  
 > **Paquete:** gestiondeunbanco.wilmervega.domain.models
 
 ---
@@ -22,145 +22,277 @@
 
 ## 1. DIAGRAMA DE CLASES DEL MODELO
 
-Este diagrama muestra todas las clases y enumeraciones del dominio del sistema bancario.
+Este diagrama muestra todas las clases y enumeraciones actuales del dominio del sistema bancario, con la jerarquía de usuarios refactorizada.
 
 ```mermaid
 classDiagram
-    class ClientePersonaNatural {
+    %% ─── Jerarquía de Personas ─────────────────────────────────
+    class Person {
         +Long id
-        +String nombreCompleto
-        +String numeroDocumento
-        +String correoElectronico
-        +String telefono
-        +String direccion
-        +LocalDate fechaNacimiento
-        +RolSistema rol
-        +String contrasenaHash
-        +calcularEdad() int
-        +esMayorDeEdad() boolean
-        +setFechaNacimiento(LocalDate)
+        +String email
+        +String phone
+        +String address
     }
 
     class NaturalClient {
-        +Long id
         +String fullName
         +String documentNumber
-        +String email
-        +String phoneNumber
+        +Date birthDate
+        +SystemRole role
+        +List~SystemUser~ systemUsers
+        +List~BankAccount~ bankAccounts
+        +List~Loan~ loans
+        +List~CompanyClient~ representedCompanies
     }
 
-    class RolSistema {
-        <<enumeration>>
-        CLIENTE_PERSONA_NATURAL
-        CLIENTE_EMPRESA
-        EMPLEADO_VENTANILLA
-        EMPLEADO_COMERCIAL
-        EMPLEADO_EMPRESA
-        SUPERVISOR_EMPRESA
-        ANALISTA_INTERNO
-        +String getDescripcion()
+    class CompanyClient {
+        +String businessName
+        +NaturalClient legalRepresentative
     }
 
-    class EstadoUsuario {
-        <<enumeration>>
-        ACTIVO
-        INACTIVO
-        BLOQUEADO
-        +String getDescripcion()
+    %% ─── Jerarquía de Usuarios ────────────────────────────────
+    class UserManager {
+        +String fullName
+        +Date birthDate
+        +UserStatus userStatus
     }
 
-    class EstadoCuenta {
-        <<enumeration>>
-        ACTIVA
-        BLOQUEADA
-        CANCELADA
-        +String getDescripcion()
+    class SystemUser {
+        +String relatedId
+        +NaturalClient naturalClient
+        +CompanyClient companyClient
+        +String identificationId
+        +SystemRole role
+        +List~Transfer~ createdTransfers
+        +List~Transfer~ approvedTransfers
+        +List~AuditLog~ auditLogs
     }
 
-    class TipoCuenta {
+    class User {
+        +Long userId
+        +NaturalClient relatedClient
+        +String documentNumber
+        +SystemRole systemRole
+        +String username
+        +String password
+    }
+
+    %% ─── Entidades del Negocio ────────────────────────────────
+    class BankAccount {
+        +Long id
+        +String accountNumber
+        +AccountType accountType
+        +BigDecimal currentBalance
+        +Currency currency
+        +AccountStatus accountStatus
+        +Date openingDate
+        +List~Transfer~ outgoingTransfers
+        +List~Transfer~ incomingTransfers
+        +validateState()
+        +hasSingleHolder() boolean
+    }
+
+    class BankingProduct {
+        +Long id
+        +String productCode
+        +String productName
+        +ProductCategory category
+        +Boolean requiresApproval
+    }
+
+    class Loan {
+        +Long loanId
+        +LoanType loanType
+        +BigDecimal requestedAmount
+        +BigDecimal approvedAmount
+        +BigDecimal interestRate
+        +Integer termInMonths
+        +LoanStatus loanStatus
+        +Date approvalDate
+        +Date disbursementDate
+    }
+
+    class Transfer {
+        +Long transferId
+        +BigDecimal amount
+        +Date creationDateTime
+        +Date approvalDateTime
+        +TransferStatus transferStatus
+    }
+
+    class AuditLog {
+        +Long auditLogId
+        +OperationType operationType
+        +LocalDateTime operationDateTime
+        +Long userId
+        +String userRole
+        +String affectedProductId
+        +String detailDataJson
+    }
+
+    %% ─── Enumeraciones ────────────────────────────────────────
+    class SystemRole {
         <<enumeration>>
-        AHORROS
-        CORRIENTE
+        NATURAL_CLIENT
+        COMPANY_CLIENT
+        TELLER_EMPLOYEE
+        COMMERCIAL_EMPLOYEE
+        COMPANY_EMPLOYEE
+        COMPANY_SUPERVISOR
+        INTERNAL_ANALYST
+        +String getDescription()
+    }
+
+    class UserStatus {
+        <<enumeration>>
+        ACTIVE
+        INACTIVE
+        BLOCKED
+        +String getDescription()
+    }
+
+    class AccountStatus {
+        <<enumeration>>
+        ACTIVE
+        BLOCKED
+        CANCELLED
+        +String getDescription()
+    }
+
+    class AccountType {
+        <<enumeration>>
+        SAVINGS
+        CHECKING
         PERSONAL
-        EMPRESARIAL
-        +String getDescripcion()
+        BUSINESS
+        +String getDescription()
     }
 
-    class Moneda {
+    class Currency {
         <<enumeration>>
         USD
         COP
         EUR
-        +String getDescripcion()
+        +String getDescription()
     }
 
-    class EstadoPrestamo {
+    class LoanStatus {
         <<enumeration>>
-        EN_ESTUDIO
-        APROBADO
-        RECHAZADO
-        DESEMBOLSADO
-        EN_MORA
-        CANCELADO
-        +String getDescripcion()
+        UNDER_REVIEW
+        APPROVED
+        REJECTED
+        DISBURSED
+        OVERDUE
+        CANCELLED
+        +String getDescription()
     }
 
-    class TipoPrestamo {
+    class LoanType {
         <<enumeration>>
-        CONSUMO
-        VEHICULO
-        HIPOTECARIO
-        EMPRESARIAL
-        +String getDescripcion()
+        CONSUMER
+        VEHICLE
+        MORTGAGE
+        BUSINESS
+        +String getDescription()
     }
 
-    class EstadoTransferencia {
+    class TransferStatus {
         <<enumeration>>
-        PENDIENTE
-        EN_ESPERA_APROBACION
-        APROBADA
-        EJECUTADA
-        RECHAZADA
-        VENCIDA
-        +String getDescripcion()
+        PENDING
+        AWAITING_APPROVAL
+        APPROVED
+        EXECUTED
+        REJECTED
+        EXPIRED
+        +String getDescription()
     }
 
-    class CategoriaProducto {
+    class ProductCategory {
         <<enumeration>>
-        CUENTAS
-        PRESTAMOS
-        SERVICIOS
-        +String getDescripcion()
+        ACCOUNTS
+        LOANS
+        SERVICES
+        +String getDescription()
     }
 
-    class TipoOperacion {
+    class OperationType {
         <<enumeration>>
-        APERTURA_CUENTA
-        CIERRE_CUENTA
-        DEPOSITO
-        RETIRO
-        TRANSFERENCIA_EJECUTADA
-        TRANSFERENCIA_RECHAZADA
-        TRANSFERENCIA_VENCIDA
-        SOLICITUD_PRESTAMO
-        APROBACION_PRESTAMO
-        RECHAZO_PRESTAMO
-        DESEMBOLSO_PRESTAMO
-        CREACION_USUARIO
-        BLOQUEO_USUARIO
-        INICIO_SESION
-        CIERRE_SESION
-        +String getDescripcion()
+        ACCOUNT_OPENING
+        ACCOUNT_CLOSURE
+        DEPOSIT
+        WITHDRAWAL
+        TRANSFER_EXECUTED
+        TRANSFER_REJECTED
+        TRANSFER_EXPIRED
+        LOAN_REQUEST
+        LOAN_APPROVAL
+        LOAN_REJECTION
+        LOAN_DISBURSEMENT
+        USER_CREATION
+        USER_BLOCKING
+        LOGIN
+        LOGOUT
+        +String getDescription()
     }
 
-    ClientePersonaNatural --> RolSistema : tiene
-    ClientePersonaNatural ..> EstadoUsuario : puede tener
+    %% ─── Herencia ─────────────────────────────────────────────
+    Person          <|-- NaturalClient
+    Person          <|-- UserManager
+    NaturalClient   <|-- CompanyClient
+    UserManager     <|-- SystemUser
+    UserManager     <|-- User
+
+    %% ─── Asociaciones ─────────────────────────────────────────
+    NaturalClient   "1" --> "0..*" SystemUser        : systemUsers
+    NaturalClient   "1" --> "0..*" BankAccount       : bankAccounts
+    NaturalClient   "1" --> "0..*" Loan              : loans
+    NaturalClient   "1" --> "0..*" CompanyClient     : representedCompanies
+
+    SystemUser      "1" --> "0..*" Transfer          : createdTransfers
+    SystemUser      "1" --> "0..*" Transfer          : approvedTransfers
+    SystemUser      "1" --> "0..*" AuditLog          : auditLogs
+    SystemUser      --> NaturalClient                : naturalClient
+    SystemUser      --> CompanyClient                : companyClient
+
+    User            --> NaturalClient                : relatedClient
+
+    BankAccount     --> BankingProduct               : bankingProduct
+    BankAccount     --> NaturalClient                : naturalClientHolder
+    BankAccount     --> CompanyClient                : companyClientHolder
+    BankAccount     --> AccountType
+    BankAccount     --> AccountStatus
+    BankAccount     --> Currency
+
+    Loan            --> BankingProduct               : bankingProduct
+    Loan            --> NaturalClient                : naturalClientApplicant
+    Loan            --> CompanyClient                : companyClientApplicant
+    Loan            --> BankAccount                  : disbursementAccount
+    Loan            --> LoanType
+    Loan            --> LoanStatus
+
+    Transfer        --> BankAccount                  : sourceAccount
+    Transfer        --> BankAccount                  : destinationAccount
+    Transfer        --> SystemUser                   : creatorUser
+    Transfer        --> SystemUser                   : approverUser
+    Transfer        --> TransferStatus
+
+    AuditLog        --> SystemUser                   : user
+    AuditLog        --> OperationType
+
+    NaturalClient   --> SystemRole
+    SystemUser      --> SystemRole
+    User            --> SystemRole
+    UserManager     --> UserStatus
+    BankingProduct  --> ProductCategory
 ```
 
-**Descripción:**
-- **ClientePersonaNatural**: Entidad principal que representa a un cliente persona física
-- **NaturalClient**: Versión simplificada del cliente natural
-- **10 Enumeraciones** que definen los diferentes tipos y estados del sistema
+**Descripción de la jerarquía actualizada:**
+- **Person**: clase base con datos de contacto comunes
+- **UserManager**: nueva clase madre de usuarios — concentra `fullName`, `birthDate` y `userStatus`
+- **SystemUser** `extends UserManager`: usuario del sistema bancario con rol, transferencias y logs
+- **User** `extends UserManager`: usuario de acceso con credenciales (`username`, `password`)
+- **NaturalClient** `extends Person`: cliente persona natural con cuentas, préstamos y empresas representadas
+- **CompanyClient** `extends NaturalClient`: cliente empresa con representante legal
 
 ---
 
@@ -510,92 +642,96 @@ graph TD
 
 ```
 gestiondeunbanco.wilmervega.domain.models/
-├── ClientePersonaNatural.java (Entidad JPA)
-├── NaturalClient.java (Entidad JPA)
+├── Person.java                  (clase base)
+├── UserManager.java             (clase madre de usuarios)
+├── SystemUser.java              (extiende UserManager)
+├── User.java                    (extiende UserManager)
+├── NaturalClient.java           (extiende Person)
+├── CompanyClient.java           (extiende NaturalClient)
+├── BankAccount.java
+├── BankingProduct.java
+├── Loan.java
+├── Transfer.java
+├── AuditLog.java
 └── Enumeraciones (10):
-    ├── CategoriaProducto.java
-    ├── EstadoCuenta.java
-    ├── EstadoPrestamo.java
-    ├── EstadoTransferencia.java
-    ├── EstadoUsuario.java
-    ├── Moneda.java
-    ├── RolSistema.java
-    ├── TipoCuenta.java
-    ├── TipoOperacion.java
-    └── TipoPrestamo.java
+    ├── AccountStatus.java
+    ├── AccountType.java
+    ├── Currency.java
+    ├── LoanStatus.java
+    ├── LoanType.java
+    ├── OperationType.java
+    ├── ProductCategory.java
+    ├── SystemRole.java
+    ├── TransferStatus.java
+    └── UserStatus.java
 ```
 
-### 🎯 Entidades Principales
+### 🎯 Jerarquía de Clases
 
-#### ClientePersonaNatural
-- **Tabla:** `cliente_persona_natural`
-- **Validaciones:** 
-  - Edad mínima: 18 años
-  - Fecha de nacimiento obligatoria y no futura
-- **Métodos de negocio:**
-  - `calcularEdad()`: Calcula la edad actual
-  - `esMayorDeEdad()`: Verifica si es mayor de 18 años
-  - `setFechaNacimiento()`: Setter con validación
-
-#### NaturalClient
-- **Tabla:** `natural_clients`
-- **Versión simplificada** sin validaciones de negocio
+```
+Person
+├── NaturalClient
+│   └── CompanyClient
+└── UserManager                  ← clase madre de gestión de usuarios
+    ├── SystemUser               ← usuario del sistema bancario
+    └── User                     ← usuario de acceso con credenciales
+```
 
 ### 📊 Enumeraciones del Dominio
 
-| Enumeración | Cantidad | Descripción |
-|-------------|----------|-------------|
-| **RolSistema** | 7 valores | Roles de usuarios y empleados |
-| **EstadoUsuario** | 3 valores | Estados del ciclo de vida del usuario |
-| **EstadoCuenta** | 3 valores | Estados de cuentas bancarias |
-| **TipoCuenta** | 4 valores | Tipos de cuentas disponibles |
-| **Moneda** | 3 valores | Monedas soportadas |
-| **EstadoPrestamo** | 6 valores | Ciclo de vida de préstamos |
-| **TipoPrestamo** | 4 valores | Tipos de préstamos ofrecidos |
-| **EstadoTransferencia** | 6 valores | Estados de transferencias |
-| **CategoriaProducto** | 3 valores | Categorías de productos |
-| **TipoOperacion** | 15 valores | Tipos de operaciones del sistema |
+| Enumeración | Valores | Descripción |
+|-------------|---------|-------------|
+| **SystemRole** | 7 | Roles de usuarios y empleados |
+| **UserStatus** | 3 | ACTIVE · INACTIVE · BLOCKED |
+| **AccountStatus** | 3 | ACTIVE · BLOCKED · CANCELLED |
+| **AccountType** | 4 | SAVINGS · CHECKING · PERSONAL · BUSINESS |
+| **Currency** | 3 | USD · COP · EUR |
+| **LoanStatus** | 6 | UNDER_REVIEW → APPROVED/REJECTED → DISBURSED → OVERDUE/CANCELLED |
+| **LoanType** | 4 | CONSUMER · VEHICLE · MORTGAGE · BUSINESS |
+| **TransferStatus** | 6 | PENDING · AWAITING_APPROVAL · APPROVED · EXECUTED · REJECTED · EXPIRED |
+| **ProductCategory** | 3 | ACCOUNTS · LOANS · SERVICES |
+| **OperationType** | 15 | Todas las operaciones auditables |
 
 ### 🔄 Reglas de Negocio Principales
 
 #### Transferencias
-- **Bajo monto:** Se ejecutan automáticamente (PENDIENTE → EJECUTADA)
-- **Alto monto:** Requieren aprobación de supervisor
-- **Tiempo límite:** 60 minutos para aprobación, sino pasan a VENCIDA
+- **Bajo monto:** `PENDING → EXECUTED` (automático)
+- **Alto monto:** `AWAITING_APPROVAL → APPROVED → EXECUTED`
+- **Rechazo:** `AWAITING_APPROVAL → REJECTED`
+- **Vencimiento:** `AWAITING_APPROVAL → EXPIRED` (60 minutos sin aprobación)
 
 #### Préstamos
-- **Evaluación:** Analista interno evalúa solicitud
-- **Estados finales:** RECHAZADO o CANCELADO
-- **Mora:** Cliente puede regularizar desde EN_MORA
+- **Evaluación:** `UNDER_REVIEW → APPROVED | REJECTED`
+- **Desembolso:** `APPROVED → DISBURSED`
+- **Pago:** `DISBURSED → CANCELLED`
+- **Mora:** `DISBURSED → OVERDUE → CANCELLED`
+
+#### Cuentas Bancarias
+- Debe tener **exactamente un titular** (natural o empresa, nunca ambos)
+- `validateState()` impide saldo negativo y titular múltiple
 
 #### Usuarios
-- **Edad mínima:** 18 años para ClientePersonaNatural
-- **Estado inicial:** ACTIVO al crear usuario
-- **Reversibilidad:** INACTIVO y BLOQUEADO son reversibles
+- `UserManager` centraliza `fullName`, `birthDate` y `userStatus`
+- `SystemUser` agrega rol bancario y registro de operaciones
+- `User` agrega credenciales de acceso (`username`, `password`)
 
 ---
 
 ## 📝 Notas de Implementación
 
 ### Tecnologías Utilizadas
-- **JPA/Hibernate:** Mapeo objeto-relacional
-- **Lombok:** Reducción de código boilerplate
-- **Jakarta Persistence:** Anotaciones estándar
+- **Spring Boot 3** · **Java 17**
+- **Lombok:** `@Getter`, `@Setter`, `@NoArgsConstructor`
+- **Spring Security:** configuración de seguridad base
+- **Maven Wrapper:** gestión del ciclo de build
 
 ### Patrones Aplicados
-- **Value Objects:** Uso de enumeraciones para tipos
-- **Domain Model:** Lógica de negocio en las entidades
-- **Validation:** Validaciones en setters y constructores
-
-### Próximos Pasos
-Para completar el dominio, se necesitarán:
-1. **Entities:** Entidades completas del dominio
-2. **Repositories:** Interfaces de persistencia
-3. **Services:** Servicios de dominio y aplicación
-4. **Value Objects:** Objetos de valor adicionales
+- **Herencia limpia:** jerarquía `Person → UserManager → SystemUser/User`
+- **Value Objects:** enumeraciones para tipos y estados
+- **Validación de negocio:** en métodos de entidad (`BankAccount.validateState()`)
 
 ---
 
-**Documento generado automáticamente**  
-**Sistema de Gestión Bancaria - Primera Entrega**  
+**Documento actualizado automáticamente — 12 de marzo de 2026**  
+**Sistema de Gestión Bancaria — Wilmer Vega**
 Wilmer Vega - Construcción de Software 2
