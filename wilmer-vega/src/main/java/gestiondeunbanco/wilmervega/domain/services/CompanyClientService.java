@@ -1,7 +1,7 @@
-package gestiondeunbanco.wilmervega.service;
+package gestiondeunbanco.wilmervega.domain.services;
 
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
-import gestiondeunbanco.wilmervega.repository.CompanyClientRepository;
+import gestiondeunbanco.wilmervega.domain.ports.CompanyClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,37 +14,37 @@ import java.util.Optional;
 @Transactional
 public class CompanyClientService {
 
-    private final CompanyClientRepository companyClientRepository;
+    private final CompanyClientPort CompanyClientPort;
 
     public CompanyClient createCompanyClient(CompanyClient companyClient) {
-        return companyClientRepository.save(companyClient);
+        return CompanyClientPort.save(companyClient);
     }
 
     public Optional<CompanyClient> getCompanyClientById(Long id) {
-        return companyClientRepository.findById(id);
+        return CompanyClientPort.findById(id);
     }
 
     public List<CompanyClient> getAllCompanyClients() {
-        return companyClientRepository.findAll();
+        return CompanyClientPort.findAll();
     }
 
     public CompanyClient updateCompanyClient(CompanyClient companyClient) {
-        return companyClientRepository.save(companyClient);
+        return CompanyClientPort.save(companyClient);
     }
 
     public void deleteCompanyClient(Long id) {
-        companyClientRepository.deleteById(id);
+        CompanyClientPort.deleteById(id);
     }
 
     public void deleteById(Long id) {
-        companyClientRepository.deleteById(id);
+        CompanyClientPort.deleteById(id);
     }
 
     public Optional<CompanyClient> findById(Long id) {
-        return companyClientRepository.findById(id);
+        return CompanyClientPort.findById(id);
     }
 
     public CompanyClient save(CompanyClient companyClient) {
-        return companyClientRepository.save(companyClient);
+        return CompanyClientPort.save(companyClient);
     }
 }

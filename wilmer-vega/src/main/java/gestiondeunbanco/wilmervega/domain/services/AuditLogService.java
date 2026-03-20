@@ -1,7 +1,7 @@
-package gestiondeunbanco.wilmervega.service;
+package gestiondeunbanco.wilmervega.domain.services;
 
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
-import gestiondeunbanco.wilmervega.repository.AuditLogRepository;
+import gestiondeunbanco.wilmervega.domain.ports.AuditLogPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,21 +11,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuditLogService {
 
-    private final AuditLogRepository auditLogRepository;
+    private final AuditLogPort AuditLogPort;
 
     public List<AuditLog> findAll() {
-        return auditLogRepository.findAll();
+        return AuditLogPort.findAll();
     }
 
     public AuditLog save(AuditLog auditLog) {
-        return auditLogRepository.save(auditLog);
+        return AuditLogPort.save(auditLog);
     }
 
     public List<AuditLog> findByUserId(Long userId) {
-        return auditLogRepository.findByUserId(userId);
+        return AuditLogPort.findByUserId(userId);
     }
 
     public List<AuditLog> findByAffectedProductId(String productId) {
-        return auditLogRepository.findByAffectedProductId(productId);
+        return AuditLogPort.findByAffectedProductId(productId);
     }
 }

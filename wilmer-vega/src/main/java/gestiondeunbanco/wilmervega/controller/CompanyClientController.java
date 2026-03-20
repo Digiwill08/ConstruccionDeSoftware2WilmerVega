@@ -1,7 +1,7 @@
 package gestiondeunbanco.wilmervega.controller;
 
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
-import gestiondeunbanco.wilmervega.service.CompanyClientService;
+import gestiondeunbanco.wilmervega.domain.services.CompanyClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
