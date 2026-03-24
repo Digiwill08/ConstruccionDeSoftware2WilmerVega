@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 @Setter
 @NoArgsConstructor
 @Entity
-public class CompanyClient extends NaturalClient {
+public class CompanyClient extends Client {
 
     private String businessName;
 

@@ -11,7 +11,7 @@ public class User extends UserManager {
 
 	private Long userId;
 
-	private NaturalClient relatedClient;
+	private Client relatedClient;
 
 	private String documentNumber;
 

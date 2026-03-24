@@ -5,25 +5,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-public class NaturalClient extends Client {
+public abstract class Client extends Person {
 
-    private String fullName;
-
-    private LocalDate birthDate;
-
-    private SystemRole role;
+    private String documentNumber;
 
     @Transient
-    private List<SystemUser> systemUsers;
+    private List<BankAccount> bankAccounts;
 
     @Transient
-    private List<CompanyClient> representedCompanies;
-
+    private List<Loan> loans;
 }

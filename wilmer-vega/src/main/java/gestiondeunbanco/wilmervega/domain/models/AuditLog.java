@@ -9,6 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
+import java.util.Map;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -32,6 +35,7 @@ public class AuditLog {
 
     private String affectedProductId;
 
-    private String detailDataJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> details;
 }
 

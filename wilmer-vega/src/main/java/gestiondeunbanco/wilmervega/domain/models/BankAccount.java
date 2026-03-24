@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -19,9 +19,7 @@ public class BankAccount {
 
     private AccountType accountType;
 
-    private NaturalClient naturalClientHolder;
-
-    private CompanyClient companyClientHolder;
+    private Client holder;
 
     private BigDecimal currentBalance;
 
@@ -29,7 +27,7 @@ public class BankAccount {
 
     private AccountStatus accountStatus;
 
-    private Date openingDate;
+    private LocalDate openingDate;
 
     private List<Transfer> outgoingTransfers;
 
@@ -50,8 +48,6 @@ public class BankAccount {
     }
 
     public boolean hasSingleHolder() {
-        boolean hasNaturalHolder = naturalClientHolder != null;
-        boolean hasCompanyHolder = companyClientHolder != null;
-        return hasNaturalHolder ^ hasCompanyHolder;
+        return holder != null;
     }
 }
