@@ -34,14 +34,18 @@ classDiagram
         +String address
     }
 
-    class NaturalClient {
-        +String fullName
+    class Client {
+        <<abstract>>
         +String documentNumber
-        +Date birthDate
-        +SystemRole role
-        +List~SystemUser~ systemUsers
         +List~BankAccount~ bankAccounts
         +List~Loan~ loans
+    }
+
+    class NaturalClient {
+        +String fullName
+        +LocalDate birthDate
+        +SystemRole role
+        +List~SystemUser~ systemUsers
         +List~CompanyClient~ representedCompanies
     }
 
@@ -70,7 +74,7 @@ classDiagram
 
     class User {
         +Long userId
-        +NaturalClient relatedClient
+        +Client relatedClient
         +String documentNumber
         +SystemRole systemRole
         +String username
@@ -85,7 +89,7 @@ classDiagram
         +BigDecimal currentBalance
         +Currency currency
         +AccountStatus accountStatus
-        +Date openingDate
+        +LocalDate openingDate
         +List~Transfer~ outgoingTransfers
         +List~Transfer~ incomingTransfers
         +validateState()
@@ -127,7 +131,7 @@ classDiagram
         +Long userId
         +String userRole
         +String affectedProductId
-        +String detailDataJson
+        +Map~String, Object~ details
     }
 
     %% ─── Enumeraciones ────────────────────────────────────────
@@ -236,16 +240,17 @@ classDiagram
     }
 
     %% ─── Herencia ─────────────────────────────────────────────
-    Person          <|-- NaturalClient
+    Person          <|-- Client
     Person          <|-- UserManager
-    NaturalClient   <|-- CompanyClient
+    Client          <|-- NaturalClient
+    Client          <|-- CompanyClient
     UserManager     <|-- SystemUser
     UserManager     <|-- User
 
     %% ─── Asociaciones ─────────────────────────────────────────
+    Client          "1" --> "0..*" BankAccount       : bankAccounts
+    Client          "1" --> "0..*" Loan              : loans
     NaturalClient   "1" --> "0..*" SystemUser        : systemUsers
-    NaturalClient   "1" --> "0..*" BankAccount       : bankAccounts
-    NaturalClient   "1" --> "0..*" Loan              : loans
     NaturalClient   "1" --> "0..*" CompanyClient     : representedCompanies
 
     SystemUser      "1" --> "0..*" Transfer          : createdTransfers
@@ -254,18 +259,16 @@ classDiagram
     SystemUser      --> NaturalClient                : naturalClient
     SystemUser      --> CompanyClient                : companyClient
 
-    User            --> NaturalClient                : relatedClient
+    User            --> Client                       : relatedClient
 
     BankAccount     --> BankingProduct               : bankingProduct
-    BankAccount     --> NaturalClient                : naturalClientHolder
-    BankAccount     --> CompanyClient                : companyClientHolder
+    BankAccount     --> Client                       : holder
     BankAccount     --> AccountType
     BankAccount     --> AccountStatus
     BankAccount     --> Currency
 
     Loan            --> BankingProduct               : bankingProduct
-    Loan            --> NaturalClient                : naturalClientApplicant
-    Loan            --> CompanyClient                : companyClientApplicant
+    Loan            --> Client                       : applicant
     Loan            --> BankAccount                  : disbursementAccount
     Loan            --> LoanType
     Loan            --> LoanStatus
@@ -291,8 +294,9 @@ classDiagram
 - **UserManager**: nueva clase madre de usuarios — concentra `fullName`, `birthDate` y `userStatus`
 - **SystemUser** `extends UserManager`: usuario del sistema bancario con rol, transferencias y logs
 - **User** `extends UserManager`: usuario de acceso con credenciales (`username`, `password`)
-- **NaturalClient** `extends Person`: cliente persona natural con cuentas, préstamos y empresas representadas
-- **CompanyClient** `extends NaturalClient`: cliente empresa con representante legal
+- **Client** `extends Person`: clase base para clientes del banco
+- **NaturalClient** `extends Client`: cliente persona natural con empresas representadas
+- **CompanyClient** `extends Client`: cliente empresa con representante legal
 
 ---
 

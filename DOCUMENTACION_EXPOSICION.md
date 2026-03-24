@@ -87,7 +87,7 @@ El dominio incluye:
 - Tipos/estados mediante enums
 
 Regla importante implementada en código:
-- Una cuenta bancaria debe tener un único titular válido (natural o empresa, no ambos).
+- Una cuenta bancaria tiene una referencia polimórfica a un `Client` único que puede ser `NaturalClient` o `CompanyClient`.
 
 ---
 

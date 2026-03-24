@@ -127,10 +127,9 @@ En esa carpeta existen interfaces adicionales (`BankAccountRepository`, `Natural
 - `UserManager extends Person`: agrega `fullName`, `birthDate`, `userStatus`
 - `SystemUser extends UserManager`: usuario operativo del sistema
 - `User extends UserManager`: otro tipo de usuario con `username/password`
-- `NaturalClient extends Person`: cliente persona natural
-- `CompanyClient extends NaturalClient`: cliente empresarial
-
-> Nota: `CompanyClient` hereda de `NaturalClient`, por lo que actualmente comparte atributos que normalmente serían de persona natural. Es una decisión de modelado que podría ajustarse más adelante.
+- `Client extends Person`: cliente base del banco (tiene documentNumber, cuentas y préstamos)
+- `NaturalClient extends Client`: cliente persona natural
+- `CompanyClient extends Client`: cliente empresarial
 
 ## 8.2 Productos bancarios
 - `BankingProduct`: catálogo base (`productCode`, `productName`, `category`, etc.)
@@ -141,7 +140,7 @@ En esa carpeta existen interfaces adicionales (`BankAccountRepository`, `Natural
 ## 8.3 Regla de negocio explícita en código
 `BankAccount` tiene validaciones internas:
 - `validateState()` exige saldo no nulo y no negativo
-- `hasSingleHolder()` obliga a tener **un solo titular** (persona natural o empresa, pero no ambos)
+- `hasSingleHolder()` obliga a tener el campo de `holder` (titular único) asignado.
 
 ---
 
