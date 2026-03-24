@@ -1,7 +1,7 @@
 package gestiondeunbanco.wilmervega.service;
 
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
-import gestiondeunbanco.wilmervega.repository.AuditLogRepository;
+import gestiondeunbanco.wilmervega.domain.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

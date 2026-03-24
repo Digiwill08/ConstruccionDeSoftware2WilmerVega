@@ -17,7 +17,7 @@ public class CompanyClientController {
 
     @GetMapping
     public ResponseEntity<List<CompanyClient>> getAll() {
-        return ResponseEntity.ok(companyClientService.getAllCompanyClients());
+        return ResponseEntity.ok(companyClientService.findAll());
     }
 
     @GetMapping("/{id}")
