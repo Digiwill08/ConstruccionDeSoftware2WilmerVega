@@ -1,130 +1,82 @@
 # Documentación para Exposición — Sistema Bancario
 
 ## 1. Objetivo del proyecto
-Este proyecto implementa una API bancaria con Spring Boot para gestionar:
-- Clientes empresariales
+Este proyecto implementa una API bancaria completa y escalable con Spring Boot para gestionar:
+- Clientes (Naturales y Empresariales)
 - Auditoría de operaciones
-- Modelo de dominio bancario (cuentas, préstamos, transferencias y usuarios)
+- Modelo de dominio bancario rico (Cuentas, Préstamos, Transferencias y Usuarios)
 
 ---
 
 ## 2. Arquitectura en una vista rápida
-El sistema está organizado por capas:
+El sistema está organizado bajo la estricta **Arquitectura Hexagonal (Puertos y Adaptadores)**, dividida en 4 capas puras:
 
-1. **Controller**: recibe solicitudes HTTP
-2. **Service**: aplica reglas de negocio
-3. **Repository**: guarda y consulta datos
-4. **Domain Models**: representa entidades y estados del banco
+1. **Capa Web (Controller)**: Recibe solicitudes HTTP y delega al Caso de Uso.
+2. **Capa de Aplicación (UseCase)**: Orquesta las transacciones y conecta la entrada con el dominio.
+3. **Capa de Dominio (Domain Services & Ports)**: Java PURO sin dependencias de Spring. Aquí viven las validaciones financieras reales y se declaran los "Puertos" (interfaces de cómo queremos guardar datos).
+4. **Capa de Infraestructura (Adapters & Repositories)**: Conecta la aplicación con MySQL. Aquí viven los adaptadores que satisfacen los puertos del dominio usando Spring Data JPA.
 
 Flujo general:
-
-`Cliente HTTP -> Controller -> Service -> Repository -> Base de datos -> Respuesta JSON`
+`Cliente HTTP -> Controller -> UseCase -> Domain Service (usa Ports) -> Port -> Persistence Adapter -> JPA Repository -> BD`
 
 ---
 
 ## 3. Tecnologías usadas
 - Java 17
-- Spring Boot
+- Spring Boot 3
 - Spring Web
-- Spring Security
-- Spring Data MongoDB
-- Spring Data JPA (preparado)
-- MySQL (configurado)
-- MongoDB (en uso para endpoints actuales)
+- Spring Data JPA
+- MySQL
 - Lombok
 
 ---
 
-## 4. Seguridad
-La seguridad está definida en `SecurityConfig`:
-- Rutas `/api/**` requieren autenticación
-- Se usa HTTP Basic
-- CSRF está deshabilitado
+## 4. Endpoints principales (Módulos activos)
+El sistema expone de forma RESTFUL todos los dominios integrados a la nueva arquitectura. Cada módulo tiene su Controlador web con CRUD y listados:
 
-Conclusión: sin credenciales válidas no se puede consumir la API principal.
-
----
-
-## 5. Endpoints principales
-
-## 5.1 Clientes de empresa
-Base: `/api/company-clients`
-
-- `GET /api/company-clients` → listar
-- `GET /api/company-clients/{id}` → buscar por id
-- `POST /api/company-clients` → crear
-- `DELETE /api/company-clients/{id}` → eliminar
-
-## 5.2 Auditoría
-Base: `/api/audit-logs`
-
-- `GET /api/audit-logs` → listar logs
-- `GET /api/audit-logs/user/{userId}` → filtrar por usuario
-- `GET /api/audit-logs/product/{productId}` → filtrar por producto
-- `POST /api/audit-logs` → registrar log
+- `/api/company-clients` → Empresas
+- `/api/natural-clients` → Clientes naturales
+- `/api/bank-accounts` → Cuentas bancarias
+- `/api/loans` → Préstamos
+- `/api/transfers` → Transferencias
+- `/api/users` → Usuarios
+- `/api/audit-logs` → Bitácora
 
 ---
 
-## 6. Explicación paso a paso (caso real)
-Ejemplo: consultar logs de un usuario
+## 5. Explicación paso a paso (caso real)
+Ejemplo: Crear una transferencia bancaria (`POST /api/transfers`)
 
-1. Cliente llama `GET /api/audit-logs/user/10`
-2. Seguridad valida autenticación
-3. `AuditLogController` recibe la petición
-4. `AuditLogService` procesa la consulta
-5. `AuditLogRepository` busca en MongoDB
-6. Se devuelve lista de logs en JSON
+1. **Web:** `TransferController` recibe el JSON y llama a `TransferUseCase`.
+2. **Aplicación:** `TransferUseCase` (con `@Service`) inicia el proceso y se lo pasa a `TransferDomainService`.
+3. **Dominio:** `TransferDomainService` aplica reglas 100% Java (ej. verificar que el monto no sea 0 o negativo). Si todo está en orden, usa el `TransferPort` para pedir que se guarde.
+4. **Infraestructura:** Spring inyecta el `TransferPersistenceAdapter` (que implementa `TransferPort`), el cual usa finalmente `TransferRepository` de Spring Data JPA para insertar el registro en MySQL.
+5. El flujo retorna hacia arriba devolviendo un código `200 OK`.
 
 ---
 
-## 7. Modelo de dominio (resumen)
+## 6. Modelo de dominio (resumen)
 El dominio incluye:
-- Personas, clientes y usuarios del sistema
-- Productos bancarios
-- Cuentas bancarias
-- Préstamos
-- Transferencias
-- Tipos/estados mediante enums
+- Jerarquía de clientes y usuarios.
+- Productos bancarios interactuando.
+- Cuentas, Préstamos y Transferencias.
+- Reglas controladas por Enums de estado limpios.
 
 Regla importante implementada en código:
-- Una cuenta bancaria tiene una referencia polimórfica a un `Client` único que puede ser `NaturalClient` o `CompanyClient`.
+- Cero acoplamiento: La lógica de `domain/services` NO importa librerías de Spring Boot. Toda persistencia se abstrae en puertos.
 
 ---
 
-## 8. Bases de datos
-Configuración actual:
-- MySQL configurado en propiedades
-- MongoDB configurado y usado por los repositorios activos del API mostrada
-
-Mensaje para exposición:
-- El proyecto está preparado para arquitectura híbrida SQL + NoSQL.
+## 7. Fortalezas logradas en la refactorización
+- **Separación absoluta de responsabilidades** (Arquitectura Hexagonal al 100%).
+- Eliminación del código legado (Capas *Service* acopladas a la base de datos).
+- El modelo de dominio principal es totalmente testeable sin necesidad de levantar bases de datos.
 
 ---
 
-## 9. Fortalezas actuales
-- Buena separación por capas
-- Modelo de dominio amplio
-- Seguridad básica activa
-- Endpoints funcionales para clientes empresa y auditoría
-
----
-
-## 10. Mejoras sugeridas (siguiente fase)
-1. Reducir duplicidad en métodos del servicio de clientes
-2. Definir claramente qué módulos van en MySQL y cuáles en MongoDB
-3. Estandarizar manejo de errores con un controlador global de excepciones
-4. Usar DTO + mapper en todos los endpoints
-
----
-
-## 11. Guion corto para exponer (2–3 minutos)
-1. Presentar objetivo del sistema bancario
-2. Mostrar arquitectura por capas
-3. Explicar seguridad en `/api/**`
-4. Demostrar 2 módulos activos: clientes empresa y auditoría
-5. Cerrar con mejoras planeadas y siguiente evolución del proyecto
-
----
-
-## 12. Conclusión
-El sistema ya tiene base sólida para crecer: estructura limpia, seguridad configurada, endpoints funcionales y dominio bancario bien modelado para extender nuevas funcionalidades.
+## 8. Guion corto para exponer (2–3 minutos)
+1. "Este es el Sistema de Gestión Bancaria que he mejorado aplicando el patrón de Arquitectura Hexagonal que vimos en clase, basado en el ejemplo de la clínica."
+2. "Hemos pasado de una arquitectura simple en capas a una purista dividida en 4: Controladores, Casos de Uso, Dominio e Infraestructura."
+3. "Demostrar cómo en `domain/services` nuestro código ya no depende de `@Service` ni de `Spring`, aislando el corazón del negocio."
+4. "Explicar el flujo completo usando, por ejemplo, el proceso de Préstamos o Transferencias. Entrar por el Controller -> UseCase -> Service Puro -> Adapter."
+5. "Concluir mostrando que el sistema cuenta con todas las entidades bancarias clave sin deudas técnicas, dejándolo listo para producción."

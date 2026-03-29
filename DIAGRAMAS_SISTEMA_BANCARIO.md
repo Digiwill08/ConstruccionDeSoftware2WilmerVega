@@ -730,6 +730,7 @@ Person
 - **Maven Wrapper:** gestión del ciclo de build
 
 ### Patrones Aplicados
+- **Arquitectura Hexagonal:** Estricta separación multicapa (Web, Aplicación, Dominio puro e Infraestructura).
 - **Herencia limpia:** jerarquía `Person → UserManager → SystemUser/User`
 - **Value Objects:** enumeraciones para tipos y estados
 - **Validación de negocio:** en métodos de entidad (`BankAccount.validateState()`)
