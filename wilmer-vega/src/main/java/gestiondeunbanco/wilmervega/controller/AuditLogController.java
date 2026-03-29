@@ -1,7 +1,7 @@
 package gestiondeunbanco.wilmervega.controller;
 
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
-import gestiondeunbanco.wilmervega.service.AuditLogService;
+import gestiondeunbanco.wilmervega.application.usecases.AuditLogUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,25 +13,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuditLogController {
 
-    private final AuditLogService auditLogService;
+    private final AuditLogUseCase auditLogUseCase;
 
     @GetMapping
     public ResponseEntity<List<AuditLog>> getAll() {
-        return ResponseEntity.ok(auditLogService.findAll());
+        return ResponseEntity.ok(auditLogUseCase.findAll());
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AuditLog>> getByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(auditLogService.findByUserId(userId));
+        return ResponseEntity.ok(auditLogUseCase.findByUserId(userId));
     }
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<AuditLog>> getByProductId(@PathVariable String productId) {
-        return ResponseEntity.ok(auditLogService.findByAffectedProductId(productId));
+        return ResponseEntity.ok(auditLogUseCase.findByAffectedProductId(productId));
     }
 
     @PostMapping
     public ResponseEntity<AuditLog> create(@RequestBody AuditLog auditLog) {
-        return ResponseEntity.ok(auditLogService.save(auditLog));
+        return ResponseEntity.ok(auditLogUseCase.save(auditLog));
     }
 }

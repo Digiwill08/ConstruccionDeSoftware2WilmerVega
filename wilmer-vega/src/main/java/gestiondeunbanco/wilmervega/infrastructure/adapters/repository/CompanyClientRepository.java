@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.domain.repository;
+package gestiondeunbanco.wilmervega.infrastructure.adapters.repository;
 
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import org.springframework.data.jpa.repository.JpaRepository;

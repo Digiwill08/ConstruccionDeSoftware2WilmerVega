@@ -1,15 +1,16 @@
-package gestiondeunbanco.wilmervega.domain.repository;
+package gestiondeunbanco.wilmervega.domain.ports;
 
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
+public interface BankAccountPort {
+    List<BankAccount> findAll();
+    Optional<BankAccount> findById(Long id);
+    BankAccount save(BankAccount bankAccount);
+    void deleteById(Long id);
     Optional<BankAccount> findByAccountNumber(String accountNumber);
     List<BankAccount> findByAccountStatus(AccountStatus status);
     boolean existsByAccountNumber(String accountNumber);

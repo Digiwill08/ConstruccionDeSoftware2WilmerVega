@@ -1,7 +1,7 @@
 package gestiondeunbanco.wilmervega.controller;
 
-import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
-import gestiondeunbanco.wilmervega.application.usecases.CompanyClientUseCase;
+import gestiondeunbanco.wilmervega.domain.models.Transfer;
+import gestiondeunbanco.wilmervega.application.usecases.TransferUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,28 +9,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/company-clients")
+@RequestMapping("/api/transfers")
 @RequiredArgsConstructor
-public class CompanyClientController {
+public class TransferController {
 
-    private final CompanyClientUseCase companyClientUseCase;
+    private final TransferUseCase transferUseCase;
 
     @GetMapping
-    public ResponseEntity<List<CompanyClient>> getAll() {
-        return ResponseEntity.ok(companyClientUseCase.findAll());
+    public ResponseEntity<List<Transfer>> getAll() {
+        return ResponseEntity.ok(transferUseCase.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyClient> getById(@PathVariable Long id) {
-        return companyClientUseCase.findById(id)
+    public ResponseEntity<Transfer> getById(@PathVariable Long id) {
+        return transferUseCase.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<CompanyClient> create(@RequestBody CompanyClient companyClient) {
+    public ResponseEntity<Transfer> create(@RequestBody Transfer transfer) {
         try {
-            CompanyClient saved = companyClientUseCase.save(companyClient);
+            Transfer saved = transferUseCase.save(transfer);
             return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -39,7 +39,7 @@ public class CompanyClientController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        companyClientUseCase.deleteById(id);
+        transferUseCase.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
