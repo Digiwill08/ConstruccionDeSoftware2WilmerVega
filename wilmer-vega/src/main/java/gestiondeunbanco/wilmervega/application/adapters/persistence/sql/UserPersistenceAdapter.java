@@ -31,12 +31,13 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return repository.findAll().stream().filter(u->u.getUsername().equals(username)).findFirst().map(this::toModel);
+        return repository.findAll().stream().filter(u -> u.getUsername().equals(username)).findFirst()
+                .map(this::toModel);
     }
-    
+
     @Override
     public boolean existsByUsername(String username) {
-        return repository.findAll().stream().anyMatch(u->u.getUsername().equals(username));
+        return repository.findAll().stream().anyMatch(u -> u.getUsername().equals(username));
     }
 
     @Override
@@ -55,8 +56,9 @@ public class UserPersistenceAdapter implements UserPort {
         entity.setId(model.getUserId());
         entity.setUsername(model.getUsername());
         entity.setPassword(model.getPassword());
-        if (model.getSystemRole() != null) entity.setRole(model.getSystemRole().name());
-        
+        if (model.getSystemRole() != null)
+            entity.setRole(model.getSystemRole().name());
+
         if (model.getRelatedClient() != null) {
             gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity c = new gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity();
             c.setId(model.getRelatedClient().getId());
@@ -70,8 +72,9 @@ public class UserPersistenceAdapter implements UserPort {
         model.setUserId(entity.getId());
         model.setUsername(entity.getUsername());
         model.setPassword(entity.getPassword());
-        if (entity.getRole() != null) model.setSystemRole(SystemRole.valueOf(entity.getRole()));
-        
+        if (entity.getRole() != null)
+            model.setSystemRole(SystemRole.valueOf(entity.getRole()));
+
         if (entity.getClient() != null) {
             gestiondeunbanco.wilmervega.domain.models.NaturalClient c = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
             c.setId(entity.getClient().getId());
