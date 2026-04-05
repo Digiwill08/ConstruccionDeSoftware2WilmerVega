@@ -6,11 +6,17 @@ This is the domain model for a banking system using Domain-Driven Design (DDD).
 ## Folder Organization
 
 ```
+application/
+├── adapters/
+│   ├── api/                 → Controladores REST (@RestController)
+│   └── persistence/sql/     → Persistencia
+│       ├── entities/        → Entidades JPA (@Entity)
+│       └── repositories/    → Repositorios (Spring Data JPA)
+├── usecases/                → Casos de uso (Orquestación)
 domain/
-├── entities/       → Classes representing things with ID
-├── valueobjects/   → Classes representing values (immutable)
-├── enums/         → Types and states
-├── repositories/  → Interfaces for saving data
+├── models/         → Clases de negocio puras (Sin JPA)
+├── ports/          → Interfaces para guardar y consultar (Abstractas)
+├── services/       → Lógica central del negocio (@Service)
 ```
 
 ## Main Entities

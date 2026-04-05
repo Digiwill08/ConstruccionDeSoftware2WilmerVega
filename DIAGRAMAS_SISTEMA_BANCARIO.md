@@ -667,7 +667,31 @@ gestiondeunbanco.wilmervega.domain.models/
     ├── ProductCategory.java
     ├── SystemRole.java
     ├── TransferStatus.java
-    └── UserStatus.java
+```
+
+### 💾 Estructura del Paquete de Persistencia `application/adapters/persistence/sql/`
+
+```
+gestiondeunbanco.wilmervega.application.adapters.persistence.sql/
+├── AuditLogPersistenceAdapter.java
+├── BankAccountPersistenceAdapter.java
+├── CompanyClientPersistenceAdapter.java
+├── LoanPersistenceAdapter.java
+├── NaturalClientPersistenceAdapter.java
+├── TransferPersistenceAdapter.java
+├── UserPersistenceAdapter.java
+├── entities/                    ← Clases mapeadas a BD (@Entity)
+│   ├── AuditLogEntity.java
+│   ├── BankAccountEntity.java
+│   ├── ClientEntity.java
+│   ├── CompanyClientEntity.java
+│   ├── LoanEntity.java
+│   ├── NaturalClientEntity.java
+│   ├── TransferEntity.java
+│   └── UserEntity.java
+└── repositories/                ← Repositorios Spring Data JPA
+    ├── AuditLogRepository.java
+    └── ...
 ```
 
 ### 🎯 Jerarquía de Clases
@@ -730,7 +754,7 @@ Person
 - **Maven Wrapper:** gestión del ciclo de build
 
 ### Patrones Aplicados
-- **Arquitectura Hexagonal:** Estricta separación multicapa (Web, Aplicación, Dominio puro e Infraestructura).
+- **Arquitectura Hexagonal Estricta:** Separación quirúrgica entre los Modelos de Negocio (POJOs puros) y el Motor de Base de Datos. Los `Entities` de JPA han sido desacoplados y residen exclusivamente en `application/adapters/persistence/sql/entities/`.
 - **Herencia limpia:** jerarquía `Person → UserManager → SystemUser/User`
 - **Value Objects:** enumeraciones para tipos y estados
 - **Validación de negocio:** en métodos de entidad (`BankAccount.validateState()`)
