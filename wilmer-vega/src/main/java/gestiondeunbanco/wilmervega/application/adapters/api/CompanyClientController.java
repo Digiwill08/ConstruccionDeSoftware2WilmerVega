@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.controller;
+package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.application.usecases.CompanyClientUseCase;

@@ -1,0 +1,16 @@
+package gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories;
+
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.BankAccountEntity;
+import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface BankAccountRepository extends JpaRepository<BankAccountEntity, Long> {
+    Optional<BankAccountEntity> findByAccountNumber(String accountNumber);
+    List<BankAccountEntity> findByAccountStatus(AccountStatus status);
+    boolean existsByAccountNumber(String accountNumber);
+}

@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.controller;
+package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
 import gestiondeunbanco.wilmervega.application.usecases.TransferUseCase;
