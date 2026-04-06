@@ -7,11 +7,11 @@ import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import java.util.List;
 import java.util.Optional;
 
-public class BankAccountDomainService {
+public class FindBankAccount {
 
     private final BankAccountPort bankAccountPort;
 
-    public BankAccountDomainService(BankAccountPort bankAccountPort) {
+    public FindBankAccount(BankAccountPort bankAccountPort) {
         this.bankAccountPort = bankAccountPort;
     }
 
@@ -21,20 +21,6 @@ public class BankAccountDomainService {
 
     public Optional<BankAccount> findById(Long id) {
         return bankAccountPort.findById(id);
-    }
-
-    public BankAccount save(BankAccount bankAccount) {
-        if (bankAccount == null) {
-            throw new IllegalArgumentException("BankAccount cannot be null");
-        }
-        if (bankAccount.getAccountNumber() != null && bankAccountPort.existsByAccountNumber(bankAccount.getAccountNumber())) {
-            throw new IllegalArgumentException("A BankAccount with this account number already exists");
-        }
-        return bankAccountPort.save(bankAccount);
-    }
-
-    public void deleteById(Long id) {
-        bankAccountPort.deleteById(id);
     }
 
     public Optional<BankAccount> findByAccountNumber(String accountNumber) {

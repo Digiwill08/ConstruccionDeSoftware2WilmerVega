@@ -5,23 +5,16 @@ import gestiondeunbanco.wilmervega.domain.ports.AuditLogPort;
 
 import java.util.List;
 
-public class AuditLogDomainService {
+public class FindAuditLog {
 
     private final AuditLogPort auditLogPort;
 
-    public AuditLogDomainService(AuditLogPort auditLogPort) {
+    public FindAuditLog(AuditLogPort auditLogPort) {
         this.auditLogPort = auditLogPort;
     }
 
     public List<AuditLog> findAll() {
         return auditLogPort.findAll();
-    }
-
-    public AuditLog save(AuditLog auditLog) {
-        if (auditLog == null) {
-            throw new IllegalArgumentException("AuditLog cannot be null");
-        }
-        return auditLogPort.save(auditLog);
     }
 
     public List<AuditLog> findByUserId(Long userId) {

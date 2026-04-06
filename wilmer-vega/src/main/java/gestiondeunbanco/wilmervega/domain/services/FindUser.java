@@ -6,11 +6,11 @@ import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDomainService {
+public class FindUser {
 
     private final UserPort userPort;
 
-    public UserDomainService(UserPort userPort) {
+    public FindUser(UserPort userPort) {
         this.userPort = userPort;
     }
 
@@ -20,20 +20,6 @@ public class UserDomainService {
 
     public Optional<User> findById(Long id) {
         return userPort.findById(id);
-    }
-
-    public User save(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
-        }
-        if (user.getUsername() != null && userPort.existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        return userPort.save(user);
-    }
-
-    public void deleteById(Long id) {
-        userPort.deleteById(id);
     }
 
     public Optional<User> findByUsername(String username) {

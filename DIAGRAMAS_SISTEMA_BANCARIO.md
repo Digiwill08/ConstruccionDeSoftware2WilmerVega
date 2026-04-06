@@ -657,16 +657,31 @@ gestiondeunbanco.wilmervega.domain.models/
 ├── Loan.java
 ├── Transfer.java
 ├── AuditLog.java
-└── Enumeraciones (10):
-    ├── AccountStatus.java
-    ├── AccountType.java
-    ├── Currency.java
-    ├── LoanStatus.java
-    ├── LoanType.java
-    ├── OperationType.java
-    ├── ProductCategory.java
-    ├── SystemRole.java
-    ├── TransferStatus.java
+└── Enumeraciones (10)
+```
+
+### 🎯 Nueva Estructura: Servicios por Operación
+En esta arquitectura refactorizada, `domain.services` utiliza el patrón de Comandos:
+```
+gestiondeunbanco.wilmervega.domain.services/
+├── CreateUser.java / FindUser.java / DeleteUser.java
+├── CreateBankAccount.java / FindBankAccount.java / DeleteBankAccount.java
+├── CreateLoan.java ...
+└── (total de 21 clases para cada operación de entidad)
+```
+
+### 👤 Nueva Estructura: Casos de Uso y API por Rol
+La Capa de Uso (`usecases`) y Controladores (`api`) se agrupan por Actores del Banco:
+```
+gestiondeunbanco.wilmervega.application.usecases/
+├── AdminUseCase.java            (gestión de audit logs y usuarios)
+├── EmployeeUseCase.java         (gestión de cuentas, clientes y préstamos)
+└── ClientUseCase.java           (transferencias y consultas personales)
+
+gestiondeunbanco.wilmervega.application.adapters.api/
+├── AdminController.java         (rutas /api/admin/*)
+├── EmployeeController.java      (rutas /api/employee/*)
+└── ClientController.java        (rutas /api/client/*)
 ```
 
 ### 💾 Estructura del Paquete de Persistencia `application/adapters/persistence/sql/`
@@ -681,17 +696,7 @@ gestiondeunbanco.wilmervega.application.adapters.persistence.sql/
 ├── TransferPersistenceAdapter.java
 ├── UserPersistenceAdapter.java
 ├── entities/                    ← Clases mapeadas a BD (@Entity)
-│   ├── AuditLogEntity.java
-│   ├── BankAccountEntity.java
-│   ├── ClientEntity.java
-│   ├── CompanyClientEntity.java
-│   ├── LoanEntity.java
-│   ├── NaturalClientEntity.java
-│   ├── TransferEntity.java
-│   └── UserEntity.java
 └── repositories/                ← Repositorios Spring Data JPA
-    ├── AuditLogRepository.java
-    └── ...
 ```
 
 ### 🎯 Jerarquía de Clases

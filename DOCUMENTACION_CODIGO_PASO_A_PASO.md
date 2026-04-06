@@ -31,13 +31,13 @@ Dentro de `wilmer-vega/src/main/java/gestiondeunbanco/wilmervega`:
 ---
 
 ## 3) Paso a paso del flujo de una petición REST
-Ejemplo enviando un `POST /api/transfers`:
+Ejemplo enviando un `POST /api/client/transfers`:
 
 1. El cliente HTTP hace su llamada `POST`.
-2. El **controlador** (`TransferController.create(...)`) la recibe.
-3. Le pasa los datos a la **capa de aplicación** (`TransferUseCase.save(...)`).
-4. El caso de uso invoca a la **capa de dominio** pura (`TransferDomainService.save(...)`). Aquí el domino valida que el monto sea, por ejemplo, mayor a cero.
-5. El servicio de dominio, sin saber si existe MySQL o no, le ordena grabar la transferencia al puerto (`TransferPort.save(...)`).
+2. El **controlador guiado por rol** (`ClientController.executeTransfer(...)`) la recibe.
+3. Le pasa los datos a la **capa de aplicación por rol** (`ClientUseCase.executeTransfer(...)`).
+4. El caso de uso invoca a la **capa de dominio orientada a comandos operativos** pura (`CreateTransfer.save(...)`).
+5. El servicio de comando, sin saber si existe MySQL o no, le ordena grabar la transferencia al puerto (`TransferPort.save(...)`).
 6. El puerto mágicamente es interceptado por un **adaptador de infraestructura** de Spring (`TransferPersistenceAdapter`).
 7. El adaptador finalmente usa el repositorio de JPA (`TransferRepository`) insertando el registro en la base de datos real.
 
@@ -46,22 +46,15 @@ Este proceso de "adentro hacia afuera" hace que el dominio (el negocio) sea indi
 ---
 
 ## 4) Endpoints disponibles
-Todos protegidos bajo `/api/**`:
+Todos protegidos y organizados por Roles:
 
-- **Usuarios (`UserController`)**
-  - `/api/users` (GET, GET /{id}, GET /username/{username}, POST, DELETE)
-- **Cuentas Bancarias (`BankAccountController`)**
-  - `/api/bank-accounts` (GET, GET /{id}, GET /number/{accountNumber}, POST, DELETE)
-- **Transferencias (`TransferController`)**
-  - `/api/transfers` (GET, GET /{id}, POST, DELETE)
-- **Préstamos (`LoanController`)**
-  - `/api/loans` (GET, GET /{id}, POST, DELETE)
-- **Clientes Empresa (`CompanyClientController`)**
-  - `/api/company-clients` (GET, GET /{id}, POST, DELETE)
-- **Clientes Naturales (`NaturalClientController`)**
-  - `/api/natural-clients` (GET, GET /{id}, GET /document/{documentNumber}, POST, DELETE)
-- **Auditoría (`AuditLogController`)**
-  - `/api/audit-logs` (GET, GET /{id}, POST, DELETE)
+- **Rutas Administrativas (`/api/admin/**`) -> `AdminController`**
+  - `/users` y `/audit-logs` (gestión del backoffice)
+- **Rutas para Empleados o Cajeros (`/api/employee/**`) -> `EmployeeController`**
+  - `/bank-accounts`, `/natural-clients`, `/company-clients`, `/loans` (aperturas de cuentas, originación de créditos, matriculación de clientes)
+- **Rutas para Uso del Cliente (`/api/client/**`) -> `ClientController`**
+  - `/bank-accounts` (consultar detalles de su propia cuenta)
+  - `/transfers` (ejecución y lectura de sus transferencias)
 
 ---
 
@@ -89,7 +82,7 @@ Si vas a presentar o leer el código, hazlo en este orden:
 
 1. Lee un **Modelo** de dominio (`BankAccount.java`).
 2. Mira el **Puerto** respectivo (`BankAccountPort.java`).
-3. Verás cómo interactúa el **Servicio de Dominio** puro (`BankAccountDomainService.java`) con ese puerto.
-4. Luego asómate al **Caso de Uso** (`BankAccountUseCase.java`) que une Spring Boot con el dominio.
-5. Pasa al **Controlador** (`BankAccountController.java`) para ver cómo exponen los endpoints.
+3. Verás cómo interactúan los nuevos **Servicios de Operaciones Comando** (ej: `CreateBankAccount.java`, `FindBankAccount.java`) con ese puerto.
+4. Luego asómate al **Caso de Uso Por Rol** (ej: `EmployeeUseCase.java`) que agrupa todos los servicios comandos usados por empleados.
+5. Pasa al **Controlador de Rol** (`EmployeeController.java`) para ver cómo exponen los endpoints específicos a `/api/employee/bank-accounts`.
 6. Finalmente nota cómo el **Adaptador de Persistencia** (`BankAccountPersistenceAdapter.java`) es la "magia" que cierra el circuito conectando el dominio con la BD en MySQL.
