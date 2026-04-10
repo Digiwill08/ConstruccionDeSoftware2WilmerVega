@@ -1,11 +1,11 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 
 import java.util.List;
-import java.util.Optional;
 
 public class FindBankAccount {
 
@@ -19,12 +19,14 @@ public class FindBankAccount {
         return bankAccountPort.findAll();
     }
 
-    public Optional<BankAccount> findById(Long id) {
-        return bankAccountPort.findById(id);
+    public BankAccount findById(Long id) {
+        return bankAccountPort.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bank Account not found with ID: " + id));
     }
 
-    public Optional<BankAccount> findByAccountNumber(String accountNumber) {
-        return bankAccountPort.findByAccountNumber(accountNumber);
+    public BankAccount findByAccountNumber(String accountNumber) {
+        return bankAccountPort.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new NotFoundException("Bank Account not found with account number: " + accountNumber));
     }
 
     public List<BankAccount> findByAccountStatus(AccountStatus status) {

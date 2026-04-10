@@ -1,10 +1,10 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
 import gestiondeunbanco.wilmervega.domain.ports.TransferPort;
 
 import java.util.List;
-import java.util.Optional;
 
 public class FindTransfer {
 
@@ -18,7 +18,8 @@ public class FindTransfer {
         return transferPort.findAll();
     }
 
-    public Optional<Transfer> findById(Long id) {
-        return transferPort.findById(id);
+    public Transfer findById(Long id) {
+        return transferPort.findById(id)
+                .orElseThrow(() -> new NotFoundException("Transfer not found with ID: " + id));
     }
 }

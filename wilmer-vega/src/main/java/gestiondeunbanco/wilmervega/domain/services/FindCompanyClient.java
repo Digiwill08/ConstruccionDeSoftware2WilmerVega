@@ -1,10 +1,10 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.ports.CompanyClientPort;
 
 import java.util.List;
-import java.util.Optional;
 
 public class FindCompanyClient {
 
@@ -18,7 +18,8 @@ public class FindCompanyClient {
         return companyClientPort.findAll();
     }
 
-    public Optional<CompanyClient> findById(Long id) {
-        return companyClientPort.findById(id);
+    public CompanyClient findById(Long id) {
+        return companyClientPort.findById(id)
+                .orElseThrow(() -> new NotFoundException("Company Client not found with ID: " + id));
     }
 }

@@ -1,10 +1,10 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 
 import java.util.List;
-import java.util.Optional;
 
 public class FindUser {
 
@@ -18,11 +18,13 @@ public class FindUser {
         return userPort.findAll();
     }
 
-    public Optional<User> findById(Long id) {
-        return userPort.findById(id);
+    public User findById(Long id) {
+        return userPort.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userPort.findByUsername(username);
+    public User findByUsername(String username) {
+        return userPort.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found with username: " + username));
     }
 }
