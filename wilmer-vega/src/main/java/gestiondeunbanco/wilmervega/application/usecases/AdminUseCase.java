@@ -5,7 +5,6 @@ import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.services.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public class AdminUseCase {
 
@@ -22,10 +21,10 @@ public class AdminUseCase {
     }
 
     public List<User> findAllUsers() { return findUser.findAll(); }
-    public Optional<User> findUserById(Long id) { return findUser.findById(id); }
+    public User findUserById(Long id) { return findUser.findById(id); }
     public User saveUser(User user) { return createUser.save(user); }
     public void deleteUserById(Long id) { deleteUser.deleteById(id); }
-    public Optional<User> findUserByUsername(String username) { return findUser.findByUsername(username); }
+    public User findUserByUsername(String username) { return findUser.findByUsername(username); }
 
     public List<AuditLog> findAllAuditLogs() { return findAuditLog.findAll(); }
     public List<AuditLog> findAuditLogsByUserId(Long userId) { return findAuditLog.findByUserId(userId); }
