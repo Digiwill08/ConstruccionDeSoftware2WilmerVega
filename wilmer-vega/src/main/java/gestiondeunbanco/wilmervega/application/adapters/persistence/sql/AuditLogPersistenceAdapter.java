@@ -41,7 +41,9 @@ public class AuditLogPersistenceAdapter implements AuditLogPort {
 
     private AuditLogEntity toEntity(AuditLog model) {
         AuditLogEntity entity = new AuditLogEntity();
-        entity.setAuditLogId(model.getAuditLogId());
+        if (model.getAuditLogId() != null) {
+            try { entity.setAuditLogId(Long.parseLong(model.getAuditLogId())); } catch (NumberFormatException ignored) {}
+        }
         if (model.getOperationType() != null) entity.setOperationType(model.getOperationType().name());
         entity.setOperationDateTime(model.getOperationDateTime());
         entity.setUserId(model.getUserId());
@@ -52,7 +54,7 @@ public class AuditLogPersistenceAdapter implements AuditLogPort {
 
     private AuditLog toModel(AuditLogEntity entity) {
         AuditLog model = new AuditLog();
-        model.setAuditLogId(entity.getAuditLogId());
+        model.setAuditLogId(entity.getAuditLogId() != null ? String.valueOf(entity.getAuditLogId()) : null);
         if (entity.getOperationType() != null) model.setOperationType(OperationType.valueOf(entity.getOperationType()));
         model.setOperationDateTime(entity.getOperationDateTime());
         model.setUserId(entity.getUserId());

@@ -7,7 +7,6 @@ import gestiondeunbanco.wilmervega.domain.services.FindBankAccount;
 import gestiondeunbanco.wilmervega.domain.services.FindTransfer;
 
 import java.util.List;
-import java.util.Optional;
 
 public class ClientUseCase {
 
@@ -21,7 +20,7 @@ public class ClientUseCase {
         this.findTransfer = findTransfer;
     }
 
-    public Optional<BankAccount> findMyBankAccount(String accountNumber) {
+    public BankAccount findMyBankAccount(String accountNumber) {
         return findBankAccount.findByAccountNumber(accountNumber);
     }
     
@@ -29,7 +28,7 @@ public class ClientUseCase {
         return createTransfer.save(transfer);
     }
     
-    public Optional<Transfer> findTransferById(Long id) {
+    public Transfer findTransferById(Long id) {
         return findTransfer.findById(id);
     }
     
