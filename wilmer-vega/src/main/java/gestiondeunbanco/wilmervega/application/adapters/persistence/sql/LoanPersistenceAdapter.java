@@ -6,6 +6,8 @@ import gestiondeunbanco.wilmervega.domain.models.LoanType;
 import gestiondeunbanco.wilmervega.domain.models.LoanStatus;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.LoanRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.LoanEntity;
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity;
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.BankAccountEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -31,13 +33,29 @@ public class LoanPersistenceAdapter implements LoanPort {
 
     @Override
     public Loan save(Loan loan) {
-        LoanEntity entity = toEntity(loan);
-        return toModel(repository.save(entity));
+        return toModel(repository.save(toEntity(loan)));
     }
 
     @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public List<Loan> findByStatus(LoanStatus status) {
+        return repository.findByLoanStatus(status.name()).stream()
+                .map(this::toModel).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Loan> findByClientDocument(String documentNumber) {
+        return repository.findByClientApplicant_DocumentNumber(documentNumber).stream()
+                .map(this::toModel).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return repository.existsById(id);
     }
 
     private LoanEntity toEntity(Loan model) {
@@ -51,15 +69,16 @@ public class LoanPersistenceAdapter implements LoanPort {
         if (model.getLoanStatus() != null) entity.setLoanStatus(model.getLoanStatus().name());
         entity.setApprovalDate(model.getApprovalDate());
         entity.setDisbursementDate(model.getDisbursementDate());
-        if (model.getNaturalClientApplicant() != null) {
-            gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.NaturalClientEntity nc = new gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.NaturalClientEntity();
-            nc.setId(model.getNaturalClientApplicant().getId());
-            entity.setNaturalClientApplicant(nc);
+        entity.setApprovedByUserId(model.getApprovedByUserId());
+        if (model.getClientApplicant() != null && model.getClientApplicant().getId() != null) {
+            ClientEntity ce = new ClientEntity();
+            ce.setId(model.getClientApplicant().getId());
+            entity.setClientApplicant(ce);
         }
-        if (model.getCompanyClientApplicant() != null) {
-            gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.CompanyClientEntity cc = new gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.CompanyClientEntity();
-            cc.setId(model.getCompanyClientApplicant().getId());
-            entity.setCompanyClientApplicant(cc);
+        if (model.getDisbursementAccount() != null && model.getDisbursementAccount().getId() != null) {
+            BankAccountEntity ba = new BankAccountEntity();
+            ba.setId(model.getDisbursementAccount().getId());
+            entity.setDisbursementAccount(ba);
         }
         return entity;
     }
@@ -75,16 +94,7 @@ public class LoanPersistenceAdapter implements LoanPort {
         if (entity.getLoanStatus() != null) model.setLoanStatus(LoanStatus.valueOf(entity.getLoanStatus()));
         model.setApprovalDate(entity.getApprovalDate());
         model.setDisbursementDate(entity.getDisbursementDate());
-        if (entity.getNaturalClientApplicant() != null) {
-            gestiondeunbanco.wilmervega.domain.models.NaturalClient c = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
-            c.setId(entity.getNaturalClientApplicant().getId());
-            model.setNaturalClientApplicant(c);
-        }
-        if (entity.getCompanyClientApplicant() != null) {
-            gestiondeunbanco.wilmervega.domain.models.CompanyClient c = new gestiondeunbanco.wilmervega.domain.models.CompanyClient();
-            c.setId(entity.getCompanyClientApplicant().getId());
-            model.setCompanyClientApplicant(c);
-        }
+        model.setApprovedByUserId(entity.getApprovedByUserId());
         return model;
     }
 }
