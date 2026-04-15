@@ -1,51 +1,74 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
+import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
+import gestiondeunbanco.wilmervega.application.usecases.AnalystUseCase;
+import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/audit-logs")
 @RequiredArgsConstructor
 public class AuditLogController {
 
+    private final AnalystUseCase analystUseCase;
+    private final AdminUseCase adminUseCase;
+
     @GetMapping
-    public ResponseEntity<List<Object>> getAllAuditLogs() {
-        // TODO: Implementar obtención de todos los logs de auditoría (solo ANALYST)
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
+        return ResponseEntity.ok(analystUseCase.findAllAuditLogs());
     }
 
     @GetMapping("/my-operations")
-    public ResponseEntity<List<Object>> getMyOperationLogs() {
-        // TODO: Implementar obtención de logs personales
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<AuditLog>> getMyOperationLogs(@RequestParam String username) {
+        Long userId = adminUseCase.findUserByUsername(username).getUserId();
+        return ResponseEntity.ok(analystUseCase.findAuditLogsByUser(userId));
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<Object>> getLogsByProduct(@PathVariable Long productId) {
-        // TODO: Implementar obtención de logs por producto
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<AuditLog>> getLogsByProduct(@PathVariable String productId) {
+        return ResponseEntity.ok(analystUseCase.findAuditLogsByProduct(productId));
     }
 
     @GetMapping("/operation-type/{operationType}")
-    public ResponseEntity<List<Object>> getLogsByOperationType(@PathVariable String operationType) {
-        // TODO: Implementar obtención de logs por tipo de operación
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<AuditLog>> getLogsByOperationType(@PathVariable String operationType) {
+        List<AuditLog> filtered = analystUseCase.findAllAuditLogs().stream()
+                .filter(log -> log.getOperationType() != null
+                        && log.getOperationType().name().equals(operationType.toUpperCase(Locale.ROOT)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(filtered);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Object>> getLogsByUser(@PathVariable Long userId) {
-        // TODO: Implementar obtención de logs por usuario (solo ANALYST)
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<AuditLog>> getLogsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(analystUseCase.findAuditLogsByUser(userId));
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<Object>> getLogsByDateRange(
+    public ResponseEntity<List<AuditLog>> getLogsByDateRange(
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        // TODO: Implementar obtención de logs por rango de fechas
-        return ResponseEntity.ok(List.of());
+        try {
+            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+
+            List<AuditLog> filtered = analystUseCase.findAllAuditLogs().stream()
+                    .filter(log -> log.getOperationDateTime() != null
+                            && !log.getOperationDateTime().isBefore(start)
+                            && !log.getOperationDateTime().isAfter(end))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(filtered);
+        } catch (DateTimeParseException ex) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
