@@ -1,10 +1,13 @@
 package gestiondeunbanco.wilmervega.config;
 
+import gestiondeunbanco.wilmervega.config.security.JwtService;
 import gestiondeunbanco.wilmervega.application.usecases.*;
 import gestiondeunbanco.wilmervega.domain.ports.*;
 import gestiondeunbanco.wilmervega.domain.services.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Spring configuration class that registers all domain services and use cases as beans.
@@ -12,6 +15,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BeanConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     // ─── Domain Services ────────────────────────────────────────────────────
 
@@ -100,5 +108,10 @@ public class BeanConfig {
     public CompanySupervisorUseCase companySupervisorUseCase(ApproveTransferService ats,
                                                               RejectTransferService rts, FindTransfer ft) {
         return new CompanySupervisorUseCase(ats, rts, ft);
+    }
+
+    @Bean
+    public AuthUseCase authUseCase(UserPort userPort, PasswordEncoder passwordEncoder, JwtService jwtService) {
+        return new AuthUseCase(userPort, passwordEncoder, jwtService);
     }
 }
