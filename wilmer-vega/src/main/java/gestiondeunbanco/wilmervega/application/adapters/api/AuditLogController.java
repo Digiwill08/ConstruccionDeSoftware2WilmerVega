@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -24,18 +28,18 @@ public class AuditLogController {
 
     @GetMapping
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
-        return ResponseEntity.ok(analystUseCase.findAllAuditLogs());
+        return executeWithTimeout(() -> analystUseCase.findAllAuditLogs());
     }
 
     @GetMapping("/my-operations")
     public ResponseEntity<List<AuditLog>> getMyOperationLogs(@RequestParam String username) {
         Long userId = adminUseCase.findUserByUsername(username).getUserId();
-        return ResponseEntity.ok(analystUseCase.findAuditLogsByUser(userId));
+        return executeWithTimeout(() -> analystUseCase.findAuditLogsByUser(userId));
     }
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<AuditLog>> getLogsByProduct(@PathVariable String productId) {
-        return ResponseEntity.ok(analystUseCase.findAuditLogsByProduct(productId));
+        return executeWithTimeout(() -> analystUseCase.findAuditLogsByProduct(productId));
     }
 
     @GetMapping("/operation-type/{operationType}")
@@ -49,7 +53,7 @@ public class AuditLogController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AuditLog>> getLogsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(analystUseCase.findAuditLogsByUser(userId));
+        return executeWithTimeout(() -> analystUseCase.findAuditLogsByUser(userId));
     }
 
     @GetMapping("/date-range")
@@ -69,6 +73,21 @@ public class AuditLogController {
             return ResponseEntity.ok(filtered);
         } catch (DateTimeParseException ex) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    private ResponseEntity<List<AuditLog>> executeWithTimeout(java.util.function.Supplier<List<AuditLog>> action) {
+        try {
+            List<AuditLog> result = CompletableFuture.supplyAsync(action)
+                    .get(2, TimeUnit.SECONDS);
+            return ResponseEntity.ok(result);
+        } catch (TimeoutException ex) {
+            return ResponseEntity.status(503).build();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return ResponseEntity.status(503).build();
+        } catch (ExecutionException ex) {
+            return ResponseEntity.status(503).build();
         }
     }
 }

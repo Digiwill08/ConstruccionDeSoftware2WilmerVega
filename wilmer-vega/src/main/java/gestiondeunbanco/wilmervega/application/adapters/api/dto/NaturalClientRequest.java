@@ -15,4 +15,5 @@ public class NaturalClientRequest {
     private String phone;
     private LocalDate birthDate;
     private String address;
+    private String role;
 }

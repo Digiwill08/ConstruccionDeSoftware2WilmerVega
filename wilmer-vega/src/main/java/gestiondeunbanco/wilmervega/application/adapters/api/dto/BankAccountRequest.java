@@ -9,7 +9,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BankAccountRequest {
-    private String accountType; // AHORROS, CORRIENTE, PERSONAL, EMPRESARIAL
+    private String accountNumber;
+    private String accountType; // SAVINGS, CHECKING, PERSONAL, BUSINESS
     private String currency; // USD, COP, EUR
+    private Long holderId;
     private BigDecimal initialBalance;
 }

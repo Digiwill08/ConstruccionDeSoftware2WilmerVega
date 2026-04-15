@@ -17,6 +17,7 @@ public class ClientResponse {
     private String address;
     private String fullName; // para persona natural
     private LocalDate birthDate; // para persona natural
+    private String role; // para persona natural
     private String businessName; // para empresa
     private Long legalRepresentativeId; // para empresa
     private String status;
