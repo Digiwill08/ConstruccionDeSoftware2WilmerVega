@@ -28,23 +28,16 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Public landing page
-                .requestMatchers("/").permitAll()
-                // Auth: login endpoint open to all users
-                .requestMatchers("/auth/**").permitAll()
-                // Admin: full system users and audit management
-                .requestMatchers("/api/admin/**").hasRole("INTERNAL_ANALYST")
-                // Analyst: loan lifecycle and audit log
-                .requestMatchers("/api/analyst/**").hasRole("INTERNAL_ANALYST")
-                // Supervisor: approve/reject company transfers
+                .requestMatchers("/", "/auth/**").permitAll()
+                .requestMatchers("/api/admin/**", "/api/analyst/**").hasRole("INTERNAL_ANALYST")
                 .requestMatchers("/api/supervisor/**").hasRole("COMPANY_SUPERVISOR")
-                // Employee: bank operations (accounts, clients, loans creation)
-                .requestMatchers("/api/employee/**")
-                    .hasAnyRole("TELLER_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST")
-                // Client: own accounts and transfers
-                .requestMatchers("/api/client/**")
-                    .hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE")
-                // All other requests must be authenticated
+                .requestMatchers("/api/employee/**").hasAnyRole("TELLER_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST")
+                .requestMatchers("/api/client/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE")
+                .requestMatchers("/api/customers/**").hasAnyRole("INTERNAL_ANALYST", "COMMERCIAL_EMPLOYEE")
+                .requestMatchers("/api/accounts/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "TELLER_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST")
+                .requestMatchers("/api/loans/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST")
+                .requestMatchers("/api/transfers/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "COMPANY_SUPERVISOR", "INTERNAL_ANALYST")
+                .requestMatchers("/api/audit-logs/**").hasRole("INTERNAL_ANALYST")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
