@@ -103,6 +103,9 @@
       border: 1px solid rgba(79, 140, 255, 0.28);
       color: #cfe0ff;
     }
+    .service-select-multi {
+      min-height: 220px;
+    }
   </style>
 </head>
 <body>
@@ -163,6 +166,57 @@
             <button class="btn btn-dark-soft" onclick="logout()">Salir</button>
           </div>
 
+          <div class="glass p-3 mb-3">
+            <h6 class="mb-3">Ejecutor visual de servicios</h6>
+            <div class="row g-2 mb-2">
+              <div class="col-md-6">
+                <label class="label">Filtro por modulo</label>
+                <select id="moduleFilter" class="form-select" onchange="filterServicesByModule()">
+                  <option value="ALL">Todos</option>
+                  <option value="AUTH">Auth</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="CLIENTES">Clientes</option>
+                  <option value="CUENTAS">Cuentas</option>
+                  <option value="PRESTAMOS">Prestamos</option>
+                  <option value="TRANSFERENCIAS">Transferencias</option>
+                  <option value="SUPERVISOR">Supervisor</option>
+                  <option value="AUDITORIA">Auditoria</option>
+                </select>
+              </div>
+              <div class="col-md-6 d-flex align-items-end gap-2">
+                <button class="btn btn-dark-soft w-100" onclick="selectFilteredServices()">Seleccionar filtrados</button>
+                <button class="btn btn-dark-soft w-100" onclick="clearModuleFilter()">Quitar filtro</button>
+              </div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-md-8">
+                <label class="label">Servicios/Rutas (seleccion multiple)</label>
+                <select id="serviceSelect" class="form-select service-select-multi" multiple onchange="syncTemplateFromSelection()"></select>
+                <div class="small-note mt-1">Usa Ctrl/Cmd + clic para seleccionar varios.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="label">Metodo</label>
+                <input id="serviceMethod" class="form-control" readonly />
+              </div>
+            </div>
+            <div class="mb-2">
+              <label class="label">Ruta</label>
+              <input id="servicePath" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="label">Body JSON (si aplica)</label>
+              <textarea id="serviceBody" class="form-control" rows="7"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-accent" onclick="executeService()">Ejecutar servicio seleccionado</button>
+              <button class="btn btn-success-soft" onclick="executeSelectedServices()">Ejecutar seleccion multiple</button>
+              <button class="btn btn-dark-soft" onclick="selectAllServices()">Seleccionar todos</button>
+              <button class="btn btn-dark-soft" onclick="clearServiceSelection()">Limpiar seleccion</button>
+              <button class="btn btn-dark-soft" onclick="loadServiceTemplate()">Restaurar plantilla</button>
+            </div>
+            <div class="small-note mt-2">Tip: usa primero los servicios de login/crear usuario para generar datos y luego prueba los demas.</div>
+          </div>
+
           <div class="mb-2 small-note">Respuesta</div>
           <pre id="output">Aun no hay respuesta.</pre>
         </div>
@@ -175,6 +229,31 @@
     const statusUser = document.getElementById('statusUser');
     const statusRole = document.getElementById('statusRole');
     const statusToken = document.getElementById('statusToken');
+    const serviceSelect = document.getElementById('serviceSelect');
+    const moduleFilter = document.getElementById('moduleFilter');
+    const serviceMethod = document.getElementById('serviceMethod');
+    const servicePath = document.getElementById('servicePath');
+    const serviceBody = document.getElementById('serviceBody');
+
+    const serviceCatalog = [
+      { name: 'Auth - Login', module: 'AUTH', method: 'POST', path: '/auth/login', protected: false, body: { username: 'pancracio', password: '123456' } },
+      { name: 'Admin - Crear usuario', module: 'ADMIN', method: 'POST', path: '/api/admin/users', protected: true, body: { username: 'nuevo_usuario_demo', password: '123456', systemRole: 'COMPANY_EMPLOYEE' } },
+      { name: 'Admin - Listar usuarios', module: 'ADMIN', method: 'GET', path: '/api/admin/users', protected: true, body: null },
+      { name: 'Clientes - Crear natural', module: 'CLIENTES', method: 'POST', path: '/api/customers/natural', protected: true, body: { fullName: 'Cliente Visual Demo', documentNumber: '10000001', email: 'cliente.visual@demo.com', phone: '3001234567', birthDate: '1995-05-10', address: 'Calle Visual 123', role: 'NATURAL_CLIENT' } },
+      { name: 'Clientes - Listar naturales', module: 'CLIENTES', method: 'GET', path: '/api/customers/natural', protected: true, body: null },
+      { name: 'Clientes - Crear empresa', module: 'CLIENTES', method: 'POST', path: '/api/customers/company', protected: true, body: { businessName: 'Empresa Visual Demo', documentNumber: '90000001', email: 'empresa.visual@demo.com', phone: '3019876543', address: 'Avenida Visual 456', legalRepresentativeId: 1 } },
+      { name: 'Clientes - Listar empresas', module: 'CLIENTES', method: 'GET', path: '/api/customers/company', protected: true, body: null },
+      { name: 'Cuentas - Crear cuenta', module: 'CUENTAS', method: 'POST', path: '/api/accounts', protected: true, body: { accountNumber: 'ACCVISUAL001', accountType: 'SAVINGS', currency: 'USD', holderId: 1, initialBalance: 25000000.0 } },
+      { name: 'Cuentas - Listar por holder', module: 'CUENTAS', method: 'GET', path: '/api/accounts?holderId=1', protected: true, body: null },
+      { name: 'Cuentas - Consultar saldo', module: 'CUENTAS', method: 'GET', path: '/api/accounts/1/balance', protected: true, body: null },
+      { name: 'Prestamos - Crear', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
+      { name: 'Prestamos - Aprobar', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/approve?analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Prestamos - Desembolsar', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Transferencias - Crear', module: 'TRANSFERENCIAS', method: 'POST', path: '/api/client/transfers', protected: true, body: { sourceAccount: { id: 1, accountNumber: 'ACCVISUAL001' }, destinationAccount: { id: 2, accountNumber: 'DSTVISUAL001' }, amount: 12000000, creatorUserId: 1 } },
+      { name: 'Supervisor - Pendientes', module: 'SUPERVISOR', method: 'GET', path: '/api/supervisor/transfers/pending', protected: true, body: null },
+      { name: 'Supervisor - Aprobar transferencia', module: 'SUPERVISOR', method: 'POST', path: '/api/supervisor/transfers/1/approve?supervisorUserId=1&role=COMPANY_SUPERVISOR', protected: true, body: null },
+      { name: 'Auditoria - Listar logs', module: 'AUDITORIA', method: 'GET', path: '/api/audit-logs', protected: true, body: null }
+    ];
 
     function setOutput(value) {
       output.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -243,6 +322,175 @@
       }
     }
 
+    function initServiceCatalog() {
+      serviceCatalog.forEach((svc, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = svc.name;
+        serviceSelect.appendChild(opt);
+      });
+      if (serviceSelect.options.length > 0) {
+        serviceSelect.options[0].selected = true;
+      }
+      loadServiceTemplate();
+    }
+
+    function getSelectedServiceIndexes() {
+      return Array.from(serviceSelect.selectedOptions)
+        .map(opt => Number(opt.value))
+        .filter(v => Number.isInteger(v) && v >= 0);
+    }
+
+    function filterServicesByModule() {
+      const selectedModule = moduleFilter.value;
+      Array.from(serviceSelect.options).forEach(opt => {
+        const idx = Number(opt.value);
+        const svc = serviceCatalog[idx];
+        const visible = selectedModule === 'ALL' || (svc && svc.module === selectedModule);
+        opt.hidden = !visible;
+      });
+      clearServiceSelection();
+    }
+
+    function syncTemplateFromSelection() {
+      const selected = getSelectedServiceIndexes();
+      const first = selected.length ? selected[0] : 0;
+      const svc = serviceCatalog[first];
+      if (!svc) return;
+      serviceMethod.value = svc.method;
+      servicePath.value = svc.path;
+      serviceBody.value = svc.body ? JSON.stringify(svc.body, null, 2) : '';
+    }
+
+    function loadServiceTemplate() {
+      const selected = getSelectedServiceIndexes();
+      const svc = serviceCatalog[selected.length ? selected[0] : 0];
+      serviceMethod.value = svc.method;
+      servicePath.value = svc.path;
+      serviceBody.value = svc.body ? JSON.stringify(svc.body, null, 2) : '';
+    }
+
+    function selectAllServices() {
+      Array.from(serviceSelect.options).forEach(opt => {
+        if (!opt.hidden) {
+          opt.selected = true;
+        }
+      });
+      syncTemplateFromSelection();
+    }
+
+    function selectFilteredServices() {
+      clearServiceSelection();
+      Array.from(serviceSelect.options).forEach(opt => {
+        if (!opt.hidden) {
+          opt.selected = true;
+        }
+      });
+      syncTemplateFromSelection();
+    }
+
+    function clearModuleFilter() {
+      moduleFilter.value = 'ALL';
+      filterServicesByModule();
+    }
+
+    function clearServiceSelection() {
+      Array.from(serviceSelect.options).forEach(opt => { opt.selected = false; });
+      const firstVisible = Array.from(serviceSelect.options).find(opt => !opt.hidden);
+      if (firstVisible) {
+        firstVisible.selected = true;
+      }
+      syncTemplateFromSelection();
+    }
+
+    async function runServiceRequest({ svc, method, path, bodyText }) {
+      const token = localStorage.getItem('jwt_token');
+      if (svc.protected && !token) {
+        return {
+          request: { method, path, protected: svc.protected },
+          status: 0,
+          ok: false,
+          response: { error: 'Este servicio requiere token. Inicia sesion primero.' }
+        };
+      }
+
+      const headers = {};
+      if (svc.protected) headers.Authorization = 'Bearer ' + token;
+
+      const request = { method, headers };
+      if (method !== 'GET' && method !== 'HEAD') {
+        headers['Content-Type'] = 'application/json';
+        if (bodyText && bodyText.trim()) {
+          try {
+            request.body = JSON.stringify(JSON.parse(bodyText));
+          } catch {
+            return {
+              request: { method, path, protected: svc.protected },
+              status: 0,
+              ok: false,
+              response: { error: 'Body JSON invalido. Revisa la sintaxis.' }
+            };
+          }
+        }
+      }
+
+      const response = await fetch(path, request);
+      const text = await response.text();
+      let parsed = text;
+      try { parsed = text ? JSON.parse(text) : null; } catch {}
+
+      if (path === '/auth/login' && response.ok && parsed && parsed.token) {
+        saveSession(parsed);
+      }
+
+      return {
+        request: { method, path, protected: svc.protected },
+        status: response.status,
+        ok: response.ok,
+        response: parsed
+      };
+    }
+
+    async function executeService() {
+      try {
+        const selected = getSelectedServiceIndexes();
+        const svc = serviceCatalog[selected.length ? selected[0] : 0];
+        const path = servicePath.value.trim();
+        const method = serviceMethod.value.trim().toUpperCase();
+        const result = await runServiceRequest({ svc, method, path, bodyText: serviceBody.value });
+        setOutput(result);
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function executeSelectedServices() {
+      try {
+        const selected = getSelectedServiceIndexes();
+        if (!selected.length) {
+          setOutput({ error: 'Selecciona al menos un servicio.' });
+          return;
+        }
+
+        const results = [];
+        for (const idx of selected) {
+          const svc = serviceCatalog[idx];
+          const bodyText = svc.body ? JSON.stringify(svc.body) : '';
+          const result = await runServiceRequest({ svc, method: svc.method, path: svc.path, bodyText });
+          results.push({ service: svc.name, ...result });
+        }
+
+        setOutput({
+          batchTotal: results.length,
+          batchOk: results.filter(r => r.ok).length,
+          batchFailed: results.filter(r => !r.ok).length,
+          results
+        });
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
     function logout() {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('jwt_username');
@@ -254,6 +502,8 @@
     }
 
     loadSession();
+    initServiceCatalog();
+    filterServicesByModule();
   </script>
 </body>
 </html>

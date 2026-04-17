@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.domain.models;
 
 public enum SystemRole {
+    ADMINISTRATOR("Platform Administrator"),
     NATURAL_CLIENT("Natural Person Client"),
     COMPANY_CLIENT("Company Client"),
     TELLER_EMPLOYEE("Teller Employee"),

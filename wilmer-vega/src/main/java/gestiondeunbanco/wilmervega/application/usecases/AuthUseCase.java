@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.application.usecases;
 
 import gestiondeunbanco.wilmervega.config.security.JwtService;
+import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,26 @@ public class AuthUseCase {
     private final UserPort userPort;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    public LoginResult register(String username, String rawPassword, String requestedRole) {
+        if (username == null || username.isBlank() || rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("Username and password are required");
+        }
+
+        if (userPort.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        SystemRole role = resolveAllowedPublicRole(requestedRole);
+
+        User user = new User();
+        user.setUsername(username.trim());
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setSystemRole(role);
+        userPort.save(user);
+
+        return login(username, rawPassword);
+    }
 
     public LoginResult login(String username, String rawPassword) {
         if (username == null || username.isBlank() || rawPassword == null || rawPassword.isBlank()) {
@@ -71,5 +92,27 @@ public class AuthUseCase {
 
     private boolean looksEncoded(String value) {
         return value.startsWith("$2a$") || value.startsWith("$2b$") || value.startsWith("$2y$");
+    }
+
+    private SystemRole resolveAllowedPublicRole(String requestedRole) {
+        if (requestedRole == null || requestedRole.isBlank()) {
+            return SystemRole.NATURAL_CLIENT;
+        }
+
+        SystemRole role;
+        try {
+            role = SystemRole.valueOf(requestedRole.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid role");
+        }
+
+        // Public registration is limited to client-side roles.
+        if (role != SystemRole.NATURAL_CLIENT &&
+            role != SystemRole.COMPANY_CLIENT &&
+            role != SystemRole.COMPANY_EMPLOYEE) {
+            throw new IllegalArgumentException("Role is not allowed for public registration");
+        }
+
+        return role;
     }
 }
