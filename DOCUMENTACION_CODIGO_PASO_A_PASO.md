@@ -1,88 +1,119 @@
 # Documentación del Código — Paso a Paso
 
 ## 1) ¿Qué es este proyecto?
-Este proyecto es una API bancaria construida con **Spring Boot**. Su objetivo es administrar:
-- Clientes Naturales y Empresas
-- Cuentas Bancarias y Préstamos
-- Transferencias y Usuarios
-- Bitácora de Auditoría
 
-La aplicación sigue estrictamente la **Arquitectura Hexagonal (Puertos y Adaptadores)** mediante 4 capas principales:
-- **Capa Web (Controladores)**: expone los endpoints REST HTTP
-- **Capa de Aplicación (Casos de Uso)**: orquesta y dirige peticiones
-- **Capa de Dominio (Servicios y Puertos)**: núcleo puro en Java sin dependencias de frameworks
-- **Capa de Infraestructura (Adaptadores y Repositorios)**: gestiona la conexión a bases de datos
+Es una aplicación bancaria construida con Spring Boot y Java 17. La solución resuelve:
 
----
+- Autenticación JWT.
+- Registro de usuarios con restricciones por rol.
+- Gestión de clientes naturales y empresas.
+- Gestión de cuentas, transferencias y préstamos.
+- Bitácora de auditoría en MongoDB.
+
+La aplicación usa arquitectura hexagonal:
+
+- Capa Web: controladores REST y panel visual.
+- Capa de Aplicación: casos de uso.
+- Capa de Dominio: modelos, servicios y puertos.
+- Capa de Infraestructura: adaptadores de persistencia.
 
 ## 2) Estructura general del proyecto
+
 Dentro de `wilmer-vega/src/main/java/gestiondeunbanco/wilmervega`:
 
-- `WilmerVegaApplication.java`: punto de arranque del microservicio
-- `controller/`: REST endpoints HTTP expuestos hacia el exterior (Capa 1)
-- `application/usecases/`: lógica de orquestación de la aplicación (Capa 2)
-- `domain/`: núcleo del negocio (Capa 3)
-  - `models/`: clases ricas, datos y reglas (`Client`, `Account`, etc)
-  - `ports/`: contratos obligatorios o interfaces a implementar
-  - `services/`: reglas estrictas de dominio sin `@Service` de Spring
-- `infrastructure/adapters/`: unión del dominio a la base de datos (Capa 4)
-  - `repository/`: los `JpaRepository` propios de Spring Data
+- `WilmerVegaApplication.java`: arranque de la aplicación.
+- `application/adapters/api/`: controladores REST.
+- `application/adapters/persistence/`: adaptadores SQL y Mongo.
+- `application/usecases/`: orquestación de reglas por rol.
+- `config/`: seguridad, beans y conectividad.
+- `domain/models/`: entidades y enums de negocio.
+- `domain/ports/`: contratos de salida.
+- `domain/services/`: reglas puras del negocio.
 
----
+## 3) Flujo de una petición REST
 
-## 3) Paso a paso del flujo de una petición REST
-Ejemplo enviando un `POST /api/client/transfers`:
+Ejemplo: `POST /api/transfers`.
 
-1. El cliente HTTP hace su llamada `POST`.
-2. El **controlador guiado por rol** (`ClientController.executeTransfer(...)`) la recibe.
-3. Le pasa los datos a la **capa de aplicación por rol** (`ClientUseCase.executeTransfer(...)`).
-4. El caso de uso invoca a la **capa de dominio orientada a comandos operativos** pura (`CreateTransfer.save(...)`).
-5. El servicio de comando, sin saber si existe MySQL o no, le ordena grabar la transferencia al puerto (`TransferPort.save(...)`).
-6. El puerto mágicamente es interceptado por un **adaptador de infraestructura** de Spring (`TransferPersistenceAdapter`).
-7. El adaptador finalmente usa el repositorio de JPA (`TransferRepository`) insertando el registro en la base de datos real.
-
-Este proceso de "adentro hacia afuera" hace que el dominio (el negocio) sea indiferente a cambios futuros (como migrar la BD de MySQL a Mongo).
-
----
+1. El cliente llama al controlador de transferencias.
+2. El controlador valida el contrato y delega al caso de uso.
+3. El caso de uso aplica la lógica por rol y decide si la operación se ejecuta o queda pendiente.
+4. El dominio verifica reglas: monto, estado, cuentas y aprobación si corresponde.
+5. El puerto define qué necesita persistirse sin acoplarse a la base de datos.
+6. El adaptador implementa el puerto y guarda la información.
+7. La bitácora registra la operación en MongoDB.
 
 ## 4) Endpoints disponibles
-Todos protegidos y organizados por Roles:
 
-- **Rutas Administrativas (`/api/admin/**`) -> `AdminController`**
-  - `/users` y `/audit-logs` (gestión del backoffice)
-- **Rutas para Empleados o Cajeros (`/api/employee/**`) -> `EmployeeController`**
-  - `/bank-accounts`, `/natural-clients`, `/company-clients`, `/loans` (aperturas de cuentas, originación de créditos, matriculación de clientes)
-- **Rutas para Uso del Cliente (`/api/client/**`) -> `ClientController`**
-  - `/bank-accounts` (consultar detalles de su propia cuenta)
-  - `/transfers` (ejecución y lectura de sus transferencias)
+Autenticación:
 
----
+- `POST /auth/login`
+- `POST /auth/register`
 
-## 5) Diseño de Clases (Modelos de Dominio)
+Administración:
 
-### Jerarquía
+- `GET /api/admin/users`
+- `GET /api/admin/users/{id}`
+- `GET /api/admin/users/username/{username}`
+- `POST /api/admin/users`
+- `DELETE /api/admin/users/{id}`
+- `GET /api/admin/audit-logs`
+
+Analista:
+
+- `GET /api/analyst/loans`
+- `POST /api/analyst/loans/{id}/approve`
+- `POST /api/analyst/loans/{id}/reject`
+- `POST /api/analyst/loans/{id}/disburse`
+- `GET /api/analyst/audit-logs`
+
+Supervisor:
+
+- `GET /api/supervisor/transfers/pending`
+- `POST /api/supervisor/transfers/{id}/approve`
+- `POST /api/supervisor/transfers/{id}/reject`
+
+Cliente:
+
+- `GET /api/client/bank-accounts/{accountNumber}`
+- `GET /api/client/transfers`
+- `POST /api/client/transfers`
+
+Empleado:
+
+- `GET /api/employee/bank-accounts`
+- `POST /api/employee/bank-accounts`
+- `GET /api/employee/natural-clients`
+- `POST /api/employee/natural-clients`
+- `GET /api/employee/company-clients`
+- `POST /api/employee/company-clients`
+- `GET /api/employee/loans`
+- `POST /api/employee/loans`
+
+## 5) Diseño de clases
+
+### Jerarquía de dominio
+
 - `Person` -> `Client` -> `NaturalClient` / `CompanyClient`
 - `Person` -> `UserManager` -> `User` / `SystemUser`
 
-### Centralización a través de Interfaces
-Ningún requerimiento de datos llama directo al repositorio `Jpa`. Todo pasa obligatoriamente por interfaces dentro de `domain/ports` (`AuditLogPort`, `TransferPort`, etc.).
+### Portabilidad del dominio
 
----
+El dominio no llama directamente a repositorios de Spring. Todo pasa por interfaces como `AuditLogPort`, `TransferPort`, `LoanPort` y `UserPort`.
 
-## 6) Configuración de Seguridad
-Archivo base: `config/SecurityConfig.java`
-1. Se desactiva CSRF
-2. Todas las rutas se autentican (`anyRequest().authenticated()`)
-3. La estrategia de login es de tipo Basic (`httpBasic()`)
+## 6) Configuración de seguridad
 
----
+La seguridad se centraliza en `SecurityConfig.java`.
 
-## 7) Guía de Lectura Rápida
-Si vas a presentar o leer el código, hazlo en este orden:
+1. CSRF está deshabilitado para la API.
+2. Se usa autenticación JWT.
+3. Las rutas públicas se limitan a login, registro y la interfaz visual.
+4. Los demás endpoints se protegen por rol.
 
-1. Lee un **Modelo** de dominio (`BankAccount.java`).
-2. Mira el **Puerto** respectivo (`BankAccountPort.java`).
-3. Verás cómo interactúan los nuevos **Servicios de Operaciones Comando** (ej: `CreateBankAccount.java`, `FindBankAccount.java`) con ese puerto.
-4. Luego asómate al **Caso de Uso Por Rol** (ej: `EmployeeUseCase.java`) que agrupa todos los servicios comandos usados por empleados.
-5. Pasa al **Controlador de Rol** (`EmployeeController.java`) para ver cómo exponen los endpoints específicos a `/api/employee/bank-accounts`.
-6. Finalmente nota cómo el **Adaptador de Persistencia** (`BankAccountPersistenceAdapter.java`) es la "magia" que cierra el circuito conectando el dominio con la BD en MySQL.
+## 7) Guía de lectura rápida
+
+1. Lee un modelo, por ejemplo `BankAccount`.
+2. Revisa su puerto, por ejemplo `BankAccountPort`.
+3. Observa el servicio de dominio que implementa las reglas.
+4. Sigue el caso de uso en `application/usecases`.
+5. Mira el controlador REST que expone la ruta.
+6. Finaliza en el adaptador de persistencia que conecta con H2 o Mongo.

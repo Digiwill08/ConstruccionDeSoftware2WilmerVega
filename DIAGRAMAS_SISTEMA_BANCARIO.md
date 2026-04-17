@@ -1,32 +1,11 @@
-# 📊 DIAGRAMAS DEL SISTEMA BANCARIO - GESTIÓN DE UN BANCO
+# Diagramas del Sistema Bancario
 
-> **Proyecto:** Gestión de un Banco - Wilmer Vega  
-> **Fecha:** 12 de marzo de 2026  
-> **Paquete:** gestiondeunbanco.wilmervega.domain.models
+## 1. Modelo de dominio
 
----
-
-## 📋 ÍNDICE
-
-1. [Diagrama de Clases del Modelo](#1-diagrama-de-clases-del-modelo)
-2. [Diagrama de Estados - Transferencias](#2-diagrama-de-estados---transferencias)
-3. [Diagrama de Estados - Préstamos](#3-diagrama-de-estados---préstamos)
-4. [Diagrama de Estados - Cuentas Bancarias](#4-diagrama-de-estados---cuentas-bancarias)
-5. [Diagrama de Estados - Usuarios](#5-diagrama-de-estados---usuarios)
-6. [Diagrama de Roles del Sistema](#6-diagrama-de-roles-del-sistema)
-7. [Diagrama de Tipos de Productos Bancarios](#7-diagrama-de-tipos-de-productos-bancarios)
-8. [Diagrama de Flujo - Tipos de Operaciones](#8-diagrama-de-flujo---tipos-de-operaciones)
-9. [Resumen del Modelo](#9-resumen-del-modelo)
-
----
-
-## 1. DIAGRAMA DE CLASES DEL MODELO
-
-Este diagrama muestra todas las clases y enumeraciones actuales del dominio del sistema bancario, con la jerarquía de usuarios refactorizada.
+El dominio actual del proyecto está compuesto por entidades bancarias, roles, estados y bitácoras de auditoría. El objetivo del modelo es separar clientes, usuarios, operaciones y control de acceso.
 
 ```mermaid
 classDiagram
-    %% ─── Jerarquía de Personas ─────────────────────────────────
     class Person {
         +Long id
         +String email
@@ -45,8 +24,6 @@ classDiagram
         +String fullName
         +LocalDate birthDate
         +SystemRole role
-        +List~SystemUser~ systemUsers
-        +List~CompanyClient~ representedCompanies
     }
 
     class CompanyClient {
@@ -54,7 +31,6 @@ classDiagram
         +NaturalClient legalRepresentative
     }
 
-    %% ─── Jerarquía de Usuarios ────────────────────────────────
     class UserManager {
         +String fullName
         +Date birthDate
@@ -62,9 +38,6 @@ classDiagram
     }
 
     class SystemUser {
-        +String relatedId
-        +NaturalClient naturalClient
-        +CompanyClient companyClient
         +String identificationId
         +SystemRole role
         +List~Transfer~ createdTransfers
@@ -73,54 +46,29 @@ classDiagram
     }
 
     class User {
-        +Long userId
-        +Client relatedClient
-        +String documentNumber
-        +SystemRole systemRole
         +String username
         +String password
+        +SystemRole systemRole
     }
 
-    %% ─── Entidades del Negocio ────────────────────────────────
     class BankAccount {
-        +Long id
         +String accountNumber
         +AccountType accountType
         +BigDecimal currentBalance
         +Currency currency
         +AccountStatus accountStatus
-        +LocalDate openingDate
-        +List~Transfer~ outgoingTransfers
-        +List~Transfer~ incomingTransfers
-        +validateState()
-        +hasSingleHolder() boolean
-    }
-
-    class BankingProduct {
-        +Long id
-        +String productCode
-        +String productName
-        +ProductCategory category
-        +Boolean requiresApproval
     }
 
     class Loan {
         +Long loanId
         +LoanType loanType
         +BigDecimal requestedAmount
-        +BigDecimal approvedAmount
-        +BigDecimal interestRate
-        +Integer termInMonths
         +LoanStatus loanStatus
-        +Date approvalDate
-        +Date disbursementDate
     }
 
     class Transfer {
         +Long transferId
         +BigDecimal amount
-        +Date creationDateTime
-        +Date approvalDateTime
         +TransferStatus transferStatus
     }
 
@@ -128,15 +76,12 @@ classDiagram
         +Long auditLogId
         +OperationType operationType
         +LocalDateTime operationDateTime
-        +Long userId
-        +String userRole
-        +String affectedProductId
         +Map~String, Object~ details
     }
 
-    %% ─── Enumeraciones ────────────────────────────────────────
     class SystemRole {
         <<enumeration>>
+        ADMINISTRATOR
         NATURAL_CLIENT
         COMPANY_CLIENT
         TELLER_EMPLOYEE
@@ -144,7 +89,6 @@ classDiagram
         COMPANY_EMPLOYEE
         COMPANY_SUPERVISOR
         INTERNAL_ANALYST
-        +String getDescription()
     }
 
     class UserStatus {
@@ -152,7 +96,6 @@ classDiagram
         ACTIVE
         INACTIVE
         BLOCKED
-        +String getDescription()
     }
 
     class AccountStatus {
@@ -160,7 +103,6 @@ classDiagram
         ACTIVE
         BLOCKED
         CANCELLED
-        +String getDescription()
     }
 
     class AccountType {
@@ -169,7 +111,6 @@ classDiagram
         CHECKING
         PERSONAL
         BUSINESS
-        +String getDescription()
     }
 
     class Currency {
@@ -177,7 +118,6 @@ classDiagram
         USD
         COP
         EUR
-        +String getDescription()
     }
 
     class LoanStatus {
@@ -188,7 +128,6 @@ classDiagram
         DISBURSED
         OVERDUE
         CANCELLED
-        +String getDescription()
     }
 
     class LoanType {
@@ -197,7 +136,6 @@ classDiagram
         VEHICLE
         MORTGAGE
         BUSINESS
-        +String getDescription()
     }
 
     class TransferStatus {
@@ -208,15 +146,6 @@ classDiagram
         EXECUTED
         REJECTED
         EXPIRED
-        +String getDescription()
-    }
-
-    class ProductCategory {
-        <<enumeration>>
-        ACCOUNTS
-        LOANS
-        SERVICES
-        +String getDescription()
     }
 
     class OperationType {
@@ -236,28 +165,82 @@ classDiagram
         USER_BLOCKING
         LOGIN
         LOGOUT
-        +String getDescription()
     }
 
-    %% ─── Herencia ─────────────────────────────────────────────
-    Person          <|-- Client
-    Person          <|-- UserManager
-    Client          <|-- NaturalClient
-    Client          <|-- CompanyClient
-    UserManager     <|-- SystemUser
-    UserManager     <|-- User
+    Person <|-- Client
+    Person <|-- UserManager
+    Client <|-- NaturalClient
+    Client <|-- CompanyClient
+    UserManager <|-- SystemUser
+    UserManager <|-- User
 
-    %% ─── Asociaciones ─────────────────────────────────────────
-    Client          "1" --> "0..*" BankAccount       : bankAccounts
-    Client          "1" --> "0..*" Loan              : loans
-    NaturalClient   "1" --> "0..*" SystemUser        : systemUsers
-    NaturalClient   "1" --> "0..*" CompanyClient     : representedCompanies
+    Client "1" --> "0..*" BankAccount
+    Client "1" --> "0..*" Loan
+    NaturalClient "1" --> "0..*" SystemUser
+    SystemUser "1" --> "0..*" Transfer
+    SystemUser "1" --> "0..*" AuditLog
+```
 
-    SystemUser      "1" --> "0..*" Transfer          : createdTransfers
-    SystemUser      "1" --> "0..*" Transfer          : approvedTransfers
-    SystemUser      "1" --> "0..*" AuditLog          : auditLogs
-    SystemUser      --> NaturalClient                : naturalClient
-    SystemUser      --> CompanyClient                : companyClient
+## 2. Estados de negocio
+
+Transferencias:
+
+- `PENDING`
+- `AWAITING_APPROVAL`
+- `APPROVED`
+- `EXECUTED`
+- `REJECTED`
+- `EXPIRED`
+
+Préstamos:
+
+- `UNDER_REVIEW`
+- `APPROVED`
+- `REJECTED`
+- `DISBURSED`
+- `OVERDUE`
+- `CANCELLED`
+
+Cuentas:
+
+- `ACTIVE`
+- `BLOCKED`
+- `CANCELLED`
+
+Usuarios:
+
+- `ACTIVE`
+- `INACTIVE`
+- `BLOCKED`
+
+## 3. Roles del sistema
+
+```mermaid
+flowchart TD
+    A[ADMINISTRATOR] --> B[Gestion total]
+    C[NATURAL_CLIENT] --> D[Consulta y operaciones propias]
+    E[COMPANY_CLIENT] --> F[Operaciones empresariales]
+    G[TELLER_EMPLOYEE] --> H[Operaciones de ventanilla]
+    I[COMMERCIAL_EMPLOYEE] --> J[Gestion comercial]
+    K[COMPANY_EMPLOYEE] --> L[Transferencias de empresa]
+    M[COMPANY_SUPERVISOR] --> N[Aprobacion o rechazo]
+    O[INTERNAL_ANALYST] --> P[Prestamos y auditoria]
+```
+
+## 4. Tipos de productos y operaciones
+
+- Cuentas: `SAVINGS`, `CHECKING`, `PERSONAL`, `BUSINESS`.
+- Monedas: `USD`, `COP`, `EUR`.
+- Préstamos: `CONSUMER`, `VEHICLE`, `MORTGAGE`, `BUSINESS`.
+- Operaciones de auditoría: aperturas, cierres, depósitos, retiros, transferencias, préstamos, login y logout.
+
+## 5. Resumen del modelo
+
+- El dominio está separado del framework.
+- Los roles están centralizados en `SystemRole`.
+- La bitácora usa una estructura flexible para auditoría.
+- Los estados del negocio están representados por enums claros.
+- La jerarquía de clientes y usuarios facilita la evolución del modelo.
 
     User            --> Client                       : relatedClient
 
@@ -750,22 +733,6 @@ Person
 
 ---
 
-## 📝 Notas de Implementación
+## 6. Cierre
 
-### Tecnologías Utilizadas
-- **Spring Boot 3** · **Java 17**
-- **Lombok:** `@Getter`, `@Setter`, `@NoArgsConstructor`
-- **Spring Security:** configuración de seguridad base
-- **Maven Wrapper:** gestión del ciclo de build
-
-### Patrones Aplicados
-- **Arquitectura Hexagonal Estricta:** Separación quirúrgica entre los Modelos de Negocio (POJOs puros) y el Motor de Base de Datos. Los `Entities` de JPA han sido desacoplados y residen exclusivamente en `application/adapters/persistence/sql/entities/`.
-- **Herencia limpia:** jerarquía `Person → UserManager → SystemUser/User`
-- **Value Objects:** enumeraciones para tipos y estados
-- **Validación de negocio:** en métodos de entidad (`BankAccount.validateState()`)
-
----
-
-**Documento actualizado automáticamente — 12 de marzo de 2026**  
-**Sistema de Gestión Bancaria — Wilmer Vega**
-Wilmer Vega - Construcción de Software 2
+Este documento describe el modelo de dominio y sus estados principales según la implementación actual del proyecto. La referencia correcta para exposición y demo funcional está en el README y en la documentación de exposición.
