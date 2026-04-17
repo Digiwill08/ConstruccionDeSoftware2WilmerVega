@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>25</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -112,8 +112,8 @@
 						<configuration>
 							<rules>
 								<requireJavaVersion>
-									<version>[25,26)</version>
-									<message>Este proyecto debe ejecutarse con Java 25.</message>
+									<version>[17,18)</version>
+									<message>Este proyecto debe ejecutarse con Java 17.</message>
 								</requireJavaVersion>
 							</rules>
 							<fail>true</fail>
