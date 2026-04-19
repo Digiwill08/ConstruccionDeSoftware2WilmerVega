@@ -1,105 +1,80 @@
-﻿# API de Wilmer Vega Bank
+# Lista de URLs
 
-Base URL: http://localhost:8083
-
-## Públicos
-
-- GET /
-- GET /ping
-
-## Auth
-
-El controlador responde en dos prefijos equivalentes:
-
-- POST /auth/login
-- POST /auth/register
-- GET /auth/profile
-- POST /auth/logout
-- POST /api/auth/login
-- POST /api/auth/register
-- GET /api/auth/profile
-- POST /api/auth/logout
-
-## Cliente
-
-- GET /api/client/bank-accounts/{accountNumber}
-- GET /api/client/transfers
-- GET /api/client/transfers/{id}
-- POST /api/client/transfers
-
-## Admin
-
-- GET /api/admin/users
-- GET /api/admin/users/{id}
-- GET /api/admin/users/username/{username}
-- POST /api/admin/users
-- DELETE /api/admin/users/{id}
-- GET /api/admin/audit-logs
-- GET /api/admin/audit-logs/user/{userId}
-
-## Audit logs
-
-- GET /api/audit-logs
-- GET /api/audit-logs/my-operations?username={username}
-- GET /api/audit-logs/product/{productId}
-- GET /api/audit-logs/operation-type/{operationType}
-- GET /api/audit-logs/user/{userId}
-- GET /api/audit-logs/date-range?startDate=2026-01-01&endDate=2026-12-31
-
-## Analyst
-
-- GET /api/analyst/loans
-- GET /api/analyst/loans/{id}
-- POST /api/analyst/loans/{id}/approve?analystUserId={analystUserId}&role=INTERNAL_ANALYST
-- POST /api/analyst/loans/{id}/reject?analystUserId={analystUserId}&role=INTERNAL_ANALYST
-- POST /api/analyst/loans/{id}/disburse?disbursementAccountId={accountId}&analystUserId={analystUserId}&role=INTERNAL_ANALYST
-- GET /api/analyst/audit-logs
-- GET /api/analyst/audit-logs/product/{productId}
-- GET /api/analyst/audit-logs/user/{userId}
-
-## Supervisor
-
-- GET /api/supervisor/transfers/pending
-- GET /api/supervisor/transfers/{id}
-- POST /api/supervisor/transfers/{id}/approve?supervisorUserId={supervisorUserId}&role=COMPANY_SUPERVISOR
-- POST /api/supervisor/transfers/{id}/reject?supervisorUserId={supervisorUserId}&role=COMPANY_SUPERVISOR
-
-## Customers
-
-- GET /api/customers/natural
-- GET /api/customers/natural/{id}
-- GET /api/customers/natural/document/{documentNumber}
-- POST /api/customers/natural
-- PUT /api/customers/natural/{id}
-- DELETE /api/customers/natural/{id}
-- GET /api/customers/company
-- GET /api/customers/company/{id}
-- GET /api/customers/company/document/{documentNumber}
-- POST /api/customers/company
-- PUT /api/customers/company/{id}
-- DELETE /api/customers/company/{id}
-
-## Employee
-
-- GET /api/employee/bank-accounts
-- POST /api/employee/bank-accounts
-- GET /api/employee/natural-clients
-- POST /api/employee/natural-clients
-- GET /api/employee/company-clients
-- POST /api/employee/company-clients
-- GET /api/employee/loans
-- POST /api/employee/loans
-
-## Accounts
-
-- POST /api/accounts
-- GET /api/accounts
-- GET /api/accounts/{accountNumber}
-- GET /api/accounts/{accountId}/balance
-- PUT /api/accounts/{accountId}/status?newStatus={status}
-
-## Notas
-
-- Los endpoints de auth aceptan tanto /auth como /api/auth porque el controlador está expuesto con ambos prefijos.
-- Las rutas con llaves como {id} o {username} deben reemplazarse con valores reales al probar en Postman.
-- La fecha de ejemplo en /api/audit-logs/date-range puede ajustarse al rango que se quiera consultar.
+http://localhost:8083/
+http://localhost:8083/auth/login
+http://localhost:8083/auth/register
+http://localhost:8083/api/client/bank-accounts/{accountNumber}
+http://localhost:8083/api/client/transfers
+http://localhost:8083/api/client/transfers/{id}
+http://localhost:8083/api/client/transfers
+http://localhost:8083/api/admin/users
+http://localhost:8083/api/admin/users/{id}
+http://localhost:8083/api/admin/users/username/{username}
+http://localhost:8083/api/admin/users
+http://localhost:8083/api/admin/users/{id}
+http://localhost:8083/api/admin/audit-logs
+http://localhost:8083/api/admin/audit-logs/user/{userId}
+http://localhost:8083/api/audit-logs
+http://localhost:8083/api/audit-logs/my-operations?username={username}
+http://localhost:8083/api/audit-logs/product/{productId}
+http://localhost:8083/api/audit-logs/operation-type/{operationType}
+http://localhost:8083/api/audit-logs/user/{userId}
+http://localhost:8083/api/audit-logs/date-range?startDate=2026-01-01&endDate=2026-12-31
+http://localhost:8083/api/analyst/loans
+http://localhost:8083/api/analyst/loans/{id}
+http://localhost:8083/api/analyst/loans/{id}/approve?analystUserId={analystUserId}&role=INTERNAL_ANALYST
+http://localhost:8083/api/analyst/loans/{id}/reject?analystUserId={analystUserId}&role=INTERNAL_ANALYST
+http://localhost:8083/api/analyst/loans/{id}/disburse?disbursementAccountId={accountId}&analystUserId={analystUserId}&role=INTERNAL_ANALYST
+http://localhost:8083/api/analyst/audit-logs
+http://localhost:8083/api/analyst/audit-logs/product/{productId}
+http://localhost:8083/api/analyst/audit-logs/user/{userId}
+http://localhost:8083/api/supervisor/transfers/pending
+http://localhost:8083/api/supervisor/transfers/{id}
+http://localhost:8083/api/supervisor/transfers/{id}/approve?supervisorUserId={supervisorUserId}&role=COMPANY_SUPERVISOR
+http://localhost:8083/api/supervisor/transfers/{id}/reject?supervisorUserId={supervisorUserId}&role=COMPANY_SUPERVISOR
+http://localhost:8083/api/customers/natural
+http://localhost:8083/api/customers/natural/{id}
+http://localhost:8083/api/customers/natural/document/{documentNumber}
+http://localhost:8083/api/customers/natural
+http://localhost:8083/api/customers/natural/{id}
+http://localhost:8083/api/customers/natural/{id}
+http://localhost:8083/api/customers/company
+http://localhost:8083/api/customers/company/{id}
+http://localhost:8083/api/customers/company/document/{documentNumber}
+http://localhost:8083/api/customers/company
+http://localhost:8083/api/customers/company/{id}
+http://localhost:8083/api/customers/company/{id}
+http://localhost:8083/api/customers-legacy/natural/register
+http://localhost:8083/api/customers-legacy/natural
+http://localhost:8083/api/customers-legacy/natural/{documentNumber}
+http://localhost:8083/api/customers-legacy/company/register
+http://localhost:8083/api/customers-legacy/company
+http://localhost:8083/api/customers-legacy/company/{documentNumber}
+http://localhost:8083/api/customers-legacy/details/{clientId}
+http://localhost:8083/api/employee/bank-accounts
+http://localhost:8083/api/employee/bank-accounts
+http://localhost:8083/api/employee/natural-clients
+http://localhost:8083/api/employee/natural-clients
+http://localhost:8083/api/employee/company-clients
+http://localhost:8083/api/employee/company-clients
+http://localhost:8083/api/employee/loans
+http://localhost:8083/api/employee/loans
+http://localhost:8083/api/loans
+http://localhost:8083/api/loans
+http://localhost:8083/api/loans/{loanId}
+http://localhost:8083/api/loans/status/{status}
+http://localhost:8083/api/loans/approve
+http://localhost:8083/api/loans/reject
+http://localhost:8083/api/loans/disburse
+http://localhost:8083/api/accounts
+http://localhost:8083/api/accounts
+http://localhost:8083/api/accounts/{accountNumber}
+http://localhost:8083/api/accounts/{accountId}/balance
+http://localhost:8083/api/accounts/{accountId}/status?newStatus={status}
+http://localhost:8083/api/transfers
+http://localhost:8083/api/transfers
+http://localhost:8083/api/transfers/{transferId}
+http://localhost:8083/api/transfers/status/{status}
+http://localhost:8083/api/transfers/approve
+http://localhost:8083/api/transfers/reject
+http://localhost:8083/api/transfers/pending-approval
