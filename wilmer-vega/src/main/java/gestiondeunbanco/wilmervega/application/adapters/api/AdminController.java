@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * REST controller for INTERNAL_ANALYST (admin) role.
  * Endpoints: /api/admin/**
+ * Exceptions handled by GlobalExceptionHandler.
  */
 @RestController
 @RequestMapping("/api/admin")

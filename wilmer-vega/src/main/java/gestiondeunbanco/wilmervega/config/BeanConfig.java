@@ -1,10 +1,13 @@
 package gestiondeunbanco.wilmervega.config;
 
+import gestiondeunbanco.wilmervega.config.security.JwtService;
 import gestiondeunbanco.wilmervega.application.usecases.*;
 import gestiondeunbanco.wilmervega.domain.ports.*;
 import gestiondeunbanco.wilmervega.domain.services.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Spring configuration class that registers all domain services and use cases as beans.
@@ -13,19 +16,26 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     // ─── Domain Services ────────────────────────────────────────────────────
 
-    @Bean public CreateBankAccount createBankAccount(BankAccountPort p) { return new CreateBankAccount(p); }
+    @Bean public CreateBankAccount createBankAccount(BankAccountPort bankAccountPort, NaturalClientPort naturalClientPort, CompanyClientPort companyClientPort) {
+        return new CreateBankAccount(bankAccountPort, naturalClientPort, companyClientPort);
+    }
     @Bean public FindBankAccount findBankAccount(BankAccountPort p) { return new FindBankAccount(p); }
     @Bean public DeleteBankAccount deleteBankAccount(BankAccountPort p) { return new DeleteBankAccount(p); }
     @Bean public UpdateBankAccount updateBankAccount(BankAccountPort p) { return new UpdateBankAccount(p); }
 
-    @Bean public CreateNaturalClient createNaturalClient(NaturalClientPort p) { return new CreateNaturalClient(p); }
+    @Bean public CreateNaturalClient createNaturalClient(NaturalClientPort naturalClientPort, CompanyClientPort companyClientPort) { return new CreateNaturalClient(naturalClientPort, companyClientPort); }
     @Bean public FindNaturalClient findNaturalClient(NaturalClientPort p) { return new FindNaturalClient(p); }
     @Bean public DeleteNaturalClient deleteNaturalClient(NaturalClientPort p) { return new DeleteNaturalClient(p); }
     @Bean public UpdateNaturalClient updateNaturalClient(NaturalClientPort p) { return new UpdateNaturalClient(p); }
 
-    @Bean public CreateCompanyClient createCompanyClient(CompanyClientPort p) { return new CreateCompanyClient(p); }
+    @Bean public CreateCompanyClient createCompanyClient(CompanyClientPort companyClientPort, NaturalClientPort naturalClientPort) { return new CreateCompanyClient(companyClientPort, naturalClientPort); }
     @Bean public FindCompanyClient findCompanyClient(CompanyClientPort p) { return new FindCompanyClient(p); }
     @Bean public DeleteCompanyClient deleteCompanyClient(CompanyClientPort p) { return new DeleteCompanyClient(p); }
     @Bean public UpdateCompanyClient updateCompanyClient(CompanyClientPort p) { return new UpdateCompanyClient(p); }
@@ -90,8 +100,19 @@ public class BeanConfig {
     }
 
     @Bean
+    public CustomerUseCase customerUseCase(CreateNaturalClient cnc, FindNaturalClient fnc, DeleteNaturalClient dnc, UpdateNaturalClient unc,
+                                           CreateCompanyClient ccc, FindCompanyClient fcc, DeleteCompanyClient dcc, UpdateCompanyClient ucc) {
+        return new CustomerUseCase(cnc, fnc, dnc, unc, ccc, fcc, dcc, ucc);
+    }
+
+    @Bean
     public ClientUseCase clientUseCase(FindBankAccount fba, CreateTransfer ct, FindTransfer ft) {
         return new ClientUseCase(fba, ct, ft);
+    }
+
+    @Bean
+    public BankAccountUseCase bankAccountUseCase(CreateBankAccount cba, FindBankAccount fba, UpdateBankAccount uba) {
+        return new BankAccountUseCase(cba, fba, uba);
     }
 
     @Bean
@@ -104,5 +125,10 @@ public class BeanConfig {
     public CompanySupervisorUseCase companySupervisorUseCase(ApproveTransferService ats,
                                                               RejectTransferService rts, FindTransfer ft) {
         return new CompanySupervisorUseCase(ats, rts, ft);
+    }
+
+    @Bean
+    public AuthUseCase authUseCase(UserPort userPort, PasswordEncoder passwordEncoder, JwtService jwtService) {
+        return new AuthUseCase(userPort, passwordEncoder, jwtService);
     }
 }

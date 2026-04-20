@@ -5,7 +5,6 @@ import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.Currency;
-import gestiondeunbanco.wilmervega.domain.models.Client;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.BankAccountRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.BankAccountEntity;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,11 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
     @Override
     public Optional<BankAccount> findById(Long id) {
         return repository.findById(id).map(this::toModel);
+    }
+
+    @Override
+    public List<BankAccount> findByHolderId(Long holderId) {
+        return repository.findByHolder_Id(holderId).stream().map(this::toModel).collect(Collectors.toList());
     }
 
     @Override

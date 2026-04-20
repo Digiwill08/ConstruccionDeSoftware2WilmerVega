@@ -1,82 +1,112 @@
 # Documentación para Exposición — Sistema Bancario
 
 ## 1. Objetivo del proyecto
-Este proyecto implementa una API bancaria completa y escalable con Spring Boot para gestionar:
-- Clientes (Naturales y Empresariales)
-- Auditoría de operaciones
-- Modelo de dominio bancario rico (Cuentas, Préstamos, Transferencias y Usuarios)
 
----
+Este proyecto implementa una plataforma bancaria REST con autenticación JWT, control por roles y una interfaz visual para ejecutar servicios funcionales. El sistema cubre:
+
+- Clientes naturales y empresas.
+- Cuentas bancarias y transferencias.
+- Préstamos con ciclo de aprobación, rechazo y desembolso.
+- Bitácora de auditoría consultable por rol.
+- Registro público limitado para tipos de usuario autorizados.
 
 ## 2. Arquitectura en una vista rápida
-El sistema está organizado bajo la estricta **Arquitectura Hexagonal (Puertos y Adaptadores)**, dividida en 4 capas puras:
 
-1. **Capa Web (Controller)**: Recibe solicitudes HTTP y delega al Caso de Uso.
-2. **Capa de Aplicación (UseCase)**: Orquesta las transacciones y conecta la entrada con el dominio.
-3. **Capa de Dominio (Domain Services & Ports)**: Java PURO sin dependencias de Spring. Aquí viven las validaciones financieras reales y se declaran los "Puertos" (interfaces de cómo queremos guardar datos).
-4. **Capa de Infraestructura (Adapters & Repositories)**: Conecta la aplicación con MySQL. Aquí viven los adaptadores que satisfacen los puertos del dominio usando Spring Data JPA.
+El sistema sigue arquitectura hexagonal. La aplicación está separada en cuatro capas:
+
+1. Capa Web: controladores REST y la interfaz visual en la ruta raíz.
+2. Capa de Aplicación: casos de uso que coordinan operaciones por rol.
+3. Capa de Dominio: modelos, puertos y reglas puras de negocio, sin dependencia de Spring.
+4. Capa de Infraestructura: adaptadores de persistencia para H2 y MongoDB.
 
 Flujo general:
-`Cliente HTTP -> Controller -> UseCase -> Domain Service (usa Ports) -> Port -> Persistence Adapter -> JPA Repository -> BD`
 
----
+`Cliente HTTP -> Controller -> UseCase -> Dominio -> Puerto -> Adaptador -> Repositorio -> Persistencia`
 
 ## 3. Tecnologías usadas
+
 - Java 17
-- Spring Boot 3
+- Spring Boot 4.0.3
 - Spring Web
-- Spring Data JPA
-- MySQL
+- Spring Security + JWT
+- Spring Data JPA con H2
+- Spring Data MongoDB
 - Lombok
+- Maven
 
----
+## 4. Módulos y endpoints principales
 
-## 4. Endpoints principales (Módulos activos)
-El sistema expone de forma RESTFUL todos los dominios integrados a la nueva arquitectura. Cada módulo tiene su Controlador web con CRUD y listados:
+Autenticación:
 
-- `/api/company-clients` → Empresas
-- `/api/natural-clients` → Clientes naturales
-- `/api/bank-accounts` → Cuentas bancarias
-- `/api/loans` → Préstamos
-- `/api/transfers` → Transferencias
-- `/api/users` → Usuarios
-- `/api/audit-logs` → Bitácora
+- `POST /auth/login`
+- `POST /auth/register`
 
----
+Clientes y cuentas:
 
-## 5. Explicación paso a paso (caso real)
-Ejemplo: Crear una transferencia bancaria (`POST /api/transfers`)
+- `GET /api/customers/natural`
+- `GET /api/customers/company`
+- `GET /api/accounts`
+- `POST /api/accounts`
 
-1. **Web:** `TransferController` recibe el JSON y llama a `TransferUseCase`.
-2. **Aplicación:** `TransferUseCase` (con `@Service`) inicia el proceso y se lo pasa a `TransferDomainService`.
-3. **Dominio:** `TransferDomainService` aplica reglas 100% Java (ej. verificar que el monto no sea 0 o negativo). Si todo está en orden, usa el `TransferPort` para pedir que se guarde.
-4. **Infraestructura:** Spring inyecta el `TransferPersistenceAdapter` (que implementa `TransferPort`), el cual usa finalmente `TransferRepository` de Spring Data JPA para insertar el registro en MySQL.
-5. El flujo retorna hacia arriba devolviendo un código `200 OK`.
+Transferencias:
 
----
+- `GET /api/transfers`
+- `POST /api/transfers`
+- `POST /api/transfers/approve`
+- `POST /api/transfers/reject`
+- `GET /api/transfers/pending-approval`
 
-## 6. Modelo de dominio (resumen)
-El dominio incluye:
-- Jerarquía de clientes y usuarios.
-- Productos bancarios interactuando.
-- Cuentas, Préstamos y Transferencias.
-- Reglas controladas por Enums de estado limpios.
+Préstamos:
 
-Regla importante implementada en código:
-- Cero acoplamiento: La lógica de `domain/services` NO importa librerías de Spring Boot. Toda persistencia se abstrae en puertos.
+- `GET /api/loans`
+- `POST /api/loans`
+- `POST /api/loans/approve`
+- `POST /api/loans/reject`
+- `POST /api/loans/disburse`
 
----
+Administración y auditoría:
 
-## 7. Fortalezas logradas en la refactorización
-- **Separación absoluta de responsabilidades** (Arquitectura Hexagonal al 100%).
-- Eliminación del código legado (Capas *Service* acopladas a la base de datos).
-- El modelo de dominio principal es totalmente testeable sin necesidad de levantar bases de datos.
+- `GET /api/admin/users`
+- `POST /api/admin/users`
+- `GET /api/admin/audit-logs`
+- `GET /api/audit-logs`
+- `GET /api/analyst/audit-logs`
+- `GET /api/supervisor/transfers/pending`
 
----
+## 5. Explicación paso a paso
 
-## 8. Guion corto para exponer (2–3 minutos)
-1. "Este es el Sistema de Gestión Bancaria que he mejorado aplicando el patrón de Arquitectura Hexagonal que vimos en clase, basado en el ejemplo de la clínica."
-2. "Hemos pasado de una arquitectura simple en capas a una purista dividida en 4: Controladores, Casos de Uso, Dominio e Infraestructura."
-3. "Demostrar cómo en `domain/services` nuestro código ya no depende de `@Service` ni de `Spring`, aislando el corazón del negocio."
-4. "Explicar el flujo completo usando, por ejemplo, el proceso de Préstamos o Transferencias. Entrar por el Controller -> UseCase -> Service Puro -> Adapter."
-5. "Concluir mostrando que el sistema cuenta con todas las entidades bancarias clave sin deudas técnicas, dejándolo listo para producción."
+Ejemplo: crear una transferencia (`POST /api/transfers`).
+
+1. El cliente envía la solicitud al controlador `TransferController`.
+2. El controlador valida el contrato y delega al caso de uso correspondiente.
+3. La capa de aplicación decide la ruta de negocio según el rol y el estado de la transferencia.
+4. El dominio aplica reglas: cuenta válida, monto permitido, estado correcto y lógica de aprobación si aplica.
+5. El puerto de persistencia abstrae el almacenamiento y el adaptador escribe en el repositorio técnico.
+6. La bitácora se registra en MongoDB para trazabilidad posterior.
+
+## 6. Modelo de dominio
+
+El modelo incluye:
+
+- `NaturalClient` y `CompanyClient`.
+- `BankAccount`, `Loan`, `Transfer` y `AuditLog`.
+- `User`, `SystemUser`, `Person` y `UserManager`.
+- Enums para estados, roles, tipos de cuenta, tipos de préstamo, divisas y categorías.
+
+La regla central es que el dominio no depende de framework. Las implementaciones de persistencia viven fuera del núcleo de negocio.
+
+## 7. Fortalezas logradas
+
+- Separación clara de responsabilidades.
+- Autenticación y autorización por roles.
+- Flujo completo de préstamos y transferencias.
+- Registro público limitado y controlado.
+- Interfaz visual para demostrar servicios sin usar Postman.
+
+## 8. Guion corto para exponer
+
+1. Presentar el objetivo: un sistema bancario con seguridad JWT y arquitectura hexagonal.
+2. Mostrar la separación entre web, aplicación, dominio e infraestructura.
+3. Explicar que H2 maneja la transacción principal y MongoDB conserva la auditoría.
+4. Demostrar un caso real: login, consulta de servicios y ejecución de una transferencia o préstamo.
+5. Cerrar mostrando el panel visual, los roles y la documentación de soporte.

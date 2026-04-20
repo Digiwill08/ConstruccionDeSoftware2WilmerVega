@@ -3,7 +3,6 @@ package gestiondeunbanco.wilmervega.application.adapters.persistence.sql;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
-import gestiondeunbanco.wilmervega.domain.models.UserStatus;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.UserRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +30,12 @@ public class UserPersistenceAdapter implements UserPort {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return repository.findAll().stream().filter(u -> u.getUsername().equals(username)).findFirst()
-                .map(this::toModel);
+        return repository.findByUsername(username).map(this::toModel);
     }
 
     @Override
     public boolean existsByUsername(String username) {
-        return repository.findAll().stream().anyMatch(u -> u.getUsername().equals(username));
+        return repository.existsByUsername(username);
     }
 
     @Override

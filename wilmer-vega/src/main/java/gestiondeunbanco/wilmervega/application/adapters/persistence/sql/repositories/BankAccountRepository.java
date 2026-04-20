@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface BankAccountRepository extends JpaRepository<BankAccountEntity, Long> {
     Optional<BankAccountEntity> findByAccountNumber(String accountNumber);
+    List<BankAccountEntity> findByHolder_Id(Long holderId);
     List<BankAccountEntity> findByAccountStatus(AccountStatus status);
     boolean existsByAccountNumber(String accountNumber);
 }

@@ -28,6 +28,16 @@ public class CompanyClientPersistenceAdapter implements CompanyClientPort {
     }
 
     @Override
+    public Optional<CompanyClient> findByDocumentNumber(String documentNumber) {
+        return repository.findByDocumentNumber(documentNumber).map(this::toModel);
+    }
+
+    @Override
+    public boolean existsByDocumentNumber(String documentNumber) {
+        return repository.existsByDocumentNumber(documentNumber);
+    }
+
+    @Override
     public CompanyClient save(CompanyClient companyClient) {
         CompanyClientEntity entity = toEntity(companyClient);
         return toModel(repository.save(entity));
