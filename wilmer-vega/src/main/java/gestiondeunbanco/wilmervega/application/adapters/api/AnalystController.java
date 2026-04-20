@@ -1,7 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import gestiondeunbanco.wilmervega.application.usecases.AnalystUseCase;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class AnalystController {
 
     private final AnalystUseCase analystUseCase;
 
-    // --- Loans ---
+    // ── Loans ─────────────────────────────────────────────────────────────────
 
     @GetMapping("/loans")
     public ResponseEntity<List<Loan>> getAllLoans() {
@@ -31,24 +30,14 @@ public class AnalystController {
 
     @GetMapping("/loans/{id}")
     public ResponseEntity<Loan> getLoanById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(analystUseCase.findLoanById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(analystUseCase.findLoanById(id));
     }
 
     @PostMapping("/loans/{id}/approve")
     public ResponseEntity<Loan> approveLoan(@PathVariable Long id,
                                              @RequestParam Long analystUserId,
                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        try {
-            return ResponseEntity.ok(analystUseCase.approveLoan(id, analystUserId, role));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(analystUseCase.approveLoan(id, analystUserId, role));
     }
 
     @PostMapping("/loans/{id}/reject")
@@ -56,14 +45,8 @@ public class AnalystController {
                                             @RequestParam Long analystUserId,
                                             @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
                                             @RequestBody(required = false) Map<String, String> body) {
-        try {
-            String reason = body != null ? body.get("reason") : null;
-            return ResponseEntity.ok(analystUseCase.rejectLoan(id, analystUserId, role, reason));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        String reason = body != null ? body.get("reason") : null;
+        return ResponseEntity.ok(analystUseCase.rejectLoan(id, analystUserId, role, reason));
     }
 
     @PostMapping("/loans/{id}/disburse")
@@ -71,16 +54,10 @@ public class AnalystController {
                                               @RequestParam Long disbursementAccountId,
                                               @RequestParam Long analystUserId,
                                               @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        try {
-            return ResponseEntity.ok(analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role));
     }
 
-    // --- Audit Log ---
+    // ── Audit Log ─────────────────────────────────────────────────────────────
 
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {

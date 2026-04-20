@@ -78,11 +78,15 @@ public class BeanConfig {
     }
 
     @Bean
-    public EmployeeUseCase employeeUseCase(CreateBankAccount cba, FindBankAccount fba, DeleteBankAccount dba,
-                                            CreateNaturalClient cnc, FindNaturalClient fnc, DeleteNaturalClient dnc,
-                                            CreateCompanyClient ccc, FindCompanyClient fcc, DeleteCompanyClient dcc,
-                                            CreateLoan cl, FindLoan fl, DeleteLoan dl) {
-        return new EmployeeUseCase(cba, fba, dba, cnc, fnc, dnc, ccc, fcc, dcc, cl, fl, dl);
+    public EmployeeUseCase employeeUseCase(CreateBankAccount cba, FindBankAccount fba,
+                                            DeleteBankAccount dba, UpdateBankAccount uba,
+                                            CreateNaturalClient cnc, FindNaturalClient fnc,
+                                            DeleteNaturalClient dnc, UpdateNaturalClient unc,
+                                            CreateCompanyClient ccc, FindCompanyClient fcc,
+                                            DeleteCompanyClient dcc, UpdateCompanyClient ucc,
+                                            CreateLoan cl, FindLoan fl,
+                                            DeleteLoan dl, UpdateLoan ul) {
+        return new EmployeeUseCase(cba, fba, dba, uba, cnc, fnc, dnc, unc, ccc, fcc, dcc, ucc, cl, fl, dl, ul);
     }
 
     @Bean
