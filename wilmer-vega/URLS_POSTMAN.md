@@ -1,4 +1,4 @@
-# Lista de URLs
+﻿# Lista de URLs
 
 http://localhost:8083/
 http://localhost:8083/auth/login
@@ -6,12 +6,9 @@ http://localhost:8083/auth/register
 http://localhost:8083/api/client/bank-accounts/{accountNumber}
 http://localhost:8083/api/client/transfers
 http://localhost:8083/api/client/transfers/{id}
-http://localhost:8083/api/client/transfers
 http://localhost:8083/api/admin/users
 http://localhost:8083/api/admin/users/{id}
 http://localhost:8083/api/admin/users/username/{username}
-http://localhost:8083/api/admin/users
-http://localhost:8083/api/admin/users/{id}
 http://localhost:8083/api/admin/audit-logs
 http://localhost:8083/api/admin/audit-logs/user/{userId}
 http://localhost:8083/api/audit-logs
@@ -35,15 +32,9 @@ http://localhost:8083/api/supervisor/transfers/{id}/reject?supervisorUserId={sup
 http://localhost:8083/api/customers/natural
 http://localhost:8083/api/customers/natural/{id}
 http://localhost:8083/api/customers/natural/document/{documentNumber}
-http://localhost:8083/api/customers/natural
-http://localhost:8083/api/customers/natural/{id}
-http://localhost:8083/api/customers/natural/{id}
 http://localhost:8083/api/customers/company
 http://localhost:8083/api/customers/company/{id}
 http://localhost:8083/api/customers/company/document/{documentNumber}
-http://localhost:8083/api/customers/company
-http://localhost:8083/api/customers/company/{id}
-http://localhost:8083/api/customers/company/{id}
 http://localhost:8083/api/customers-legacy/natural/register
 http://localhost:8083/api/customers-legacy/natural
 http://localhost:8083/api/customers-legacy/natural/{documentNumber}
@@ -52,14 +43,9 @@ http://localhost:8083/api/customers-legacy/company
 http://localhost:8083/api/customers-legacy/company/{documentNumber}
 http://localhost:8083/api/customers-legacy/details/{clientId}
 http://localhost:8083/api/employee/bank-accounts
-http://localhost:8083/api/employee/bank-accounts
-http://localhost:8083/api/employee/natural-clients
 http://localhost:8083/api/employee/natural-clients
 http://localhost:8083/api/employee/company-clients
-http://localhost:8083/api/employee/company-clients
 http://localhost:8083/api/employee/loans
-http://localhost:8083/api/employee/loans
-http://localhost:8083/api/loans
 http://localhost:8083/api/loans
 http://localhost:8083/api/loans/{loanId}
 http://localhost:8083/api/loans/status/{status}
@@ -67,11 +53,9 @@ http://localhost:8083/api/loans/approve
 http://localhost:8083/api/loans/reject
 http://localhost:8083/api/loans/disburse
 http://localhost:8083/api/accounts
-http://localhost:8083/api/accounts
 http://localhost:8083/api/accounts/{accountNumber}
 http://localhost:8083/api/accounts/{accountId}/balance
 http://localhost:8083/api/accounts/{accountId}/status?newStatus={status}
-http://localhost:8083/api/transfers
 http://localhost:8083/api/transfers
 http://localhost:8083/api/transfers/{transferId}
 http://localhost:8083/api/transfers/status/{status}

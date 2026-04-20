@@ -3,7 +3,6 @@ package gestiondeunbanco.wilmervega.application.adapters.persistence.sql;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogPort;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.OperationType;
-import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.AuditLogRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.AuditLogEntity;
 import lombok.RequiredArgsConstructor;

@@ -1,0 +1,4 @@
+2026-04-19 12:13:31.690907-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "MERGE INTO users KEY(username) ([*]username, password, role, status) VALUES ('pancracio', '123456', 'INTERNAL_ANALYST', 'ACTIVE')"; se esperaba "(, SELECT, TABLE, VALUES"
+Syntax error in SQL statement "MERGE INTO users KEY(username) ([*]username, password, role, status) VALUES ('pancracio', '123456', 'INTERNAL_ANALYST', 'ACTIVE')"; expected "(, SELECT, TABLE, VALUES"; SQL statement:
+MERGE INTO users KEY(username) (username, password, role, status) VALUES ('pancracio', '123456', 'INTERNAL_ANALYST', 'ACTIVE') [42001-240]
