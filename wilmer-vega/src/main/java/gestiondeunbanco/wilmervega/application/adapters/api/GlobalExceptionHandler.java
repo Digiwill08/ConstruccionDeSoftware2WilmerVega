@@ -1,7 +1,11 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
+import com.mongodb.MongoException;
+import com.mongodb.MongoTimeoutException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.exception.BusinessException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,7 +18,7 @@ import java.util.Map;
 
 /**
  * Global exception handler — centralizes all HTTP error responses.
- * Follows the same pattern as the clinica reference project.
+ * Covers: domain exceptions, security, MongoDB failures, and generic errors.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +53,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAuthException(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(errorBody(401, "No autenticado: " + ex.getMessage()));
+    }
+
+    /** 503 — MongoDB / DataSource unavailable */
+    @ExceptionHandler({DataAccessResourceFailureException.class, MongoTimeoutException.class,
+                       MongoException.class, DataAccessException.class})
+    public ResponseEntity<Map<String, Object>> handleMongoFailures(Exception ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(errorBody(503, "Servicio de auditoría temporalmente no disponible"));
     }
 
     /** 500 — Unexpected server error */
