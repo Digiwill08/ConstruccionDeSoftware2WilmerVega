@@ -1,5 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
@@ -24,16 +25,20 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return adminUseCase.findUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(adminUseCase.findUserById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/users/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        return adminUseCase.findUserByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(adminUseCase.findUserByUsername(username));
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/users")
