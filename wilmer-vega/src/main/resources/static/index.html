@@ -118,7 +118,7 @@
 
     <div class="row g-4">
       <div class="col-12 col-lg-5">
-        <div class="glass panel h-100">
+        <div class="glass panel">
           <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="mb-0">Login</h5>
             <span class="badge badge-soft rounded-pill px-3 py-2">JWT</span>
@@ -133,6 +133,69 @@
           </div>
           <button class="btn btn-accent w-100" onclick="login()">Iniciar sesion</button>
           <div class="mt-3 small-note">Token guardado en <code>localStorage</code>.</div>
+        </div>
+
+        <div class="glass panel mt-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0">Alta rapida</h5>
+            <span class="badge badge-soft rounded-pill px-3 py-2">Guardar datos</span>
+          </div>
+
+          <div class="mb-2 fw-semibold">Crear usuario</div>
+          <div class="mb-2">
+            <label class="label">Nuevo username</label>
+            <input id="registerUsername" class="form-control" value="usuario_demo_web" />
+          </div>
+          <div class="mb-2">
+            <label class="label">Nueva clave</label>
+            <input id="registerPassword" type="password" class="form-control" value="123456" />
+          </div>
+          <div class="mb-3">
+            <label class="label">Rol</label>
+            <select id="registerRole" class="form-select">
+              <option value="NATURAL_CLIENT" selected>NATURAL_CLIENT</option>
+              <option value="COMPANY_CLIENT">COMPANY_CLIENT</option>
+              <option value="COMPANY_EMPLOYEE">COMPANY_EMPLOYEE</option>
+            </select>
+          </div>
+          <button class="btn btn-accent w-100 mb-3" onclick="registerUser()">Crear usuario y guardar</button>
+
+          <div class="mb-2 fw-semibold">Crear cuenta bancaria</div>
+          <div class="mb-2">
+            <label class="label">Numero de cuenta</label>
+            <input id="quickAccountNumber" class="form-control" value="ACCWEB001" />
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="label">Tipo</label>
+              <select id="quickAccountType" class="form-select">
+                <option value="SAVINGS" selected>SAVINGS</option>
+                <option value="CHECKING">CHECKING</option>
+                <option value="PERSONAL">PERSONAL</option>
+                <option value="BUSINESS">BUSINESS</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="label">Moneda</label>
+              <select id="quickAccountCurrency" class="form-select">
+                <option value="COP" selected>COP</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="label">holderId</label>
+              <input id="quickHolderId" type="number" min="1" class="form-control" value="1" />
+            </div>
+            <div class="col-6">
+              <label class="label">Saldo inicial</label>
+              <input id="quickInitialBalance" type="number" min="0" step="0.01" class="form-control" value="100000" />
+            </div>
+          </div>
+          <button class="btn btn-success-soft w-100" onclick="createQuickAccount()">Crear cuenta y guardar</button>
+          <div class="mt-3 small-note">Para crear cuenta necesitas haber iniciado sesion con un rol autorizado.</div>
         </div>
       </div>
 
@@ -234,6 +297,14 @@
     const serviceMethod = document.getElementById('serviceMethod');
     const servicePath = document.getElementById('servicePath');
     const serviceBody = document.getElementById('serviceBody');
+    const registerUsername = document.getElementById('registerUsername');
+    const registerPassword = document.getElementById('registerPassword');
+    const registerRole = document.getElementById('registerRole');
+    const quickAccountNumber = document.getElementById('quickAccountNumber');
+    const quickAccountType = document.getElementById('quickAccountType');
+    const quickAccountCurrency = document.getElementById('quickAccountCurrency');
+    const quickHolderId = document.getElementById('quickHolderId');
+    const quickInitialBalance = document.getElementById('quickInitialBalance');
 
     const serviceCatalog = [
       { name: 'Auth - Login', module: 'AUTH', method: 'POST', path: '/auth/login', protected: false, body: { username: 'pancracio', password: '123456' } },
@@ -296,6 +367,109 @@
         }
         saveSession(data);
         setOutput(data);
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function registerUser() {
+      try {
+        const payload = {
+          username: registerUsername.value.trim(),
+          password: registerPassword.value,
+          role: registerRole.value
+        };
+
+        if (!payload.username || !payload.password) {
+          setOutput({ error: 'Debes ingresar username y password para crear usuario.' });
+          return;
+        }
+
+        const response = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let data = text;
+        try { data = text ? JSON.parse(text) : null; } catch {}
+
+        if (!response.ok) {
+          setOutput({ step: 'crear_usuario', status: response.status, response: data });
+          return;
+        }
+
+        // El endpoint register responde LoginResult y trae token listo para usar.
+        if (data && data.token) {
+          saveSession(data);
+          document.getElementById('username').value = payload.username;
+          document.getElementById('password').value = payload.password;
+        }
+
+        setOutput({
+          step: 'crear_usuario',
+          status: response.status,
+          message: 'Usuario creado y guardado correctamente.',
+          response: data
+        });
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function createQuickAccount() {
+      try {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+          setOutput({ error: 'Primero inicia sesion para crear cuenta.' });
+          return;
+        }
+
+        const holderId = Number(quickHolderId.value);
+        const initialBalance = Number(quickInitialBalance.value);
+
+        if (!quickAccountNumber.value.trim()) {
+          setOutput({ error: 'El numero de cuenta es obligatorio.' });
+          return;
+        }
+        if (!Number.isFinite(holderId) || holderId <= 0) {
+          setOutput({ error: 'holderId debe ser un numero mayor a 0.' });
+          return;
+        }
+        if (!Number.isFinite(initialBalance) || initialBalance < 0) {
+          setOutput({ error: 'Saldo inicial invalido.' });
+          return;
+        }
+
+        const payload = {
+          accountNumber: quickAccountNumber.value.trim(),
+          accountType: quickAccountType.value,
+          currency: quickAccountCurrency.value,
+          holderId,
+          initialBalance
+        };
+
+        const response = await fetch('/api/accounts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let data = text;
+        try { data = text ? JSON.parse(text) : null; } catch {}
+
+        setOutput({
+          step: 'crear_cuenta',
+          status: response.status,
+          ok: response.ok,
+          request: payload,
+          response: data
+        });
       } catch (error) {
         setOutput({ error: error.message });
       }

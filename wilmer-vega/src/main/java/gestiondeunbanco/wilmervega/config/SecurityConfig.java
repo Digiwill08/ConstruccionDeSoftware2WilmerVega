@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.config;
 
 import gestiondeunbanco.wilmervega.config.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +36,20 @@ public class SecurityConfig {
                 .requestMatchers("/api/client/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "ADMINISTRATOR")
                 .requestMatchers("/api/customers/**").hasAnyRole("INTERNAL_ANALYST", "COMMERCIAL_EMPLOYEE", "ADMINISTRATOR")
                 .requestMatchers("/api/accounts/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "TELLER_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST", "ADMINISTRATOR")
-                .requestMatchers("/api/loans/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST", "ADMINISTRATOR")
-                .requestMatchers("/api/transfers/**").hasAnyRole("NATURAL_CLIENT", "COMPANY_CLIENT", "COMPANY_EMPLOYEE", "COMPANY_SUPERVISOR", "INTERNAL_ANALYST", "ADMINISTRATOR")
                 .requestMatchers("/api/audit-logs/**").hasAnyRole("INTERNAL_ANALYST", "ADMINISTRATOR")
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"status\":401,\"message\":\"No autenticado: se requiere un token valido\",\"errors\":null}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"status\":403,\"message\":\"Acceso denegado: no tiene permisos para este recurso\",\"errors\":null}");
+                })
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
