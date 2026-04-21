@@ -2,6 +2,7 @@ package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import com.mongodb.MongoException;
 import com.mongodb.MongoTimeoutException;
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,16 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+        @ExceptionHandler(NotFoundException.class)
+        public ResponseEntity<Void> handleNotFoundException(NotFoundException ex) {
+                return ResponseEntity.notFound().build();
+        }
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+                return ResponseEntity.badRequest().body(ex.getMessage());
+        }
 
     @ExceptionHandler({DataAccessResourceFailureException.class, MongoTimeoutException.class, MongoException.class, DataAccessException.class})
     public ResponseEntity<Map<String, String>> handleMongoFailures(Exception ex) {

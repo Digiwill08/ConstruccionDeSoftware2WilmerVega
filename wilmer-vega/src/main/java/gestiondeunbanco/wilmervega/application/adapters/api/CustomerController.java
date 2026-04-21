@@ -4,7 +4,6 @@ import gestiondeunbanco.wilmervega.application.adapters.api.dto.ClientResponse;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.CompanyClientRequest;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.NaturalClientRequest;
 import gestiondeunbanco.wilmervega.application.usecases.CustomerUseCase;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -27,115 +25,71 @@ public class CustomerController {
     // --- Natural clients ---
     @GetMapping("/natural")
     public ResponseEntity<List<ClientResponse>> getAllNaturalClients() {
-        return ResponseEntity.ok(customerUseCase.findAllNaturalClients().stream().map(this::toResponse).collect(Collectors.toList()));
+        return ResponseEntity.ok(customerUseCase.findAllNaturalClients().stream().map(this::toResponse).toList());
     }
 
     @GetMapping("/natural/{id}")
     public ResponseEntity<ClientResponse> getNaturalClientById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientById(id)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientById(id)));
     }
 
     @GetMapping("/natural/document/{documentNumber}")
     public ResponseEntity<ClientResponse> getNaturalClientByDocument(@PathVariable String documentNumber) {
-        try {
-            return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientByDocumentNumber(documentNumber)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientByDocumentNumber(documentNumber)));
     }
 
     @PostMapping("/natural")
-    public ResponseEntity<?> createNaturalClient(@RequestBody NaturalClientRequest request) {
-        try {
-            NaturalClient saved = customerUseCase.saveNaturalClient(toNaturalModel(request));
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<ClientResponse> createNaturalClient(@RequestBody NaturalClientRequest request) {
+        NaturalClient saved = customerUseCase.saveNaturalClient(toNaturalModel(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
     }
 
     @PutMapping("/natural/{id}")
-    public ResponseEntity<?> updateNaturalClient(@PathVariable Long id, @RequestBody NaturalClientRequest request) {
-        try {
-            NaturalClient model = toNaturalModel(request);
-            model.setId(id);
-            return ResponseEntity.ok(toResponse(customerUseCase.updateNaturalClient(model)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<ClientResponse> updateNaturalClient(@PathVariable Long id, @RequestBody NaturalClientRequest request) {
+        NaturalClient model = toNaturalModel(request);
+        model.setId(id);
+        return ResponseEntity.ok(toResponse(customerUseCase.updateNaturalClient(model)));
     }
 
     @DeleteMapping("/natural/{id}")
     public ResponseEntity<Void> deleteNaturalClient(@PathVariable Long id) {
-        try {
-            customerUseCase.deleteNaturalClientById(id);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        customerUseCase.deleteNaturalClientById(id);
+        return ResponseEntity.noContent().build();
     }
 
     // --- Company clients ---
     @GetMapping("/company")
     public ResponseEntity<List<ClientResponse>> getAllCompanyClients() {
-        return ResponseEntity.ok(customerUseCase.findAllCompanyClients().stream().map(this::toResponse).collect(Collectors.toList()));
+        return ResponseEntity.ok(customerUseCase.findAllCompanyClients().stream().map(this::toResponse).toList());
     }
 
     @GetMapping("/company/{id}")
     public ResponseEntity<ClientResponse> getCompanyClientById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientById(id)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientById(id)));
     }
 
     @GetMapping("/company/document/{documentNumber}")
     public ResponseEntity<ClientResponse> getCompanyClientByDocument(@PathVariable String documentNumber) {
-        try {
-            return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientByDocumentNumber(documentNumber)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientByDocumentNumber(documentNumber)));
     }
 
     @PostMapping("/company")
-    public ResponseEntity<?> createCompanyClient(@RequestBody CompanyClientRequest request) {
-        try {
-            CompanyClient saved = customerUseCase.saveCompanyClient(toCompanyModel(request));
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<ClientResponse> createCompanyClient(@RequestBody CompanyClientRequest request) {
+        CompanyClient saved = customerUseCase.saveCompanyClient(toCompanyModel(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
     }
 
     @PutMapping("/company/{id}")
-    public ResponseEntity<?> updateCompanyClient(@PathVariable Long id, @RequestBody CompanyClientRequest request) {
-        try {
-            CompanyClient model = toCompanyModel(request);
-            model.setId(id);
-            return ResponseEntity.ok(toResponse(customerUseCase.updateCompanyClient(model)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<ClientResponse> updateCompanyClient(@PathVariable Long id, @RequestBody CompanyClientRequest request) {
+        CompanyClient model = toCompanyModel(request);
+        model.setId(id);
+        return ResponseEntity.ok(toResponse(customerUseCase.updateCompanyClient(model)));
     }
 
     @DeleteMapping("/company/{id}")
     public ResponseEntity<Void> deleteCompanyClient(@PathVariable Long id) {
-        try {
-            customerUseCase.deleteCompanyClientById(id);
-            return ResponseEntity.noContent().build();
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        customerUseCase.deleteCompanyClientById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private NaturalClient toNaturalModel(NaturalClientRequest request) {

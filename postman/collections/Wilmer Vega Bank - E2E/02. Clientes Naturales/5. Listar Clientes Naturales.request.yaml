@@ -1,13 +1,11 @@
 $kind: http-request
-name: '5. Listar Clientes Naturales'
+name: 5. Listar Clientes Naturales
 method: GET
-url: '{{baseUrl}}/api/customers/natural'
+url: "{{baseUrl}}/api/customers/natural"
 order: 5000
 headers:
-  - key: Authorization
-    value: 'Bearer {{token}}'
+  Authorization: Bearer {{token}}
 scripts:
   - type: afterResponse
+    code: pm.test('Status 200', function () { pm.response.to.have.status(200); });
     language: text/javascript
-    code: |-
-      pm.test('Status 200', function () { pm.response.to.have.status(200); });
