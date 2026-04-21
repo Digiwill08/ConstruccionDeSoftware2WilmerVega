@@ -1,0 +1,13 @@
+$kind: http-request
+name: '34. Listar Préstamos (Analista)'
+method: GET
+url: '{{baseUrl}}/api/analyst/loans'
+order: 34000
+headers:
+  - key: Authorization
+    value: 'Bearer {{analystToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

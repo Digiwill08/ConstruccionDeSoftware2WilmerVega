@@ -1,0 +1,29 @@
+$kind: http-request
+name: '11. Crear Prestamo UNDER_REVIEW'
+method: POST
+url: '{{baseUrl}}/api/employee/loans'
+order: 11000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{analystToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "loanType": "CONSUMER",
+      "requestedAmount": 3000000,
+      "approvedAmount": 2000000,
+      "interestRate": 1.8,
+      "termInMonths": 12,
+      "loanStatus": "UNDER_REVIEW"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });
+      const data = pm.response.json();
+      pm.expect(data.loanId).to.be.a('number');
+      pm.environment.set('loanId', data.loanId);

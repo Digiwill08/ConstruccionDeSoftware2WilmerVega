@@ -1,0 +1,13 @@
+$kind: http-request
+name: '19. Ver Transferencias Pendientes (Supervisor)'
+method: GET
+url: '{{baseUrl}}/api/supervisor/transfers/pending'
+order: 19000
+headers:
+  - key: Authorization
+    value: 'Bearer {{supervisorToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

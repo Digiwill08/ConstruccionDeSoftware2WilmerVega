@@ -1,0 +1,13 @@
+$kind: http-request
+name: '27. Ver Audit Logs (Admin)'
+method: GET
+url: '{{baseUrl}}/api/admin/audit-logs'
+order: 27000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200 o 503', function () { pm.expect([200,503]).to.include(pm.response.code); });

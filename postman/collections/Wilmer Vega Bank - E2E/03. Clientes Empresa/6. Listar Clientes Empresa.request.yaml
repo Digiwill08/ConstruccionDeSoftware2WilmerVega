@@ -1,0 +1,13 @@
+$kind: http-request
+name: '6. Listar Clientes Empresa'
+method: GET
+url: '{{baseUrl}}/api/customers/company'
+order: 6000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

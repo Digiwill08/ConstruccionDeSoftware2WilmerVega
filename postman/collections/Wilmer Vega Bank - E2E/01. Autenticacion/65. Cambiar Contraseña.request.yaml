@@ -1,0 +1,23 @@
+$kind: http-request
+name: '65. Cambiar Contraseña'
+method: PUT
+url: '{{baseUrl}}/api/auth/change-password'
+order: 65000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{token}}'
+body:
+  type: json
+  content: |-
+    {
+      "currentPassword": "{{currentPassword}}",
+      "newPassword": "NewPassword123!",
+      "confirmPassword": "NewPassword123!"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

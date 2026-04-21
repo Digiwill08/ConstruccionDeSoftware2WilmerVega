@@ -1,0 +1,13 @@
+$kind: http-request
+name: '24. Listar Usuarios (Admin)'
+method: GET
+url: '{{baseUrl}}/api/admin/users'
+order: 24000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

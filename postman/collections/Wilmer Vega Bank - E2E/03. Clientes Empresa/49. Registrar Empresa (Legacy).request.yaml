@@ -1,0 +1,26 @@
+$kind: http-request
+name: '49. Registrar Empresa (Legacy)'
+method: POST
+url: '{{baseUrl}}/api/customers-legacy/company/register'
+order: 49000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{token}}'
+body:
+  type: json
+  content: |-
+    {
+      "businessName": "Legacy Empresa {{$timestamp}}",
+      "documentNumber": "LEG{{$timestamp}}",
+      "email": "legacyemp{{$timestamp}}@demo.com",
+      "phone": "3019876543",
+      "address": "Av Legacy 456",
+      "legalRepresentativeId": {{naturalClientId}}
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200 o 201', function () { pm.expect([200,201]).to.include(pm.response.code); });

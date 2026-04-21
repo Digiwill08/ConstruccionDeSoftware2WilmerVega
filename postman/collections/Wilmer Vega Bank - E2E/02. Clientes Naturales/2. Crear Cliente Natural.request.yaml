@@ -1,0 +1,31 @@
+﻿$kind: http-request
+name: '2. Crear Cliente Natural'
+method: POST
+url: '{{baseUrl}}/api/customers/natural'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{token}}'
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Jose",
+      "documentNumber": "1125118",
+      "email": "JOSE@DEMO.CO",
+      "phone": "3052501510",
+      "birthDate": "1994-08-08",
+      "address": "CALLE 15320-45",
+      "role": "NATURAL_CLIENT"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 201', function () { pm.response.to.have.status(201); });
+      const data = pm.response.json();
+      pm.expect(data.id).to.be.a('number');
+      pm.environment.set('naturalClientId', data.id);
+      pm.environment.set('naturalDocument', data.documentNumber || '');

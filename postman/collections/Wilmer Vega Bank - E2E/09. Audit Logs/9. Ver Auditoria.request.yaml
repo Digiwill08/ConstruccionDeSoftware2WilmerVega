@@ -1,0 +1,15 @@
+$kind: http-request
+name: '9. Ver Auditoria'
+method: GET
+url: '{{baseUrl}}/api/audit-logs'
+order: 9000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200 o 503 por Mongo no disponible', function () {
+        pm.expect([200, 503]).to.include(pm.response.code);
+      });

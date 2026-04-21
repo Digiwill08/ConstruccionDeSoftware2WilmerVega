@@ -1,0 +1,13 @@
+$kind: http-request
+name: '32. Audit Logs por UserId'
+method: GET
+url: '{{baseUrl}}/api/audit-logs/user/{{loggedUserId}}'
+order: 32000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200 o 503', function () { pm.expect([200,503]).to.include(pm.response.code); });

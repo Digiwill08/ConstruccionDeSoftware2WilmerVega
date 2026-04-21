@@ -1,6 +1,6 @@
 #FileLock
-#Sun Apr 19 23:05:21 COT 2026
-server=192.168.101.6\:53408
-hostName=DIGIWILL.bbrouter
+#Tue Apr 21 08:28:58 COT 2026
+server=localhost\:54567
+hostName=localhost
 method=file
-id=19da9106d5ff7b2fb00860d411be87ba81ba32ee40d
+id=19db03ad3fbe8a75bc65e15ad513087f84cdeb254f0
