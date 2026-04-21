@@ -1,5 +1,5 @@
 $kind: http-request
-name: '66. Solicitar Restablecimiento de Contraseña'
+name: '66. Request Password Reset'
 method: POST
 url: '{{baseUrl}}/api/auth/forgot-password'
 order: 66000

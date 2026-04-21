@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("local", "atlas")]
     [string]$Mode = "local",
 
@@ -14,7 +14,7 @@ param(
 
 if ($Mode -eq "atlas") {
     if ([string]::IsNullOrWhiteSpace($MongoUser) -or [string]::IsNullOrWhiteSpace($MongoClusterHost)) {
-        throw "En modo 'atlas' debes enviar -MongoUser y -MongoClusterHost."
+        throw "In 'atlas' mode you must provide -MongoUser and -MongoClusterHost."
     }
 
     $securePassword = Read-Host "Mongo password" -AsSecureString
@@ -28,7 +28,7 @@ if ($Mode -eq "atlas") {
     $encodedPassword = [System.Uri]::EscapeDataString($plainPassword)
     $uri = "mongodb+srv://${MongoUser}:$encodedPassword@$MongoClusterHost/$MongoDatabase?retryWrites=true&w=majority"
 } else {
-    # Modo local (gratis): requiere MongoDB corriendo en tu maquina o Docker en el puerto indicado.
+    # Local mode (free): requires MongoDB running on your machine or Docker on the specified port.
     $uri = "mongodb://127.0.0.1:$MongoLocalPort/${MongoDatabase}?connectTimeoutMS=5000&socketTimeoutMS=5000&serverSelectionTimeoutMS=5000"
 }
 
@@ -36,10 +36,11 @@ $env:MONGODB_URI = $uri
 $env:MONGODB_DATABASE = $MongoDatabase
 $env:MONGODB_REQUIRED = if ($MongoRequired) { "true" } else { "false" }
 
-Write-Host "Modo Mongo: $Mode"
-Write-Host "MONGODB_URI configurado: $uri"
+Write-Host "Mongo mode: $Mode"
+Write-Host "Configured MONGODB_URI: $uri"
 Write-Host "MONGODB_DATABASE: $MongoDatabase"
 Write-Host "MONGODB_REQUIRED: $env:MONGODB_REQUIRED"
-Write-Host "Iniciando app en puerto $Port..."
+Write-Host "Starting app on port $Port..."
 
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=$Port"
+
