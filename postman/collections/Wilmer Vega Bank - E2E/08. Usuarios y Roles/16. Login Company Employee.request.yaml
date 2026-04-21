@@ -1,0 +1,23 @@
+$kind: http-request
+name: '16. Login Company Employee'
+method: POST
+url: '{{baseUrl}}/auth/login'
+order: 16000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "{{companyEmployeeUsername}}",
+      "password": "{{companyEmployeePassword}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });
+      const data = pm.response.json();
+      pm.environment.set('companyEmployeeToken', data.token);
+      pm.environment.set('companyEmployeeUserId', data.userId || '');

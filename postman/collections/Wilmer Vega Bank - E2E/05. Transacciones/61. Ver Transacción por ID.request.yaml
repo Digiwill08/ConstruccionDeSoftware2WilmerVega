@@ -1,0 +1,13 @@
+$kind: http-request
+name: '61. Ver Transacción por ID'
+method: GET
+url: '{{baseUrl}}/api/transactions/{{transactionId}}'
+order: 61000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

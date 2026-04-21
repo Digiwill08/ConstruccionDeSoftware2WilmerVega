@@ -1,0 +1,21 @@
+$kind: http-request
+name: '21. Registrar Nuevo Usuario'
+method: POST
+url: '{{baseUrl}}/auth/register'
+order: 21000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "newuser{{$timestamp}}",
+      "password": "123456",
+      "systemRole": "INTERNAL_ANALYST"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200 o 201', function () { pm.expect([200,201]).to.include(pm.response.code); });

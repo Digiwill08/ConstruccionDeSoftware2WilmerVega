@@ -1,0 +1,22 @@
+$kind: http-request
+name: '13. Desembolsar Prestamo (Analista)'
+method: POST
+url: '{{baseUrl}}/api/analyst/loans/{{loanId}}/disburse'
+order: 13000
+headers:
+  - key: Authorization
+    value: 'Bearer {{analystToken}}'
+queryParams:
+  - key: disbursementAccountId
+    value: '{{accountId}}'
+  - key: analystUserId
+    value: '{{analystUserId}}'
+  - key: role
+    value: INTERNAL_ANALYST
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });
+      const data = pm.response.json();
+      pm.expect(data.loanStatus).to.eql('DISBURSED');

@@ -1,0 +1,18 @@
+$kind: http-request
+name: '41. Rechazar Transferencia (Supervisor)'
+method: POST
+url: '{{baseUrl}}/api/supervisor/transfers/{{pendingTransferId}}/reject'
+order: 41000
+headers:
+  - key: Authorization
+    value: 'Bearer {{supervisorToken}}'
+queryParams:
+  - key: supervisorUserId
+    value: '{{supervisorUserId}}'
+  - key: role
+    value: COMPANY_SUPERVISOR
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

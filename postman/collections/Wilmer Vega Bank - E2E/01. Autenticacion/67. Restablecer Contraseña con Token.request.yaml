@@ -1,0 +1,21 @@
+$kind: http-request
+name: '67. Restablecer Contraseña con Token'
+method: POST
+url: '{{baseUrl}}/api/auth/reset-password'
+order: 67000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "token": "{{resetToken}}",
+      "newPassword": "ResetPassword123!",
+      "confirmPassword": "ResetPassword123!"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

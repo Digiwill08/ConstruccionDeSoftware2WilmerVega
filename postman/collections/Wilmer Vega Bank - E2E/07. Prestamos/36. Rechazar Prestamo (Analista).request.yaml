@@ -1,0 +1,18 @@
+$kind: http-request
+name: '36. Rechazar Préstamo (Analista)'
+method: POST
+url: '{{baseUrl}}/api/analyst/loans/{{loanId}}/reject'
+order: 36000
+headers:
+  - key: Authorization
+    value: 'Bearer {{analystToken}}'
+queryParams:
+  - key: analystUserId
+    value: '{{analystUserId}}'
+  - key: role
+    value: INTERNAL_ANALYST
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

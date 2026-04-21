@@ -1,0 +1,13 @@
+$kind: http-request
+name: '8. Consultar Saldo'
+method: GET
+url: '{{baseUrl}}/api/accounts/{{accountId}}/balance'
+order: 8000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

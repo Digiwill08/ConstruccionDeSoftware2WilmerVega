@@ -1,0 +1,13 @@
+$kind: http-request
+name: '47. Listar Clientes Naturales (Legacy)'
+method: GET
+url: '{{baseUrl}}/api/customers-legacy/natural'
+order: 47000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });

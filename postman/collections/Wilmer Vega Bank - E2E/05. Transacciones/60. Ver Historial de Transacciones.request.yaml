@@ -1,0 +1,14 @@
+$kind: http-request
+name: '60. Ver Historial de Transacciones'
+method: GET
+url: '{{baseUrl}}/api/transactions/history/{{accountNumber}}'
+order: 60000
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status 200', function () { pm.response.to.have.status(200); });
+      pm.test('Respuesta es array', function () { pm.expect(pm.response.json()).to.be.an('array'); });
