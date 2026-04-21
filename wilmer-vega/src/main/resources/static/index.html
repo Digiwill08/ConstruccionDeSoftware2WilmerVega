@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="es">
+﻿<!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -112,8 +112,8 @@
   <div class="container py-4 py-lg-5">
     <div class="hero">
       <div class="brand">Wilmer Vega Bank Demo</div>
-      <div class="title">Panel visual para login JWT y pruebas rápidas</div>
-      <p class="subtitle">Esta interfaz simple te permite iniciar sesion, guardar el token en el navegador y consultar endpoints protegidos sin salir del browser.</p>
+      <div class="title">Panel visual para login JWT y pruebas rÃ¡pidas</div>
+      <p class="subtitle">This simple interface lets you sign in, store the token in the browser, and call protected endpoints without leaving the page.</p>
     </div>
 
     <div class="row g-4">
@@ -124,50 +124,50 @@
             <span class="badge badge-soft rounded-pill px-3 py-2">JWT</span>
           </div>
           <div class="mb-3">
-            <label class="label">Usuario</label>
+            <label class="label">Username</label>
             <input id="username" class="form-control" value="pancracio" />
           </div>
           <div class="mb-3">
-            <label class="label">Clave</label>
+            <label class="label">Password</label>
             <input id="password" type="password" class="form-control" value="123456" />
           </div>
-          <button class="btn btn-accent w-100" onclick="login()">Iniciar sesion</button>
-          <div class="mt-3 small-note">Token guardado en <code>localStorage</code>.</div>
+          <button class="btn btn-accent w-100" onclick="login()">Sign in</button>
+          <div class="mt-3 small-note">Token stored in <code>localStorage</code>.</div>
         </div>
 
         <div class="glass panel mt-4">
           <div class="d-flex align-items-center justify-content-between mb-3">
-            <h5 class="mb-0">Alta rapida</h5>
-            <span class="badge badge-soft rounded-pill px-3 py-2">Guardar datos</span>
+            <h5 class="mb-0">Quick setup</h5>
+            <span class="badge badge-soft rounded-pill px-3 py-2">Persist data</span>
           </div>
 
-          <div class="mb-2 fw-semibold">Crear usuario</div>
+          <div class="mb-2 fw-semibold">Create user</div>
           <div class="mb-2">
-            <label class="label">Nuevo username</label>
-            <input id="registerUsername" class="form-control" value="usuario_demo_web" />
+            <label class="label">New username</label>
+            <input id="registerUsername" class="form-control" value="web_demo_user" />
           </div>
           <div class="mb-2">
-            <label class="label">Nueva clave</label>
+            <label class="label">New password</label>
             <input id="registerPassword" type="password" class="form-control" value="123456" />
           </div>
           <div class="mb-3">
-            <label class="label">Rol</label>
+            <label class="label">Role</label>
             <select id="registerRole" class="form-select">
               <option value="NATURAL_CLIENT" selected>NATURAL_CLIENT</option>
               <option value="COMPANY_CLIENT">COMPANY_CLIENT</option>
               <option value="COMPANY_EMPLOYEE">COMPANY_EMPLOYEE</option>
             </select>
           </div>
-          <button class="btn btn-accent w-100 mb-3" onclick="registerUser()">Crear usuario y guardar</button>
+          <button class="btn btn-accent w-100 mb-3" onclick="registerUser()">Create user and save</button>
 
-          <div class="mb-2 fw-semibold">Crear cuenta bancaria</div>
+          <div class="mb-2 fw-semibold">Create bank account</div>
           <div class="mb-2">
-            <label class="label">Numero de cuenta</label>
+            <label class="label">Account number</label>
             <input id="quickAccountNumber" class="form-control" value="ACCWEB001" />
           </div>
           <div class="row g-2 mb-2">
             <div class="col-6">
-              <label class="label">Tipo</label>
+              <label class="label">Type</label>
               <select id="quickAccountType" class="form-select">
                 <option value="SAVINGS" selected>SAVINGS</option>
                 <option value="CHECKING">CHECKING</option>
@@ -176,7 +176,7 @@
               </select>
             </div>
             <div class="col-6">
-              <label class="label">Moneda</label>
+              <label class="label">Currency</label>
               <select id="quickAccountCurrency" class="form-select">
                 <option value="COP" selected>COP</option>
                 <option value="USD">USD</option>
@@ -190,98 +190,98 @@
               <input id="quickHolderId" type="number" min="1" class="form-control" value="1" />
             </div>
             <div class="col-6">
-              <label class="label">Saldo inicial</label>
+              <label class="label">Initial balance</label>
               <input id="quickInitialBalance" type="number" min="0" step="0.01" class="form-control" value="100000" />
             </div>
           </div>
-          <button class="btn btn-success-soft w-100" onclick="createQuickAccount()">Crear cuenta y guardar</button>
-          <div class="mt-3 small-note">Para crear cuenta necesitas haber iniciado sesion con un rol autorizado.</div>
+          <button class="btn btn-success-soft w-100" onclick="createQuickAccount()">Create account and save</button>
+          <div class="mt-3 small-note">To create an account, you must sign in with an authorized role.</div>
         </div>
       </div>
 
       <div class="col-12 col-lg-7">
         <div class="glass panel h-100">
-          <h5 class="mb-3">Estado actual</h5>
+          <h5 class="mb-3">Current status</h5>
           <div class="row g-3 mb-3">
             <div class="col-md-4">
               <div class="glass p-3 h-100">
-                <div class="small-note">Usuario</div>
+                <div class="small-note">Username</div>
                 <div id="statusUser" class="fw-semibold">-</div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="glass p-3 h-100">
-                <div class="small-note">Rol</div>
+                <div class="small-note">Role</div>
                 <div id="statusRole" class="fw-semibold">-</div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="glass p-3 h-100">
                 <div class="small-note">Token</div>
-                <div id="statusToken" class="fw-semibold">No cargado</div>
+                <div id="statusToken" class="fw-semibold">Not loaded</div>
               </div>
             </div>
           </div>
 
           <div class="d-flex flex-wrap gap-2 mb-3">
-            <button class="btn btn-success-soft" onclick="callProtected('/api/admin/users')">Ver usuarios admin</button>
-            <button class="btn btn-dark-soft" onclick="callProtected('/api/audit-logs')">Ver bitacora</button>
-            <button class="btn btn-dark-soft" onclick="logout()">Salir</button>
+            <button class="btn btn-success-soft" onclick="callProtected('/api/admin/users')">View admin users</button>
+            <button class="btn btn-dark-soft" onclick="callProtected('/api/audit-logs')">View audit log</button>
+            <button class="btn btn-dark-soft" onclick="logout()">Sign out</button>
           </div>
 
           <div class="glass p-3 mb-3">
-            <h6 class="mb-3">Ejecutor visual de servicios</h6>
+            <h6 class="mb-3">Visual service runner</h6>
             <div class="row g-2 mb-2">
               <div class="col-md-6">
-                <label class="label">Filtro por modulo</label>
+                <label class="label">Module filter</label>
                 <select id="moduleFilter" class="form-select" onchange="filterServicesByModule()">
-                  <option value="ALL">Todos</option>
+                  <option value="ALL">All</option>
                   <option value="AUTH">Auth</option>
                   <option value="ADMIN">Admin</option>
-                  <option value="CLIENTES">Clientes</option>
-                  <option value="CUENTAS">Cuentas</option>
-                  <option value="PRESTAMOS">Prestamos</option>
-                  <option value="TRANSFERENCIAS">Transferencias</option>
+                  <option value="CLIENTES">Clients</option>
+                  <option value="CUENTAS">Accounts</option>
+                  <option value="PRESTAMOS">Loans</option>
+                  <option value="TRANSFERENCIAS">Transfers</option>
                   <option value="SUPERVISOR">Supervisor</option>
-                  <option value="AUDITORIA">Auditoria</option>
+                  <option value="AUDITORIA">Audit</option>
                 </select>
               </div>
               <div class="col-md-6 d-flex align-items-end gap-2">
-                <button class="btn btn-dark-soft w-100" onclick="selectFilteredServices()">Seleccionar filtrados</button>
-                <button class="btn btn-dark-soft w-100" onclick="clearModuleFilter()">Quitar filtro</button>
+                <button class="btn btn-dark-soft w-100" onclick="selectFilteredServices()">Select filtered</button>
+                <button class="btn btn-dark-soft w-100" onclick="clearModuleFilter()">Clear filter</button>
               </div>
             </div>
             <div class="row g-2 mb-2">
               <div class="col-md-8">
-                <label class="label">Servicios/Rutas (seleccion multiple)</label>
+                <label class="label">Services/Routes (multi-select)</label>
                 <select id="serviceSelect" class="form-select service-select-multi" multiple onchange="syncTemplateFromSelection()"></select>
-                <div class="small-note mt-1">Usa Ctrl/Cmd + clic para seleccionar varios.</div>
+                <div class="small-note mt-1">Use Ctrl/Cmd + click to select multiple.</div>
               </div>
               <div class="col-md-4">
-                <label class="label">Metodo</label>
+                <label class="label">Method</label>
                 <input id="serviceMethod" class="form-control" readonly />
               </div>
             </div>
             <div class="mb-2">
-              <label class="label">Ruta</label>
+              <label class="label">Path</label>
               <input id="servicePath" class="form-control" />
             </div>
             <div class="mb-2">
-              <label class="label">Body JSON (si aplica)</label>
+              <label class="label">JSON body (if applicable)</label>
               <textarea id="serviceBody" class="form-control" rows="7"></textarea>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-accent" onclick="executeService()">Ejecutar servicio seleccionado</button>
-              <button class="btn btn-success-soft" onclick="executeSelectedServices()">Ejecutar seleccion multiple</button>
-              <button class="btn btn-dark-soft" onclick="selectAllServices()">Seleccionar todos</button>
-              <button class="btn btn-dark-soft" onclick="clearServiceSelection()">Limpiar seleccion</button>
-              <button class="btn btn-dark-soft" onclick="loadServiceTemplate()">Restaurar plantilla</button>
+              <button class="btn btn-accent" onclick="executeService()">Run selected service</button>
+              <button class="btn btn-success-soft" onclick="executeSelectedServices()">Run multi-selection</button>
+              <button class="btn btn-dark-soft" onclick="selectAllServices()">Select all</button>
+              <button class="btn btn-dark-soft" onclick="clearServiceSelection()">Clear selection</button>
+              <button class="btn btn-dark-soft" onclick="loadServiceTemplate()">Restore template</button>
             </div>
-            <div class="small-note mt-2">Tip: usa primero los servicios de login/crear usuario para generar datos y luego prueba los demas.</div>
+            <div class="small-note mt-2">Tip: run login/create-user services first to generate data, then test the rest.</div>
           </div>
 
-          <div class="mb-2 small-note">Respuesta</div>
-          <pre id="output">Aun no hay respuesta.</pre>
+          <div class="mb-2 small-note">Response</div>
+          <pre id="output">No response yet.</pre>
         </div>
       </div>
     </div>
@@ -308,22 +308,22 @@
 
     const serviceCatalog = [
       { name: 'Auth - Login', module: 'AUTH', method: 'POST', path: '/auth/login', protected: false, body: { username: 'pancracio', password: '123456' } },
-      { name: 'Admin - Crear usuario', module: 'ADMIN', method: 'POST', path: '/api/admin/users', protected: true, body: { username: 'nuevo_usuario_demo', password: '123456', systemRole: 'COMPANY_EMPLOYEE' } },
-      { name: 'Admin - Listar usuarios', module: 'ADMIN', method: 'GET', path: '/api/admin/users', protected: true, body: null },
-      { name: 'Clientes - Crear natural', module: 'CLIENTES', method: 'POST', path: '/api/customers/natural', protected: true, body: { fullName: 'Cliente Visual Demo', documentNumber: '10000001', email: 'cliente.visual@demo.com', phone: '3001234567', birthDate: '1995-05-10', address: 'Calle Visual 123', role: 'NATURAL_CLIENT' } },
-      { name: 'Clientes - Listar naturales', module: 'CLIENTES', method: 'GET', path: '/api/customers/natural', protected: true, body: null },
-      { name: 'Clientes - Crear empresa', module: 'CLIENTES', method: 'POST', path: '/api/customers/company', protected: true, body: { businessName: 'Empresa Visual Demo', documentNumber: '90000001', email: 'empresa.visual@demo.com', phone: '3019876543', address: 'Avenida Visual 456', legalRepresentativeId: 1 } },
-      { name: 'Clientes - Listar empresas', module: 'CLIENTES', method: 'GET', path: '/api/customers/company', protected: true, body: null },
-      { name: 'Cuentas - Crear cuenta', module: 'CUENTAS', method: 'POST', path: '/api/accounts', protected: true, body: { accountNumber: 'ACCVISUAL001', accountType: 'SAVINGS', currency: 'USD', holderId: 1, initialBalance: 25000000.0 } },
-      { name: 'Cuentas - Listar por holder', module: 'CUENTAS', method: 'GET', path: '/api/accounts?holderId=1', protected: true, body: null },
-      { name: 'Cuentas - Consultar saldo', module: 'CUENTAS', method: 'GET', path: '/api/accounts/1/balance', protected: true, body: null },
-      { name: 'Prestamos - Crear', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
-      { name: 'Prestamos - Aprobar', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/approve?analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
-      { name: 'Prestamos - Desembolsar', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
-      { name: 'Transferencias - Crear', module: 'TRANSFERENCIAS', method: 'POST', path: '/api/client/transfers', protected: true, body: { sourceAccount: { id: 1, accountNumber: 'ACCVISUAL001' }, destinationAccount: { id: 2, accountNumber: 'DSTVISUAL001' }, amount: 12000000, creatorUserId: 1 } },
-      { name: 'Supervisor - Pendientes', module: 'SUPERVISOR', method: 'GET', path: '/api/supervisor/transfers/pending', protected: true, body: null },
-      { name: 'Supervisor - Aprobar transferencia', module: 'SUPERVISOR', method: 'POST', path: '/api/supervisor/transfers/1/approve?supervisorUserId=1&role=COMPANY_SUPERVISOR', protected: true, body: null },
-      { name: 'Auditoria - Listar logs', module: 'AUDITORIA', method: 'GET', path: '/api/audit-logs', protected: true, body: null }
+      { name: 'Admin - Create user', module: 'ADMIN', method: 'POST', path: '/api/admin/users', protected: true, body: { username: 'new_demo_user', password: '123456', systemRole: 'COMPANY_EMPLOYEE' } },
+      { name: 'Admin - List users', module: 'ADMIN', method: 'GET', path: '/api/admin/users', protected: true, body: null },
+      { name: 'Clients - Create natural', module: 'CLIENTES', method: 'POST', path: '/api/customers/natural', protected: true, body: { fullName: 'Visual Demo Client', documentNumber: '10000001', email: 'visual.client@demo.com', phone: '3001234567', birthDate: '1995-05-10', address: 'Visual Street 123', role: 'NATURAL_CLIENT' } },
+      { name: 'Clients - List natural', module: 'CLIENTES', method: 'GET', path: '/api/customers/natural', protected: true, body: null },
+      { name: 'Clients - Create company', module: 'CLIENTES', method: 'POST', path: '/api/customers/company', protected: true, body: { businessName: 'Visual Demo Company', documentNumber: '90000001', email: 'visual.company@demo.com', phone: '3019876543', address: 'Visual Avenue 456', legalRepresentativeId: 1 } },
+      { name: 'Clients - List companies', module: 'CLIENTES', method: 'GET', path: '/api/customers/company', protected: true, body: null },
+      { name: 'Accounts - Create account', module: 'CUENTAS', method: 'POST', path: '/api/accounts', protected: true, body: { accountNumber: 'ACCVISUAL001', accountType: 'SAVINGS', currency: 'USD', holderId: 1, initialBalance: 25000000.0 } },
+      { name: 'Accounts - List by holder', module: 'CUENTAS', method: 'GET', path: '/api/accounts?holderId=1', protected: true, body: null },
+      { name: 'Accounts - Check balance', module: 'CUENTAS', method: 'GET', path: '/api/accounts/1/balance', protected: true, body: null },
+      { name: 'Loans - Create', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
+      { name: 'Loans - Approve', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/approve?analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Loans - Disburse', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Transfers - Create', module: 'TRANSFERENCIAS', method: 'POST', path: '/api/client/transfers', protected: true, body: { sourceAccount: { id: 1, accountNumber: 'ACCVISUAL001' }, destinationAccount: { id: 2, accountNumber: 'DSTVISUAL001' }, amount: 12000000, creatorUserId: 1 } },
+      { name: 'Supervisor - Pending', module: 'SUPERVISOR', method: 'GET', path: '/api/supervisor/transfers/pending', protected: true, body: null },
+      { name: 'Supervisor - Approve transfer', module: 'SUPERVISOR', method: 'POST', path: '/api/supervisor/transfers/1/approve?supervisorUserId=1&role=COMPANY_SUPERVISOR', protected: true, body: null },
+      { name: 'Audit - List logs', module: 'AUDITORIA', method: 'GET', path: '/api/audit-logs', protected: true, body: null }
     ];
 
     function setOutput(value) {
@@ -336,7 +336,7 @@
       localStorage.setItem('jwt_role', data.role);
       statusUser.textContent = data.username || '-';
       statusRole.textContent = data.role || '-';
-      statusToken.textContent = data.token ? data.token.substring(0, 24) + '...' : 'No cargado';
+      statusToken.textContent = data.token ? data.token.substring(0, 24) + '...' : 'Not loaded';
     }
 
     function loadSession() {
@@ -345,7 +345,7 @@
       const role = localStorage.getItem('jwt_role');
       statusUser.textContent = username || '-';
       statusRole.textContent = role || '-';
-      statusToken.textContent = token ? token.substring(0, 24) + '...' : 'No cargado';
+      statusToken.textContent = token ? token.substring(0, 24) + '...' : 'Not loaded';
       return token;
     }
 
@@ -381,7 +381,7 @@
         };
 
         if (!payload.username || !payload.password) {
-          setOutput({ error: 'Debes ingresar username y password para crear usuario.' });
+          setOutput({ error: 'You must provide username and password to create a user.' });
           return;
         }
 
@@ -396,11 +396,11 @@
         try { data = text ? JSON.parse(text) : null; } catch {}
 
         if (!response.ok) {
-          setOutput({ step: 'crear_usuario', status: response.status, response: data });
+          setOutput({ step: 'create_user', status: response.status, response: data });
           return;
         }
 
-        // El endpoint register responde LoginResult y trae token listo para usar.
+        // The register endpoint returns LoginResult with a ready-to-use token.
         if (data && data.token) {
           saveSession(data);
           document.getElementById('username').value = payload.username;
@@ -408,9 +408,9 @@
         }
 
         setOutput({
-          step: 'crear_usuario',
+          step: 'create_user',
           status: response.status,
-          message: 'Usuario creado y guardado correctamente.',
+          message: 'User created and saved successfully.',
           response: data
         });
       } catch (error) {
@@ -422,7 +422,7 @@
       try {
         const token = localStorage.getItem('jwt_token');
         if (!token) {
-          setOutput({ error: 'Primero inicia sesion para crear cuenta.' });
+          setOutput({ error: 'Sign in first to create an account.' });
           return;
         }
 
@@ -430,15 +430,15 @@
         const initialBalance = Number(quickInitialBalance.value);
 
         if (!quickAccountNumber.value.trim()) {
-          setOutput({ error: 'El numero de cuenta es obligatorio.' });
+          setOutput({ error: 'Account number is required.' });
           return;
         }
         if (!Number.isFinite(holderId) || holderId <= 0) {
-          setOutput({ error: 'holderId debe ser un numero mayor a 0.' });
+          setOutput({ error: 'holderId must be a number greater than 0.' });
           return;
         }
         if (!Number.isFinite(initialBalance) || initialBalance < 0) {
-          setOutput({ error: 'Saldo inicial invalido.' });
+          setOutput({ error: 'Invalid initial balance.' });
           return;
         }
 
@@ -464,7 +464,7 @@
         try { data = text ? JSON.parse(text) : null; } catch {}
 
         setOutput({
-          step: 'crear_cuenta',
+          step: 'create_account',
           status: response.status,
           ok: response.ok,
           request: payload,
@@ -479,7 +479,7 @@
       try {
         const token = localStorage.getItem('jwt_token');
         if (!token) {
-          setOutput({ error: 'Primero inicia sesion.' });
+          setOutput({ error: 'Sign in first.' });
           return;
         }
         const response = await fetch(path, {
@@ -584,7 +584,7 @@
           request: { method, path, protected: svc.protected },
           status: 0,
           ok: false,
-          response: { error: 'Este servicio requiere token. Inicia sesion primero.' }
+          response: { error: 'This service requires a token. Sign in first.' }
         };
       }
 
@@ -602,7 +602,7 @@
               request: { method, path, protected: svc.protected },
               status: 0,
               ok: false,
-              response: { error: 'Body JSON invalido. Revisa la sintaxis.' }
+              response: { error: 'Invalid JSON body. Check the syntax.' }
             };
           }
         }
@@ -642,7 +642,7 @@
       try {
         const selected = getSelectedServiceIndexes();
         if (!selected.length) {
-          setOutput({ error: 'Selecciona al menos un servicio.' });
+          setOutput({ error: 'Select at least one service.' });
           return;
         }
 
@@ -671,8 +671,8 @@
       localStorage.removeItem('jwt_role');
       statusUser.textContent = '-';
       statusRole.textContent = '-';
-      statusToken.textContent = 'No cargado';
-      setOutput('Sesion cerrada.');
+      statusToken.textContent = 'Not loaded';
+      setOutput('Session closed.');
     }
 
     loadSession();
@@ -681,3 +681,4 @@
   </script>
 </body>
 </html>
+

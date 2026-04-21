@@ -1,16 +1,17 @@
 $kind: http-request
 name: 1. Login
-method: GET
-url: http://localhost:8083/auth/login
+method: POST
+url: '{{baseUrl}}/auth/login'
 order: 1000
 headers:
-  Content-Type: application/json
+  - key: Content-Type
+    value: application/json
 body:
   type: json
   content: |-
     {
-      "username": "{{PAS}}",
-      "password": "{{password}
+      "username": "{{username}}",
+      "password": "{{password}}"
     }
 scripts:
   - type: afterResponse

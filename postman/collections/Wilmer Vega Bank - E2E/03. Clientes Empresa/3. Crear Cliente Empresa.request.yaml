@@ -12,11 +12,11 @@ body:
   type: json
   content: |-
     {
-      "businessName": "Empresa Demo {{$timestamp}}",
+      "businessName": "Demo Company {{$timestamp}}",
       "documentNumber": "90{{$timestamp}}",
-      "email": "empresa{{$timestamp}}@demo.com",
+      "email": "company{{$timestamp}}@demo.com",
       "phone": "3019876543",
-      "address": "Av Empresa 456",
+      "address": "Company Ave 456",
       "legalRepresentativeId": {{naturalClientId}}
     }
 scripts:

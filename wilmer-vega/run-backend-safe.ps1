@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("start", "status", "stop")]
     [string]$Action = "status",
 
@@ -45,7 +45,7 @@ switch ($Action) {
     "start" {
         $existingPid = Get-ListeningProcessId -TargetPort $Port
         if ($null -ne $existingPid) {
-            Write-Host "Backend ya esta corriendo en puerto $Port con PID $existingPid."
+            Write-Host "Backend is already running on port $Port con PID $existingPid."
             Set-Content -Path $pidFile -Value $existingPid -Encoding ascii
             exit 0
         }
@@ -65,7 +65,7 @@ switch ($Action) {
         )
 
         $proc = Start-Process -FilePath "powershell.exe" -ArgumentList $args -WorkingDirectory $scriptDir -RedirectStandardOutput $logFile -RedirectStandardError $errFile -PassThru
-        Write-Host "Proceso lanzado (wrapper PID: $($proc.Id)). Esperando a que el backend responda..."
+        Write-Host "Process started (wrapper PID: $($proc.Id)). Waiting for backend response..."
 
         $deadline = (Get-Date).AddSeconds($StartupTimeoutSec)
         $backendPid = $null
@@ -75,22 +75,22 @@ switch ($Action) {
             $backendPid = Get-ListeningProcessId -TargetPort $Port
             if ($null -ne $backendPid -and (Test-HttpUp -TargetPort $Port)) {
                 Set-Content -Path $pidFile -Value $backendPid -Encoding ascii
-                Write-Host "Backend arriba en http://127.0.0.1:$Port (PID $backendPid)."
+                Write-Host "Backend is up at http://127.0.0.1:$Port (PID $backendPid)."
                 Write-Host "Log: $logFile"
                 if (Test-Path $errFile) {
                     $errLength = (Get-Item $errFile).Length
                     if ($errLength -gt 0) {
-                        Write-Host "Errores: $errFile"
+                        Write-Host "Errors: $errFile"
                     }
                 }
                 exit 0
             }
         }
 
-        Write-Host "No se detecto backend disponible en $StartupTimeoutSec segundos."
-        Write-Host "Revisa log: $logFile"
+        Write-Host "No backend available detected within $StartupTimeoutSec seconds."
+        Write-Host "Check log: $logFile"
         if (Test-Path $errFile) {
-            Write-Host "Revisa errores: $errFile"
+            Write-Host "Check errors: $errFile"
         }
         exit 1
     }
@@ -98,7 +98,7 @@ switch ($Action) {
     "status" {
         $runningPid = Get-ListeningProcessId -TargetPort $Port
         if ($null -eq $runningPid) {
-            Write-Host "Backend detenido en puerto $Port."
+            Write-Host "Backend stopped on port $Port."
             exit 1
         }
 
@@ -107,14 +107,14 @@ switch ($Action) {
             exit 0
         }
 
-        Write-Host "Hay proceso escuchando en puerto $Port (PID $runningPid), pero no responde HTTP correctamente."
+        Write-Host "A process is listening on port $Port (PID $runningPid), but it does not respond to HTTP correctly."
         exit 1
     }
 
     "stop" {
         $runningPid = Get-ListeningProcessId -TargetPort $Port
         if ($null -eq $runningPid) {
-            Write-Host "No hay backend escuchando en puerto $Port."
+            Write-Host "No backend is listening on port $Port."
             if (Test-Path $pidFile) {
                 Remove-Item $pidFile -Force
             }
@@ -126,14 +126,15 @@ switch ($Action) {
 
         $afterStopPid = Get-ListeningProcessId -TargetPort $Port
         if ($null -eq $afterStopPid) {
-            Write-Host "Backend detenido correctamente (PID $runningPid)."
+            Write-Host "Backend stopped successfully (PID $runningPid)."
             if (Test-Path $pidFile) {
                 Remove-Item $pidFile -Force
             }
             exit 0
         }
 
-        Write-Host "No se pudo detener el proceso en puerto $Port (PID actual: $afterStopPid)."
+        Write-Host "Could not stop process on port $Port (PID actual: $afterStopPid)."
         exit 1
     }
 }
+

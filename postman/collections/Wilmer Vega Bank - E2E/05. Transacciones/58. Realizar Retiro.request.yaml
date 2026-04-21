@@ -14,7 +14,7 @@ body:
     {
       "accountNumber": "{{accountNumber}}",
       "amount": 50000,
-      "description": "Retiro de prueba"
+      "description": "Test withdrawal"
     }
 scripts:
   - type: afterResponse

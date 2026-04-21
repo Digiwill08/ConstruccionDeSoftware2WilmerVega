@@ -14,7 +14,7 @@ body:
     {
       "accountNumber": "{{accountNumber}}",
       "amount": 100000,
-      "description": "Depósito de prueba"
+      "description": "Test deposit"
     }
 scripts:
   - type: afterResponse

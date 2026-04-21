@@ -1,7 +1,7 @@
-name: Wilmer Vega Bank - Local
+﻿name: Wilmer Vega Bank - Local
 values:
   - key: baseUrl
-    value: 'http://localhost:8083'
+    value: 'http://127.0.0.1:8083'
     enabled: true
     type: default
   - key: username
@@ -93,10 +93,6 @@ values:
     enabled: true
     type: default
   - key: pendingTransferId
-    value: ''
-    enabled: true
-    type: default
-  - key: sourceAccountId
     value: ''
     enabled: true
     type: default
