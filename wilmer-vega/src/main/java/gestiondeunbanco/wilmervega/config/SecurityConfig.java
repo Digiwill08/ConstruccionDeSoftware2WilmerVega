@@ -31,6 +31,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/index.html", "/favicon.ico", "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/ping").permitAll()
                 .requestMatchers("/api/admin/**", "/api/analyst/**").hasAnyRole("INTERNAL_ANALYST", "ADMINISTRATOR")
                 .requestMatchers("/api/supervisor/**").hasAnyRole("COMPANY_SUPERVISOR", "ADMINISTRATOR")
                 .requestMatchers("/api/employee/**").hasAnyRole("TELLER_EMPLOYEE", "COMMERCIAL_EMPLOYEE", "INTERNAL_ANALYST", "ADMINISTRATOR")

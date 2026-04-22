@@ -13,8 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableMongoRepositories(basePackages = "gestiondeunbanco.wilmervega.application.adapters.persistence.mongo")
 public class WilmerVegaApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(WilmerVegaApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(WilmerVegaApplication.class, args);
+    }
 }

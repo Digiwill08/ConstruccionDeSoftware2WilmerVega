@@ -1,9 +1,8 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
+import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
-import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,20 +24,12 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(adminUseCase.findUserById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(adminUseCase.findUserById(id));
     }
 
     @GetMapping("/users/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        try {
-            return ResponseEntity.ok(adminUseCase.findUserByUsername(username));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(adminUseCase.findUserByUsername(username));
     }
 
     @PostMapping("/users")

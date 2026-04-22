@@ -1,7 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import gestiondeunbanco.wilmervega.application.usecases.AnalystUseCase;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +30,7 @@ public class AnalystController {
 
     @GetMapping("/loans/{id}")
     public ResponseEntity<Loan> getLoanById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(analystUseCase.findLoanById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(analystUseCase.findLoanById(id));
     }
 
     @PostMapping("/loans/{id}/approve")
@@ -44,8 +39,6 @@ public class AnalystController {
                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
         try {
             return ResponseEntity.ok(analystUseCase.approveLoan(id, analystUserId, role));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -59,8 +52,6 @@ public class AnalystController {
         try {
             String reason = body != null ? body.get("reason") : null;
             return ResponseEntity.ok(analystUseCase.rejectLoan(id, analystUserId, role, reason));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -73,8 +64,6 @@ public class AnalystController {
                                               @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
         try {
             return ResponseEntity.ok(analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
