@@ -21,7 +21,7 @@ public class AnalystController {
 
     private final AnalystUseCase analystUseCase;
 
-    // ── Loans ─────────────────────────────────────────────────────────────────
+    // --- Loans ---
 
     @GetMapping("/loans")
     public ResponseEntity<List<Loan>> getAllLoans() {
@@ -37,7 +37,11 @@ public class AnalystController {
     public ResponseEntity<Loan> approveLoan(@PathVariable Long id,
                                              @RequestParam Long analystUserId,
                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        return ResponseEntity.ok(analystUseCase.approveLoan(id, analystUserId, role));
+        try {
+            return ResponseEntity.ok(analystUseCase.approveLoan(id, analystUserId, role));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/loans/{id}/reject")
@@ -45,8 +49,12 @@ public class AnalystController {
                                             @RequestParam Long analystUserId,
                                             @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
                                             @RequestBody(required = false) Map<String, String> body) {
-        String reason = body != null ? body.get("reason") : null;
-        return ResponseEntity.ok(analystUseCase.rejectLoan(id, analystUserId, role, reason));
+        try {
+            String reason = body != null ? body.get("reason") : null;
+            return ResponseEntity.ok(analystUseCase.rejectLoan(id, analystUserId, role, reason));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/loans/{id}/disburse")
@@ -54,10 +62,14 @@ public class AnalystController {
                                               @RequestParam Long disbursementAccountId,
                                               @RequestParam Long analystUserId,
                                               @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        return ResponseEntity.ok(analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role));
+        try {
+            return ResponseEntity.ok(analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    // ── Audit Log ─────────────────────────────────────────────────────────────
+    // --- Audit Log ---
 
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {

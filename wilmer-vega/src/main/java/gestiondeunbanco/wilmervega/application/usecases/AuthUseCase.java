@@ -71,6 +71,19 @@ public class AuthUseCase {
         );
     }
 
+    public Map<String, Object> getProfile(String username) {
+        User user = userPort.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException(INVALID_CREDENTIALS));
+
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("username", user.getUsername());
+        profile.put("role", user.getSystemRole() != null ? user.getSystemRole().name() : null);
+        profile.put("userId", user.getUserId());
+        profile.put("email", user.getRelatedClient() != null ? user.getRelatedClient().getEmail() : null);
+        profile.put("documentNumber", user.getRelatedClient() != null ? user.getRelatedClient().getDocumentNumber() : null);
+        return profile;
+    }
+
     private boolean passwordMatchesAndMigrateIfNeeded(User user, String rawPassword) {
         String storedPassword = user.getPassword();
         if (storedPassword == null || storedPassword.isBlank()) {

@@ -76,6 +76,10 @@ public class UserPersistenceAdapter implements UserPort {
         if (entity.getClient() != null) {
             gestiondeunbanco.wilmervega.domain.models.NaturalClient c = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
             c.setId(entity.getClient().getId());
+            c.setEmail(entity.getClient().getEmail());
+            c.setPhone(entity.getClient().getPhone());
+            c.setAddress(entity.getClient().getAddress());
+            c.setDocumentNumber(entity.getClient().getDocumentNumber());
             model.setRelatedClient(c);
         }
         return model;

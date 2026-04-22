@@ -20,7 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
+                "spring.datasource.url=${MYSQL_TEST_URL:jdbc:mysql://127.0.0.1:3306/bank_test?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}",
+                "spring.datasource.username=${MYSQL_TEST_USER:root}",
+                "spring.datasource.password=${MYSQL_TEST_PASSWORD:root}",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "spring.sql.init.mode=never",
                 "spring.data.mongodb.uri=mongodb://127.0.0.1:27017/test_db?serverSelectionTimeoutMS=100",

@@ -3,7 +3,6 @@ package gestiondeunbanco.wilmervega.application.adapters.api;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountRequest;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountResponse;
 import gestiondeunbanco.wilmervega.application.usecases.BankAccountUseCase;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
@@ -44,21 +43,13 @@ public class BankAccountController {
 
     @GetMapping("/{accountNumber}")
     public ResponseEntity<BankAccountResponse> getAccountByNumber(@PathVariable String accountNumber) {
-        try {
-            return ResponseEntity.ok(toResponse(bankAccountUseCase.findByAccountNumber(accountNumber)));
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toResponse(bankAccountUseCase.findByAccountNumber(accountNumber)));
     }
 
     @GetMapping("/{accountId}/balance")
     public ResponseEntity<Object> getAccountBalance(@PathVariable Long accountId) {
-        try {
-            BankAccount account = bankAccountUseCase.findById(accountId);
-            return ResponseEntity.ok(account.getCurrentBalance());
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        BankAccount account = bankAccountUseCase.findById(accountId);
+        return ResponseEntity.ok(account.getCurrentBalance());
     }
 
     @PutMapping("/{accountId}/status")
@@ -71,8 +62,6 @@ public class BankAccountController {
             return ResponseEntity.ok(toResponse(updated));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body("Invalid status");
-        } catch (NotFoundException ex) {
-            return ResponseEntity.notFound().build();
         }
     }
 

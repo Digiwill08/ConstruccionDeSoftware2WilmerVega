@@ -1,7 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
 import gestiondeunbanco.wilmervega.application.usecases.CompanySupervisorUseCase;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +27,7 @@ public class CompanySupervisorController {
 
     @GetMapping("/transfers/{id}")
     public ResponseEntity<Transfer> getTransferById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(companySupervisorUseCase.findTransferById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(companySupervisorUseCase.findTransferById(id));
     }
 
     @PostMapping("/transfers/{id}/approve")
@@ -41,8 +36,6 @@ public class CompanySupervisorController {
                                                      @RequestParam(defaultValue = "COMPANY_SUPERVISOR") String role) {
         try {
             return ResponseEntity.ok(companySupervisorUseCase.approveTransfer(id, supervisorUserId, role));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -56,8 +49,6 @@ public class CompanySupervisorController {
         try {
             String reason = body != null ? body.get("reason") : null;
             return ResponseEntity.ok(companySupervisorUseCase.rejectTransfer(id, supervisorUserId, role, reason));
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }

@@ -1,20 +1,14 @@
 package gestiondeunbanco.wilmervega.application.adapters.api;
 
+import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
-import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST controller for INTERNAL_ANALYST (admin) role.
- * Endpoints: /api/admin/**
- * Exceptions handled by GlobalExceptionHandler.
- */
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -22,8 +16,7 @@ public class AdminController {
 
     private final AdminUseCase adminUseCase;
 
-    // ── Users ─────────────────────────────────────────────────────────────────
-
+    // --- Users ---
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(adminUseCase.findAllUsers());
@@ -41,7 +34,12 @@ public class AdminController {
 
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(adminUseCase.saveUser(user));
+        try {
+            User saved = adminUseCase.saveUser(user);
+            return ResponseEntity.ok(saved);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/users/{id}")
@@ -50,8 +48,7 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // ── Audit Logs ────────────────────────────────────────────────────────────
-
+    // --- Audit Logs ---
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
         return ResponseEntity.ok(adminUseCase.findAllAuditLogs());
