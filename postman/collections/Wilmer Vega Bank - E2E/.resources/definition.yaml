@@ -1,5 +1,0 @@
-$kind: collection
-name: Wilmer Vega Bank - E2E
-description: Collection for JWT login + clients + accounts + audit logs.
-variables:
-  baseUrl: ""

@@ -2,8 +2,11 @@ package gestiondeunbanco.wilmervega.config;
 
 import gestiondeunbanco.wilmervega.config.security.JwtService;
 import gestiondeunbanco.wilmervega.application.usecases.*;
+import gestiondeunbanco.wilmervega.domain.models.SystemRole;
+import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.ports.*;
 import gestiondeunbanco.wilmervega.domain.services.*;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +22,20 @@ public class BeanConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CommandLineRunner adminUserInitializer(UserPort userPort, PasswordEncoder passwordEncoder) {
+        return args -> {
+            final String username = "admin";
+            final String rawPassword = "admin";
+
+            User admin = userPort.findByUsername(username).orElseGet(User::new);
+            admin.setUsername(username);
+            admin.setPassword(passwordEncoder.encode(rawPassword));
+            admin.setSystemRole(SystemRole.ADMINISTRATOR);
+            userPort.save(admin);
+        };
     }
 
     // ─── Domain Services ────────────────────────────────────────────────────
