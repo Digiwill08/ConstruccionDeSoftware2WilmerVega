@@ -3,7 +3,7 @@ package gestiondeunbanco.wilmervega.application.adapters.api;
 import com.mongodb.MongoException;
 import com.mongodb.MongoTimeoutException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
-import gestiondeunbanco.wilmervega.exception.BusinessException;
+import gestiondeunbanco.wilmervega.domain.exceptions.BusinessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
