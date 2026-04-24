@@ -82,9 +82,6 @@ public class CreateTransfer {
             sourceAccount.setCurrentBalance(originBalanceBefore.subtract(transfer.getAmount()));
             bankAccountPort.save(sourceAccount);
 
-            BigDecimal destBalanceBefore = null;
-            BigDecimal destBalanceAfter = null;
-
             // If destination account is internal, update its balance
             if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
                 bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
