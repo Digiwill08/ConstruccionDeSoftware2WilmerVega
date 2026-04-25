@@ -14,8 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,12 +28,17 @@ public class BankAccountController {
     private final BankAccountUseCase bankAccountUseCase;
 
     @PostMapping
-    public ResponseEntity<?> createBankAccount(@RequestBody BankAccountRequest request) {
+    public ResponseEntity<Map<String, Object>> createBankAccount(@RequestBody BankAccountRequest request) {
         try {
             BankAccount created = bankAccountUseCase.create(toModel(request));
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Cuenta creada correctamente");
+            response.put("id", created.getId());
+            response.put("accountNumber", created.getAccountNumber());
+            response.put("status", created.getAccountStatus() != null ? created.getAccountStatus().name() : null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         }
     }
 

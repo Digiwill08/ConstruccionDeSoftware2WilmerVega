@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -33,12 +35,17 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> createUser(@RequestBody User user) {
         try {
             User saved = adminUseCase.saveUser(user);
-            return ResponseEntity.ok(saved);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Usuario creado correctamente");
+            response.put("id", saved.getUserId());
+            response.put("username", saved.getUsername());
+            response.put("role", saved.getSystemRole() != null ? saved.getSystemRole().name() : null);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 

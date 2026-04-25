@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -31,26 +32,36 @@ public class CompanySupervisorController {
     }
 
     @PostMapping("/transfers/{id}/approve")
-    public ResponseEntity<Transfer> approveTransfer(@PathVariable Long id,
+    public ResponseEntity<Map<String, Object>> approveTransfer(@PathVariable Long id,
                                                      @RequestParam Long supervisorUserId,
                                                      @RequestParam(defaultValue = "COMPANY_SUPERVISOR") String role) {
         try {
-            return ResponseEntity.ok(companySupervisorUseCase.approveTransfer(id, supervisorUserId, role));
+            Transfer saved = companySupervisorUseCase.approveTransfer(id, supervisorUserId, role);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Transferencia aprobada correctamente");
+            response.put("id", saved.getTransferId());
+            response.put("status", saved.getTransferStatus() != null ? saved.getTransferStatus().name() : null);
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     @PostMapping("/transfers/{id}/reject")
-    public ResponseEntity<Transfer> rejectTransfer(@PathVariable Long id,
+    public ResponseEntity<Map<String, Object>> rejectTransfer(@PathVariable Long id,
                                                     @RequestParam Long supervisorUserId,
                                                     @RequestParam(defaultValue = "COMPANY_SUPERVISOR") String role,
                                                     @RequestBody(required = false) Map<String, String> body) {
         try {
             String reason = body != null ? body.get("reason") : null;
-            return ResponseEntity.ok(companySupervisorUseCase.rejectTransfer(id, supervisorUserId, role, reason));
+            Transfer saved = companySupervisorUseCase.rejectTransfer(id, supervisorUserId, role, reason);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Transferencia rechazada correctamente");
+            response.put("id", saved.getTransferId());
+            response.put("status", saved.getTransferStatus() != null ? saved.getTransferStatus().name() : null);
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

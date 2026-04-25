@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -39,9 +40,14 @@ public class CustomerController {
     }
 
     @PostMapping("/natural")
-    public ResponseEntity<ClientResponse> createNaturalClient(@RequestBody NaturalClientRequest request) {
+    public ResponseEntity<Map<String, Object>> createNaturalClient(@RequestBody NaturalClientRequest request) {
         NaturalClient saved = customerUseCase.saveNaturalClient(toNaturalModel(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "message", "Cliente natural creado correctamente",
+                "id", saved.getId(),
+                "type", "NATURAL",
+                "documentNumber", saved.getDocumentNumber()
+        ));
     }
 
     @PutMapping("/natural/{id}")
@@ -74,9 +80,14 @@ public class CustomerController {
     }
 
     @PostMapping("/company")
-    public ResponseEntity<ClientResponse> createCompanyClient(@RequestBody CompanyClientRequest request) {
+    public ResponseEntity<Map<String, Object>> createCompanyClient(@RequestBody CompanyClientRequest request) {
         CompanyClient saved = customerUseCase.saveCompanyClient(toCompanyModel(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "message", "Cliente empresa creado correctamente",
+                "id", saved.getId(),
+                "type", "COMPANY",
+                "documentNumber", saved.getDocumentNumber()
+        ));
     }
 
     @PutMapping("/company/{id}")

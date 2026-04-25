@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * REST controller for TELLER_EMPLOYEE / COMMERCIAL_EMPLOYEE / INTERNAL_ANALYST roles.
@@ -38,8 +40,14 @@ public class EmployeeController {
     }
 
     @PostMapping("/bank-accounts")
-    public ResponseEntity<BankAccount> createBankAccount(@RequestBody BankAccount account) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeUseCase.saveBankAccount(account));
+    public ResponseEntity<Map<String, Object>> createBankAccount(@RequestBody BankAccount account) {
+        BankAccount saved = employeeUseCase.saveBankAccount(account);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Cuenta bancaria creada correctamente");
+        response.put("id", saved.getId());
+        response.put("accountNumber", saved.getAccountNumber());
+        response.put("status", saved.getAccountStatus() != null ? saved.getAccountStatus().name() : null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/bank-accounts/{id}")
@@ -68,8 +76,14 @@ public class EmployeeController {
     }
 
     @PostMapping("/natural-clients")
-    public ResponseEntity<NaturalClient> createNaturalClient(@RequestBody NaturalClient client) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeUseCase.saveNaturalClient(client));
+    public ResponseEntity<Map<String, Object>> createNaturalClient(@RequestBody NaturalClient client) {
+        NaturalClient saved = employeeUseCase.saveNaturalClient(client);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Cliente natural creado correctamente");
+        response.put("id", saved.getId());
+        response.put("documentNumber", saved.getDocumentNumber());
+        response.put("role", saved.getRole() != null ? saved.getRole().name() : null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/natural-clients/{id}")
@@ -98,8 +112,14 @@ public class EmployeeController {
     }
 
     @PostMapping("/company-clients")
-    public ResponseEntity<CompanyClient> createCompanyClient(@RequestBody CompanyClient client) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeUseCase.saveCompanyClient(client));
+    public ResponseEntity<Map<String, Object>> createCompanyClient(@RequestBody CompanyClient client) {
+        CompanyClient saved = employeeUseCase.saveCompanyClient(client);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Cliente empresa creado correctamente");
+        response.put("id", saved.getId());
+        response.put("documentNumber", saved.getDocumentNumber());
+        response.put("businessName", saved.getBusinessName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/company-clients/{id}")
@@ -128,8 +148,13 @@ public class EmployeeController {
     }
 
     @PostMapping("/loans")
-    public ResponseEntity<Loan> createLoan(@RequestBody Loan loan) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeUseCase.saveLoan(loan));
+    public ResponseEntity<Map<String, Object>> createLoan(@RequestBody Loan loan) {
+        Loan saved = employeeUseCase.saveLoan(loan);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Prestamo creado correctamente");
+        response.put("id", saved.getLoanId());
+        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/loans/{id}")

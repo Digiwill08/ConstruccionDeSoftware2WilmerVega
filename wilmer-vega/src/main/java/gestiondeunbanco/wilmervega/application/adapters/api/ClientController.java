@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/client")
@@ -34,11 +36,16 @@ public class ClientController {
     }
 
     @PostMapping("/transfers")
-    public ResponseEntity<Transfer> executeTransfer(@RequestBody Transfer transfer) {
+    public ResponseEntity<Map<String, Object>> executeTransfer(@RequestBody Transfer transfer) {
         try {
-            return ResponseEntity.ok(clientUseCase.executeTransfer(transfer));
+            Transfer saved = clientUseCase.executeTransfer(transfer);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Transferencia ejecutada correctamente");
+            response.put("id", saved.getTransferId());
+            response.put("status", saved.getTransferStatus() != null ? saved.getTransferStatus().name() : null);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

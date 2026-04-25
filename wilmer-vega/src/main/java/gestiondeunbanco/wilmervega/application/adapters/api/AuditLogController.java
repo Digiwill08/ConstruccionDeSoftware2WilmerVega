@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/audit-logs")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuditLogController {
 

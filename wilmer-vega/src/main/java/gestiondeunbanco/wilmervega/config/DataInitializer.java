@@ -24,6 +24,8 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Populating H2 database with test data...");
 
+        migrateLegacyAdministratorRole();
+
         // 1. Create Internal Analyst (Admin/Analyst role) if missing
         if (!userPort.existsByUsername("analista")) {
             User analyst = new User();
@@ -89,5 +91,16 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         log.info("Data initialization complete. System ready for testing.");
+    }
+
+    private void migrateLegacyAdministratorRole() {
+        userPort.findAll().stream()
+                .filter(user -> user.getSystemRole() != null)
+                .filter(user -> "ADMINISTRATOR".equalsIgnoreCase(user.getSystemRole().name()))
+                .forEach(user -> {
+                    user.setSystemRole(SystemRole.INTERNAL_ANALYST);
+                    userPort.save(user);
+                    log.info("Migrated legacy ADMINISTRATOR user '{}' to INTERNAL_ANALYST.", user.getUsername());
+                });
     }
 }

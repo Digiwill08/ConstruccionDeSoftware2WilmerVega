@@ -33,7 +33,7 @@ public class BeanConfig {
             User admin = userPort.findByUsername(username).orElseGet(User::new);
             admin.setUsername(username);
             admin.setPassword(passwordEncoder.encode(rawPassword));
-            admin.setSystemRole(SystemRole.ADMINISTRATOR);
+            admin.setSystemRole(SystemRole.INTERNAL_ANALYST);
             userPort.save(admin);
         };
     }

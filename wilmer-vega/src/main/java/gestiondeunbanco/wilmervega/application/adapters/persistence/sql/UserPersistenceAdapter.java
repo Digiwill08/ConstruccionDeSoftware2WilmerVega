@@ -71,7 +71,7 @@ public class UserPersistenceAdapter implements UserPort {
         model.setUsername(entity.getUsername());
         model.setPassword(entity.getPassword());
         if (entity.getRole() != null)
-            model.setSystemRole(SystemRole.valueOf(entity.getRole()));
+            model.setSystemRole(resolveRole(entity.getRole()));
 
         if (entity.getClient() != null) {
             gestiondeunbanco.wilmervega.domain.models.NaturalClient c = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
@@ -83,5 +83,13 @@ public class UserPersistenceAdapter implements UserPort {
             model.setRelatedClient(c);
         }
         return model;
+    }
+
+    private SystemRole resolveRole(String role) {
+        if ("ADMINISTRATOR".equalsIgnoreCase(role)) {
+            return SystemRole.INTERNAL_ANALYST;
+        }
+
+        return SystemRole.valueOf(role);
     }
 }
