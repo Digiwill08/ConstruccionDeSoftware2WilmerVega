@@ -20,6 +20,7 @@ La aplicación expone el backend en `http://localhost:8083`.
 
 ## Documentación útil
 
+- Arquitectura DDD y Clean Architecture: [docs/arquitectura-ddd.md](docs/arquitectura-ddd.md)
 - Endpoints para Postman: [URLS_POSTMAN.md](URLS_POSTMAN.md)
 - Modelo de dominio: [src/main/java/gestiondeunbanco/wilmervega/domain/models/README.md](src/main/java/gestiondeunbanco/wilmervega/domain/models/README.md)
 
