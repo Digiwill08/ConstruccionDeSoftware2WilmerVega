@@ -22,7 +22,7 @@ public class TransferPersistenceAdapter implements TransferPort {
 
     @Override
     public List<Transfer> findAll() {
-        return repository.findAll().stream().map(this::toModel).collect(Collectors.toList());
+        return repository.findAll().stream().map(this::toModel).toList();
     }
 
     @Override
@@ -43,19 +43,19 @@ public class TransferPersistenceAdapter implements TransferPort {
     @Override
     public List<Transfer> findByStatus(TransferStatus status) {
         return repository.findByTransferStatus(status.name()).stream()
-                .map(this::toModel).collect(Collectors.toList());
+                .map(this::toModel).toList();
     }
 
     @Override
     public List<Transfer> findAwaitingApprovalOlderThan(LocalDateTime cutoffTime) {
         return repository.findAwaitingApprovalOlderThan(cutoffTime).stream()
-                .map(this::toModel).collect(Collectors.toList());
+                .map(this::toModel).toList();
     }
 
     @Override
     public List<Transfer> findBySourceAccountNumber(String accountNumber) {
         return repository.findBySourceAccount_AccountNumber(accountNumber).stream()
-                .map(this::toModel).collect(Collectors.toList());
+                .map(this::toModel).toList();
     }
 
     private TransferEntity toEntity(Transfer model) {

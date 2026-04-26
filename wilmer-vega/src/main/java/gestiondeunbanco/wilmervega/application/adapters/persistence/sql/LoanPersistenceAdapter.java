@@ -23,7 +23,7 @@ public class LoanPersistenceAdapter implements LoanPort {
 
     @Override
     public List<Loan> findAll() {
-        return repository.findAll().stream().map(this::toModel).collect(Collectors.toList());
+        return repository.findAll().stream().map(this::toModel).toList();
     }
 
     @Override
@@ -44,13 +44,13 @@ public class LoanPersistenceAdapter implements LoanPort {
     @Override
     public List<Loan> findByStatus(LoanStatus status) {
         return repository.findByLoanStatus(status.name()).stream()
-                .map(this::toModel).collect(Collectors.toList());
+                .map(this::toModel).toList();
     }
 
     @Override
     public List<Loan> findByClientDocument(String documentNumber) {
         return repository.findByClientApplicant_DocumentNumber(documentNumber).stream()
-                .map(this::toModel).collect(Collectors.toList());
+                .map(this::toModel).toList();
     }
 
     @Override

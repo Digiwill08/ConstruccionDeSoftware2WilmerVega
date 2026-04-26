@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Adapter that implements AuditLogMongoPort using Spring Data MongoDB.
@@ -29,21 +28,21 @@ public class AuditLogMongoAdapter implements AuditLogMongoPort {
     public List<AuditLog> findByAffectedProductId(String productId) {
         return repository.findByAffectedProductId(productId).stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<AuditLog> findByUserId(Long userId) {
         return repository.findByUserId(userId).stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<AuditLog> findAll() {
         return repository.findAll().stream()
                 .map(this::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // --- Mappers ---
