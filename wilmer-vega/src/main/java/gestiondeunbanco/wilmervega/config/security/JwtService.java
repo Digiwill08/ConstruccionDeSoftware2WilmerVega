@@ -3,7 +3,6 @@ package gestiondeunbanco.wilmervega.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,10 +16,14 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long expirationMs;
 
-    public JwtService(@Value("${jwt.secret}") String secret,
-                      @Value("${jwt.expirationMs}") long expirationMs) {
+    public JwtService(JwtProperties jwtProperties) {
+        String secret = jwtProperties.getSecret();
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured through JWT_SECRET or application properties");
+        }
+
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+        this.expirationMs = jwtProperties.getExpiration().toMillis();
     }
 
     public String generateToken(String username, Map<String, Object> claims) {

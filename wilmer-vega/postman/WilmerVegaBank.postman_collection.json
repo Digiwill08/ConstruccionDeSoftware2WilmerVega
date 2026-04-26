@@ -189,7 +189,12 @@
                                                       "url":  "{{baseUrl}}/api/customers-legacy/natural/register",
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\n  \"fullName\": \"Legacy Natural\",\n  \"documentNumber\": \"LEG{{$timestamp}}\",\n  \"email\": \"legacy{{$timestamp}}@demo.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-01-01\",\n  \"address\": \"Calle Legacy 123\",\n  \"role\": \"NATURAL_CLIENT\"\n}"
+                                                                   "raw":  "{\n  \"fullName\": \"Legacy Natural\",\n  \"documentNumber\": \"LEG{{$timestamp}}\",\n  \"email\": \"legacy{{$timestamp}}@demo.com\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1990-01-01\",\n  \"address\": \"Calle Legacy 123\",\n  \"role\": \"NATURAL_CLIENT\"\n}",
+                                                                   "options":  {
+                                                                                "raw":  {
+                                                                                             "language":  "json"
+                                                                                         }
+                                                                            }
                                                                }
                                                   }
                                   },
@@ -210,7 +215,12 @@
                                                       "url":  "{{baseUrl}}/api/customers/natural",
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\n  \"fullName\": \"Jose\",\n  \"documentNumber\": \"1125118\",\n  \"email\": \"JOSE@DEMO.CO\",\n  \"phone\": \"3052501510\",\n  \"birthDate\": \"1994-08-08\",\n  \"address\": \"CALLE 15320-45\",\n  \"role\": \"NATURAL_CLIENT\"\n}"
+                                                                   "raw":  "{\n  \"fullName\": \"Jose\",\n  \"documentNumber\": \"1125118\",\n  \"email\": \"JOSE@DEMO.CO\",\n  \"phone\": \"3052501510\",\n  \"birthDate\": \"1994-08-08\",\n  \"address\": \"CALLE 15320-45\",\n  \"role\": \"NATURAL_CLIENT\"\n}",
+                                                                   "options":  {
+                                                                                "raw":  {
+                                                                                             "language":  "json"
+                                                                                         }
+                                                                            }
                                                                }
                                                   }
                                   },

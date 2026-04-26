@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.application.adapters.api;
+package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;

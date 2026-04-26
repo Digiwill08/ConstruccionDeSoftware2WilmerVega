@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.application.adapters.api;
+package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

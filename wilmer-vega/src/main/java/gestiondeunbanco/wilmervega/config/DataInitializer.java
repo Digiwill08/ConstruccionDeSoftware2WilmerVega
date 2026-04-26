@@ -22,7 +22,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Populating H2 database with test data...");
+        log.info("Populating database with test data...");
 
         migrateLegacyAdministratorRole();
 

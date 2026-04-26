@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.application.usecases;
 
 import gestiondeunbanco.wilmervega.config.security.JwtService;
+import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
@@ -41,18 +42,18 @@ public class AuthUseCase {
 
     public LoginResult login(String username, String rawPassword) {
         if (username == null || username.isBlank() || rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException(INVALID_CREDENTIALS);
+            throw new InvalidCredentialsException(INVALID_CREDENTIALS);
         }
 
         User user = userPort.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException(INVALID_CREDENTIALS));
+                .orElseThrow(() -> new InvalidCredentialsException(INVALID_CREDENTIALS));
 
         if (!passwordMatchesAndMigrateIfNeeded(user, rawPassword)) {
-            throw new IllegalArgumentException(INVALID_CREDENTIALS);
+            throw new InvalidCredentialsException(INVALID_CREDENTIALS);
         }
 
         if (user.getSystemRole() == null) {
-            throw new IllegalArgumentException(INVALID_CREDENTIALS);
+            throw new InvalidCredentialsException(INVALID_CREDENTIALS);
         }
 
         Map<String, Object> claims = new HashMap<>();
