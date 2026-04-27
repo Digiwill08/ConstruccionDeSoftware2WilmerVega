@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import gestiondeunbanco.wilmervega.domain.ports.TransferPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class CreateTransfer {
         this.auditLogMongoPort = auditLogMongoPort;
     }
 
+    @Transactional
     public Transfer save(Transfer transfer) {
         // 1. Validate transfer is not null
         if (transfer == null) {

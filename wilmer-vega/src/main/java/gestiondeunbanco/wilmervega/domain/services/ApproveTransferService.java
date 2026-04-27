@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import gestiondeunbanco.wilmervega.domain.ports.TransferPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class ApproveTransferService {
         this.auditLogMongoPort = auditLogMongoPort;
     }
 
+    @Transactional
     public Transfer approve(Long transferId, Long supervisorUserId, String supervisorRole) {
         // 1. Find transfer
         Transfer transfer = transferPort.findById(transferId)

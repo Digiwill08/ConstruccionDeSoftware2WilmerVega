@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.TransferPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class RejectTransferService {
         this.auditLogMongoPort = auditLogMongoPort;
     }
 
+    @Transactional
     public Transfer reject(Long transferId, Long supervisorUserId, String supervisorRole, String reason) {
         Transfer transfer = transferPort.findById(transferId)
                 .orElseThrow(() -> new NotFoundException("Transfer not found with ID: " + transferId));

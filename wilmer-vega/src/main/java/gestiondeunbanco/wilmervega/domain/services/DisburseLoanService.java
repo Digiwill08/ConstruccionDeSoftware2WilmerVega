@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import gestiondeunbanco.wilmervega.domain.ports.LoanPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ public class DisburseLoanService {
         this.auditLogMongoPort = auditLogMongoPort;
     }
 
+    @Transactional
     public Loan disburse(Long loanId, Long disbursementAccountId, Long analystUserId, String analystRole) {
         // 1. Find loan
         Loan loan = loanPort.findById(loanId)
