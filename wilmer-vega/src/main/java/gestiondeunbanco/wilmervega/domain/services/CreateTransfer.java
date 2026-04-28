@@ -109,7 +109,9 @@ public class CreateTransfer {
                                    BigDecimal balanceBefore, BigDecimal balanceAfter,
                                    Long userId, String role) {
         AuditLog log = new AuditLog();
-        log.setOperationType(OperationType.TRANSFER_EXECUTED);
+        // Use TRANSFER_INITIATED for pending approvals, TRANSFER_EXECUTED for immediate ones
+        boolean isExecuted = "EXECUTED".equals(newStatus);
+        log.setOperationType(isExecuted ? OperationType.TRANSFER_EXECUTED : OperationType.TRANSFER_INITIATED);
         log.setOperationDateTime(LocalDateTime.now());
         log.setUserId(userId);
         log.setUserRole(role);
