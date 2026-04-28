@@ -3,6 +3,7 @@ package gestiondeunbanco.wilmervega.domain.services;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
+import org.springframework.transaction.annotation.Transactional;
 
 public class UpdateBankAccount {
 
@@ -12,6 +13,7 @@ public class UpdateBankAccount {
         this.bankAccountPort = bankAccountPort;
     }
 
+    @Transactional
     public BankAccount update(BankAccount bankAccount) {
         if (bankAccount == null || bankAccount.getId() == null) {
             throw new IllegalArgumentException("BankAccount or ID cannot be null for update");

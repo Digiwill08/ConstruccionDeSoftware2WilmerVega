@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transfers")
@@ -26,7 +26,9 @@ public class TransferEntity {
     private BankAccountEntity destinationAccount;
 
     private BigDecimal amount;
-    private Date creationDateTime;
-    private Date approvalDateTime;
+    private LocalDateTime creationDateTime;
+    private LocalDateTime approvalDateTime;
     private String transferStatus;
+    private Long creatorUserId;
+    private Long approverUserId;
 }

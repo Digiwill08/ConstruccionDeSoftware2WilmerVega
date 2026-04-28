@@ -1,13 +1,15 @@
-package gestiondeunbanco.wilmervega.application.adapters.api;
+package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
+import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
-import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -24,25 +26,26 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return adminUseCase.findUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(adminUseCase.findUserById(id));
     }
 
     @GetMapping("/users/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        return adminUseCase.findUserByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(adminUseCase.findUserByUsername(username));
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> createUser(@RequestBody User user) {
         try {
             User saved = adminUseCase.saveUser(user);
-            return ResponseEntity.ok(saved);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Usuario creado correctamente");
+            response.put("id", saved.getUserId());
+            response.put("username", saved.getUsername());
+            response.put("role", saved.getSystemRole() != null ? saved.getSystemRole().name() : null);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 

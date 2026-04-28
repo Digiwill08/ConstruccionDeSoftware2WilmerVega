@@ -5,15 +5,14 @@ import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.Currency;
-import gestiondeunbanco.wilmervega.domain.models.Client;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.BankAccountRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.BankAccountEntity;
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -23,12 +22,17 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
 
     @Override
     public List<BankAccount> findAll() {
-        return repository.findAll().stream().map(this::toModel).collect(Collectors.toList());
+        return repository.findAll().stream().map(this::toModel).toList();
     }
 
     @Override
     public Optional<BankAccount> findById(Long id) {
         return repository.findById(id).map(this::toModel);
+    }
+
+    @Override
+    public List<BankAccount> findByHolderId(Long holderId) {
+        return repository.findByHolder_Id(holderId).stream().map(this::toModel).toList();
     }
 
     @Override
@@ -38,7 +42,7 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
 
     @Override
     public List<BankAccount> findByAccountStatus(AccountStatus status) {
-        return repository.findAll().stream().filter(r -> r.getAccountStatus() != null && r.getAccountStatus().equals(status.name())).map(this::toModel).collect(Collectors.toList());
+        return repository.findByAccountStatus(status.name()).stream().map(this::toModel).toList();
     }
 
     @Override
@@ -48,8 +52,7 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
 
     @Override
     public BankAccount save(BankAccount bankAccount) {
-        BankAccountEntity entity = toEntity(bankAccount);
-        return toModel(repository.save(entity));
+        return toModel(repository.save(toEntity(bankAccount)));
     }
 
     @Override
@@ -67,7 +70,7 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
         entity.setAccountStatus(model.getAccountStatus() != null ? model.getAccountStatus().name() : null);
         entity.setOpeningDate(model.getOpeningDate());
         if (model.getHolder() != null) {
-            gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity clientEntity = new gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity();
+            ClientEntity clientEntity = new ClientEntity();
             clientEntity.setId(model.getHolder().getId());
             entity.setHolder(clientEntity);
         }

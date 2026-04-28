@@ -1,13 +1,15 @@
-package gestiondeunbanco.wilmervega.application.adapters.api;
+package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
+import gestiondeunbanco.wilmervega.application.usecases.ClientUseCase;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
-import gestiondeunbanco.wilmervega.application.usecases.ClientUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/client")
@@ -19,9 +21,7 @@ public class ClientController {
     // --- Bank Accounts ---
     @GetMapping("/bank-accounts/{accountNumber}")
     public ResponseEntity<BankAccount> getBankAccountByNumber(@PathVariable String accountNumber) {
-        return clientUseCase.findMyBankAccount(accountNumber)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(clientUseCase.findMyBankAccount(accountNumber));
     }
 
     // --- Transfers ---
@@ -29,21 +29,23 @@ public class ClientController {
     public ResponseEntity<List<Transfer>> getAllTransfers() {
         return ResponseEntity.ok(clientUseCase.findAllTransfers());
     }
-    
+
     @GetMapping("/transfers/{id}")
     public ResponseEntity<Transfer> getTransferById(@PathVariable Long id) {
-        return clientUseCase.findTransferById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(clientUseCase.findTransferById(id));
     }
 
     @PostMapping("/transfers")
-    public ResponseEntity<Transfer> executeTransfer(@RequestBody Transfer transfer) {
+    public ResponseEntity<Map<String, Object>> executeTransfer(@RequestBody Transfer transfer) {
         try {
             Transfer saved = clientUseCase.executeTransfer(transfer);
-            return ResponseEntity.ok(saved);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Transferencia ejecutada correctamente");
+            response.put("id", saved.getTransferId());
+            response.put("status", saved.getTransferStatus() != null ? saved.getTransferStatus().name() : null);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

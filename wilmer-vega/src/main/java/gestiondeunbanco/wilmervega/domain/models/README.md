@@ -1,88 +1,62 @@
-# Bank Domain Model - DDD Architecture
+# Domain Model
 
-## Project Description
-This is the domain model for a banking system using Domain-Driven Design (DDD).
+This package contains the pure banking domain used by the application. The code here is intentionally free of Spring annotations where possible so the business rules remain testable and isolated.
 
 ## Folder Organization
 
 ```
-application/
-├── adapters/
-│   ├── api/                 → Controladores REST (@RestController)
-│   └── persistence/sql/     → Persistencia
-│       ├── entities/        → Entidades JPA (@Entity)
-│       └── repositories/    → Repositorios (Spring Data JPA)
-├── usecases/                → Casos de uso (Orquestación)
 domain/
-├── models/         → Clases de negocio puras (Sin JPA)
-├── ports/          → Interfaces para guardar y consultar (Abstractas)
-├── services/       → Lógica central del negocio (@Service)
+├── models/   -> Business entities and enums
+├── ports/    -> Output contracts for persistence and integrations
+├── services/ -> Domain rules and operations
+└── exceptions/ -> Domain-specific errors
 ```
+
+Application code lives outside the domain in `application/` and only orchestrates use cases or exposes REST endpoints.
 
 ## Main Entities
 
-### Users and Clients
-- **User**: Base class for system users
-- **NaturalClient**: Individual bank clients
-- **CompanyClient**: Company clients
-- **Employee**: Bank employees
+### Users and clients
 
-### Banking Operations
-- **BankAccount**: Savings and checking accounts
-- **Loan**: Credits and loans
-- **Transfer**: Money transfers between accounts
-- **BankProduct**: Product catalog
+- `User`: system credentials and role.
+- `SystemUser`: operational user that creates or approves financial operations.
+- `NaturalClient`: individual client.
+- `CompanyClient`: corporate client.
+- `Person` and `UserManager`: shared base abstractions.
+
+### Banking operations
+
+- `BankAccount`: account state, balance and type.
+- `Loan`: requested and approved financing.
+- `Transfer`: movement of money between accounts.
+- `BankingProduct`: product catalog.
 
 ### Auditing
-- **OperationLog**: Record of all operations (for MongoDB)
 
-## Value Objects (Immutable Values)
+- `AuditLog`: immutable trace of business actions stored in MongoDB.
 
-- **Email**: Validates email format
-- **IdentificationNumber**: Validates ID length
-- **Phone**: Validates phone number
-- **Money**: Amount with currency (USD, COP, EUR)
+## Enumerations
 
-## Enumerations (Lists of Options)
+- `SystemRole`: includes `ADMINISTRATOR`, clients, employees, supervisor and analyst roles.
+- `UserStatus`: `ACTIVE`, `INACTIVE`, `BLOCKED`.
+- `AccountStatus`: `ACTIVE`, `BLOCKED`, `CANCELLED`.
+- `AccountType`: `SAVINGS`, `CHECKING`, `PERSONAL`, `BUSINESS`.
+- `Currency`: `USD`, `COP`, `EUR`.
+- `LoanStatus`: `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `DISBURSED`, `OVERDUE`, `CANCELLED`.
+- `LoanType`: `CONSUMER`, `VEHICLE`, `MORTGAGE`, `BUSINESS`.
+- `TransferStatus`: `PENDING`, `AWAITING_APPROVAL`, `APPROVED`, `EXECUTED`, `REJECTED`, `EXPIRED`.
+- `ProductCategory`: product families for the bank.
+- `OperationType`: audit events such as login, loan approval and transfer execution.
 
-- **SystemRole**: User types (Client, Employee, Analyst, etc.)
-- **UserStatus**: ACTIVE, INACTIVE, BLOCKED
-- **AccountStatus**: ACTIVE, BLOCKED, CANCELLED
-- **LoanStatus**: UNDER_REVIEW, APPROVED, REJECTED, DISBURSED
-- **TransferStatus**: PENDING, APPROVED, EXECUTED, REJECTED
-- **AccountType**: SAVINGS, CHECKING, BUSINESS
-- **LoanType**: CONSUMER, VEHICLE, MORTGAGE
-- **Currency**: USD, COP, EUR
-- **ProductCategory**: ACCOUNTS, LOANS, SERVICES
-- **OperationType**: Types of operations for audit
+## What this model supports
 
-## Repositories (Save and Search Data)
+- Business validation in pure Java.
+- Role-based banking workflows.
+- Approval and rejection flows for loans and transfers.
+- Traceability through audit events.
+- Reusable contracts through ports.
 
-- UserRepository
-- NaturalClientRepository
-- CompanyClientRepository
-- EmployeeRepository
-- BankAccountRepository
-- LoanRepository
-- TransferRepository
+## Notes
 
-## What This Model Does
-
-✅ Validates age (must be 18+)  
-✅ Validates emails and phones  
-✅ Controls loan approvals  
-✅ Controls transfer approvals  
-✅ Checks account balances  
-✅ Logs all operations  
-
-## DDD Concepts Applied
-
-- **Entities**: Classes with ID
-- **Value Objects**: Immutable values
-- **Repositories**: Save data
-- **Business Rules**: Validations in classes
-
----
-
-**Date**: March 1, 2026  
-**Status**: ✅ Ready for delivery
+- The domain is designed to be testable without starting the web layer.
+- Persistence details are handled by adapters in the application layer.

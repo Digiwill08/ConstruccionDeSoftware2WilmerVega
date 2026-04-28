@@ -1,0 +1,684 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wilmer Vega Bank - Demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(17, 24, 39, 0.88);
+      --panel-border: rgba(148, 163, 184, 0.16);
+      --text: #e5eefb;
+      --muted: #93a4bf;
+      --accent: #4f8cff;
+      --accent-2: #22c55e;
+    }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(79, 140, 255, 0.20), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.16), transparent 26%),
+        linear-gradient(135deg, #050816, #0b1220 55%, #111827);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .hero {
+      padding: 3rem 0 1rem;
+    }
+    .brand {
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .title {
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 800;
+      line-height: 1;
+      margin-top: 0.35rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      max-width: 56rem;
+      margin-top: 1rem;
+    }
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.35);
+      backdrop-filter: blur(14px);
+    }
+    .panel {
+      padding: 1.25rem;
+    }
+    .label {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: .35rem;
+    }
+    .form-control, .form-select {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      color: var(--text);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: rgba(79, 140, 255, 0.95);
+      box-shadow: 0 0 0 .2rem rgba(79, 140, 255, .18);
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text);
+    }
+    .btn-accent {
+      background: linear-gradient(135deg, #4f8cff, #6b6ef9);
+      border: 0;
+      color: white;
+      font-weight: 700;
+    }
+    .btn-accent:hover { color: white; opacity: .95; }
+    .btn-success-soft {
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #bbf7d0;
+    }
+    .btn-dark-soft {
+      background: rgba(148, 163, 184, 0.10);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: #dbe7ff;
+    }
+    pre {
+      background: rgba(2, 6, 23, 0.85);
+      color: #dbeafe;
+      border-radius: 16px;
+      padding: 1rem;
+      min-height: 220px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .small-note { color: var(--muted); font-size: .9rem; }
+    .badge-soft {
+      background: rgba(79, 140, 255, 0.16);
+      border: 1px solid rgba(79, 140, 255, 0.28);
+      color: #cfe0ff;
+    }
+    .service-select-multi {
+      min-height: 220px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4 py-lg-5">
+    <div class="hero">
+      <div class="brand">Wilmer Vega Bank Demo</div>
+      <div class="title">Panel visual para login JWT y pruebas rÃ¡pidas</div>
+      <p class="subtitle">This simple interface lets you sign in, store the token in the browser, and call protected endpoints without leaving the page.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-lg-5">
+        <div class="glass panel">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0">Login</h5>
+            <span class="badge badge-soft rounded-pill px-3 py-2">JWT</span>
+          </div>
+          <div class="mb-3">
+            <label class="label">Username</label>
+            <input id="username" class="form-control" value="pancracio" />
+          </div>
+          <div class="mb-3">
+            <label class="label">Password</label>
+            <input id="password" type="password" class="form-control" value="123456" />
+          </div>
+          <button class="btn btn-accent w-100" onclick="login()">Sign in</button>
+          <div class="mt-3 small-note">Token stored in <code>localStorage</code>.</div>
+        </div>
+
+        <div class="glass panel mt-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0">Quick setup</h5>
+            <span class="badge badge-soft rounded-pill px-3 py-2">Persist data</span>
+          </div>
+
+          <div class="mb-2 fw-semibold">Create user</div>
+          <div class="mb-2">
+            <label class="label">New username</label>
+            <input id="registerUsername" class="form-control" value="web_demo_user" />
+          </div>
+          <div class="mb-2">
+            <label class="label">New password</label>
+            <input id="registerPassword" type="password" class="form-control" value="123456" />
+          </div>
+          <div class="mb-3">
+            <label class="label">Role</label>
+            <select id="registerRole" class="form-select">
+              <option value="NATURAL_CLIENT" selected>NATURAL_CLIENT</option>
+              <option value="COMPANY_CLIENT">COMPANY_CLIENT</option>
+              <option value="COMPANY_EMPLOYEE">COMPANY_EMPLOYEE</option>
+            </select>
+          </div>
+          <button class="btn btn-accent w-100 mb-3" onclick="registerUser()">Create user and save</button>
+
+          <div class="mb-2 fw-semibold">Create bank account</div>
+          <div class="mb-2">
+            <label class="label">Account number</label>
+            <input id="quickAccountNumber" class="form-control" value="ACCWEB001" />
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="label">Type</label>
+              <select id="quickAccountType" class="form-select">
+                <option value="SAVINGS" selected>SAVINGS</option>
+                <option value="CHECKING">CHECKING</option>
+                <option value="PERSONAL">PERSONAL</option>
+                <option value="BUSINESS">BUSINESS</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="label">Currency</label>
+              <select id="quickAccountCurrency" class="form-select">
+                <option value="COP" selected>COP</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="label">holderId</label>
+              <input id="quickHolderId" type="number" min="1" class="form-control" value="1" />
+            </div>
+            <div class="col-6">
+              <label class="label">Initial balance</label>
+              <input id="quickInitialBalance" type="number" min="0" step="0.01" class="form-control" value="100000" />
+            </div>
+          </div>
+          <button class="btn btn-success-soft w-100" onclick="createQuickAccount()">Create account and save</button>
+          <div class="mt-3 small-note">To create an account, you must sign in with an authorized role.</div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-7">
+        <div class="glass panel h-100">
+          <h5 class="mb-3">Current status</h5>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <div class="glass p-3 h-100">
+                <div class="small-note">Username</div>
+                <div id="statusUser" class="fw-semibold">-</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass p-3 h-100">
+                <div class="small-note">Role</div>
+                <div id="statusRole" class="fw-semibold">-</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass p-3 h-100">
+                <div class="small-note">Token</div>
+                <div id="statusToken" class="fw-semibold">Not loaded</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button class="btn btn-success-soft" onclick="callProtected('/api/admin/users')">View admin users</button>
+            <button class="btn btn-dark-soft" onclick="callProtected('/api/audit-logs')">View audit log</button>
+            <button class="btn btn-dark-soft" onclick="logout()">Sign out</button>
+          </div>
+
+          <div class="glass p-3 mb-3">
+            <h6 class="mb-3">Visual service runner</h6>
+            <div class="row g-2 mb-2">
+              <div class="col-md-6">
+                <label class="label">Module filter</label>
+                <select id="moduleFilter" class="form-select" onchange="filterServicesByModule()">
+                  <option value="ALL">All</option>
+                  <option value="AUTH">Auth</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="CLIENTES">Clients</option>
+                  <option value="CUENTAS">Accounts</option>
+                  <option value="PRESTAMOS">Loans</option>
+                  <option value="TRANSFERENCIAS">Transfers</option>
+                  <option value="SUPERVISOR">Supervisor</option>
+                  <option value="AUDITORIA">Audit</option>
+                </select>
+              </div>
+              <div class="col-md-6 d-flex align-items-end gap-2">
+                <button class="btn btn-dark-soft w-100" onclick="selectFilteredServices()">Select filtered</button>
+                <button class="btn btn-dark-soft w-100" onclick="clearModuleFilter()">Clear filter</button>
+              </div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-md-8">
+                <label class="label">Services/Routes (multi-select)</label>
+                <select id="serviceSelect" class="form-select service-select-multi" multiple onchange="syncTemplateFromSelection()"></select>
+                <div class="small-note mt-1">Use Ctrl/Cmd + click to select multiple.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="label">Method</label>
+                <input id="serviceMethod" class="form-control" readonly />
+              </div>
+            </div>
+            <div class="mb-2">
+              <label class="label">Path</label>
+              <input id="servicePath" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="label">JSON body (if applicable)</label>
+              <textarea id="serviceBody" class="form-control" rows="7"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-accent" onclick="executeService()">Run selected service</button>
+              <button class="btn btn-success-soft" onclick="executeSelectedServices()">Run multi-selection</button>
+              <button class="btn btn-dark-soft" onclick="selectAllServices()">Select all</button>
+              <button class="btn btn-dark-soft" onclick="clearServiceSelection()">Clear selection</button>
+              <button class="btn btn-dark-soft" onclick="loadServiceTemplate()">Restore template</button>
+            </div>
+            <div class="small-note mt-2">Tip: run login/create-user services first to generate data, then test the rest.</div>
+          </div>
+
+          <div class="mb-2 small-note">Response</div>
+          <pre id="output">No response yet.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    const statusUser = document.getElementById('statusUser');
+    const statusRole = document.getElementById('statusRole');
+    const statusToken = document.getElementById('statusToken');
+    const serviceSelect = document.getElementById('serviceSelect');
+    const moduleFilter = document.getElementById('moduleFilter');
+    const serviceMethod = document.getElementById('serviceMethod');
+    const servicePath = document.getElementById('servicePath');
+    const serviceBody = document.getElementById('serviceBody');
+    const registerUsername = document.getElementById('registerUsername');
+    const registerPassword = document.getElementById('registerPassword');
+    const registerRole = document.getElementById('registerRole');
+    const quickAccountNumber = document.getElementById('quickAccountNumber');
+    const quickAccountType = document.getElementById('quickAccountType');
+    const quickAccountCurrency = document.getElementById('quickAccountCurrency');
+    const quickHolderId = document.getElementById('quickHolderId');
+    const quickInitialBalance = document.getElementById('quickInitialBalance');
+
+    const serviceCatalog = [
+      { name: 'Auth - Login', module: 'AUTH', method: 'POST', path: '/auth/login', protected: false, body: { username: 'pancracio', password: '123456' } },
+      { name: 'Admin - Create user', module: 'ADMIN', method: 'POST', path: '/api/admin/users', protected: true, body: { username: 'new_demo_user', password: '123456', systemRole: 'COMPANY_EMPLOYEE' } },
+      { name: 'Admin - List users', module: 'ADMIN', method: 'GET', path: '/api/admin/users', protected: true, body: null },
+      { name: 'Clients - Create natural', module: 'CLIENTES', method: 'POST', path: '/api/customers/natural', protected: true, body: { fullName: 'Visual Demo Client', documentNumber: '10000001', email: 'visual.client@demo.com', phone: '3001234567', birthDate: '1995-05-10', address: 'Visual Street 123', role: 'NATURAL_CLIENT' } },
+      { name: 'Clients - List natural', module: 'CLIENTES', method: 'GET', path: '/api/customers/natural', protected: true, body: null },
+      { name: 'Clients - Create company', module: 'CLIENTES', method: 'POST', path: '/api/customers/company', protected: true, body: { businessName: 'Visual Demo Company', documentNumber: '90000001', email: 'visual.company@demo.com', phone: '3019876543', address: 'Visual Avenue 456', legalRepresentativeId: 1 } },
+      { name: 'Clients - List companies', module: 'CLIENTES', method: 'GET', path: '/api/customers/company', protected: true, body: null },
+      { name: 'Accounts - Create account', module: 'CUENTAS', method: 'POST', path: '/api/accounts', protected: true, body: { accountNumber: 'ACCVISUAL001', accountType: 'SAVINGS', currency: 'USD', holderId: 1, initialBalance: 25000000.0 } },
+      { name: 'Accounts - List by holder', module: 'CUENTAS', method: 'GET', path: '/api/accounts?holderId=1', protected: true, body: null },
+      { name: 'Accounts - Check balance', module: 'CUENTAS', method: 'GET', path: '/api/accounts/1/balance', protected: true, body: null },
+      { name: 'Loans - Create', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
+      { name: 'Loans - Approve', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/approve?analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Loans - Disburse', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
+      { name: 'Transfers - Create', module: 'TRANSFERENCIAS', method: 'POST', path: '/api/client/transfers', protected: true, body: { sourceAccount: { id: 1, accountNumber: 'ACCVISUAL001' }, destinationAccount: { id: 2, accountNumber: 'DSTVISUAL001' }, amount: 12000000, creatorUserId: 1 } },
+      { name: 'Supervisor - Pending', module: 'SUPERVISOR', method: 'GET', path: '/api/supervisor/transfers/pending', protected: true, body: null },
+      { name: 'Supervisor - Approve transfer', module: 'SUPERVISOR', method: 'POST', path: '/api/supervisor/transfers/1/approve?supervisorUserId=1&role=COMPANY_SUPERVISOR', protected: true, body: null },
+      { name: 'Audit - List logs', module: 'AUDITORIA', method: 'GET', path: '/api/audit-logs', protected: true, body: null }
+    ];
+
+    function setOutput(value) {
+      output.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+    }
+
+    function saveSession(data) {
+      localStorage.setItem('jwt_token', data.token);
+      localStorage.setItem('jwt_username', data.username);
+      localStorage.setItem('jwt_role', data.role);
+      statusUser.textContent = data.username || '-';
+      statusRole.textContent = data.role || '-';
+      statusToken.textContent = data.token ? data.token.substring(0, 24) + '...' : 'Not loaded';
+    }
+
+    function loadSession() {
+      const token = localStorage.getItem('jwt_token');
+      const username = localStorage.getItem('jwt_username');
+      const role = localStorage.getItem('jwt_role');
+      statusUser.textContent = username || '-';
+      statusRole.textContent = role || '-';
+      statusToken.textContent = token ? token.substring(0, 24) + '...' : 'Not loaded';
+      return token;
+    }
+
+    async function login() {
+      try {
+        const payload = {
+          username: document.getElementById('username').value.trim(),
+          password: document.getElementById('password').value
+        };
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setOutput(data);
+          return;
+        }
+        saveSession(data);
+        setOutput(data);
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function registerUser() {
+      try {
+        const payload = {
+          username: registerUsername.value.trim(),
+          password: registerPassword.value,
+          role: registerRole.value
+        };
+
+        if (!payload.username || !payload.password) {
+          setOutput({ error: 'You must provide username and password to create a user.' });
+          return;
+        }
+
+        const response = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let data = text;
+        try { data = text ? JSON.parse(text) : null; } catch {}
+
+        if (!response.ok) {
+          setOutput({ step: 'create_user', status: response.status, response: data });
+          return;
+        }
+
+        // The register endpoint returns LoginResult with a ready-to-use token.
+        if (data && data.token) {
+          saveSession(data);
+          document.getElementById('username').value = payload.username;
+          document.getElementById('password').value = payload.password;
+        }
+
+        setOutput({
+          step: 'create_user',
+          status: response.status,
+          message: 'User created and saved successfully.',
+          response: data
+        });
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function createQuickAccount() {
+      try {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+          setOutput({ error: 'Sign in first to create an account.' });
+          return;
+        }
+
+        const holderId = Number(quickHolderId.value);
+        const initialBalance = Number(quickInitialBalance.value);
+
+        if (!quickAccountNumber.value.trim()) {
+          setOutput({ error: 'Account number is required.' });
+          return;
+        }
+        if (!Number.isFinite(holderId) || holderId <= 0) {
+          setOutput({ error: 'holderId must be a number greater than 0.' });
+          return;
+        }
+        if (!Number.isFinite(initialBalance) || initialBalance < 0) {
+          setOutput({ error: 'Invalid initial balance.' });
+          return;
+        }
+
+        const payload = {
+          accountNumber: quickAccountNumber.value.trim(),
+          accountType: quickAccountType.value,
+          currency: quickAccountCurrency.value,
+          holderId,
+          initialBalance
+        };
+
+        const response = await fetch('/api/accounts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let data = text;
+        try { data = text ? JSON.parse(text) : null; } catch {}
+
+        setOutput({
+          step: 'create_account',
+          status: response.status,
+          ok: response.ok,
+          request: payload,
+          response: data
+        });
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function callProtected(path) {
+      try {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+          setOutput({ error: 'Sign in first.' });
+          return;
+        }
+        const response = await fetch(path, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const text = await response.text();
+        try {
+          setOutput(JSON.parse(text));
+        } catch {
+          setOutput(text);
+        }
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    function initServiceCatalog() {
+      serviceCatalog.forEach((svc, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = svc.name;
+        serviceSelect.appendChild(opt);
+      });
+      if (serviceSelect.options.length > 0) {
+        serviceSelect.options[0].selected = true;
+      }
+      loadServiceTemplate();
+    }
+
+    function getSelectedServiceIndexes() {
+      return Array.from(serviceSelect.selectedOptions)
+        .map(opt => Number(opt.value))
+        .filter(v => Number.isInteger(v) && v >= 0);
+    }
+
+    function filterServicesByModule() {
+      const selectedModule = moduleFilter.value;
+      Array.from(serviceSelect.options).forEach(opt => {
+        const idx = Number(opt.value);
+        const svc = serviceCatalog[idx];
+        const visible = selectedModule === 'ALL' || (svc && svc.module === selectedModule);
+        opt.hidden = !visible;
+      });
+      clearServiceSelection();
+    }
+
+    function syncTemplateFromSelection() {
+      const selected = getSelectedServiceIndexes();
+      const first = selected.length ? selected[0] : 0;
+      const svc = serviceCatalog[first];
+      if (!svc) return;
+      serviceMethod.value = svc.method;
+      servicePath.value = svc.path;
+      serviceBody.value = svc.body ? JSON.stringify(svc.body, null, 2) : '';
+    }
+
+    function loadServiceTemplate() {
+      const selected = getSelectedServiceIndexes();
+      const svc = serviceCatalog[selected.length ? selected[0] : 0];
+      serviceMethod.value = svc.method;
+      servicePath.value = svc.path;
+      serviceBody.value = svc.body ? JSON.stringify(svc.body, null, 2) : '';
+    }
+
+    function selectAllServices() {
+      Array.from(serviceSelect.options).forEach(opt => {
+        if (!opt.hidden) {
+          opt.selected = true;
+        }
+      });
+      syncTemplateFromSelection();
+    }
+
+    function selectFilteredServices() {
+      clearServiceSelection();
+      Array.from(serviceSelect.options).forEach(opt => {
+        if (!opt.hidden) {
+          opt.selected = true;
+        }
+      });
+      syncTemplateFromSelection();
+    }
+
+    function clearModuleFilter() {
+      moduleFilter.value = 'ALL';
+      filterServicesByModule();
+    }
+
+    function clearServiceSelection() {
+      Array.from(serviceSelect.options).forEach(opt => { opt.selected = false; });
+      const firstVisible = Array.from(serviceSelect.options).find(opt => !opt.hidden);
+      if (firstVisible) {
+        firstVisible.selected = true;
+      }
+      syncTemplateFromSelection();
+    }
+
+    async function runServiceRequest({ svc, method, path, bodyText }) {
+      const token = localStorage.getItem('jwt_token');
+      if (svc.protected && !token) {
+        return {
+          request: { method, path, protected: svc.protected },
+          status: 0,
+          ok: false,
+          response: { error: 'This service requires a token. Sign in first.' }
+        };
+      }
+
+      const headers = {};
+      if (svc.protected) headers.Authorization = 'Bearer ' + token;
+
+      const request = { method, headers };
+      if (method !== 'GET' && method !== 'HEAD') {
+        headers['Content-Type'] = 'application/json';
+        if (bodyText && bodyText.trim()) {
+          try {
+            request.body = JSON.stringify(JSON.parse(bodyText));
+          } catch {
+            return {
+              request: { method, path, protected: svc.protected },
+              status: 0,
+              ok: false,
+              response: { error: 'Invalid JSON body. Check the syntax.' }
+            };
+          }
+        }
+      }
+
+      const response = await fetch(path, request);
+      const text = await response.text();
+      let parsed = text;
+      try { parsed = text ? JSON.parse(text) : null; } catch {}
+
+      if (path === '/auth/login' && response.ok && parsed && parsed.token) {
+        saveSession(parsed);
+      }
+
+      return {
+        request: { method, path, protected: svc.protected },
+        status: response.status,
+        ok: response.ok,
+        response: parsed
+      };
+    }
+
+    async function executeService() {
+      try {
+        const selected = getSelectedServiceIndexes();
+        const svc = serviceCatalog[selected.length ? selected[0] : 0];
+        const path = servicePath.value.trim();
+        const method = serviceMethod.value.trim().toUpperCase();
+        const result = await runServiceRequest({ svc, method, path, bodyText: serviceBody.value });
+        setOutput(result);
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    async function executeSelectedServices() {
+      try {
+        const selected = getSelectedServiceIndexes();
+        if (!selected.length) {
+          setOutput({ error: 'Select at least one service.' });
+          return;
+        }
+
+        const results = [];
+        for (const idx of selected) {
+          const svc = serviceCatalog[idx];
+          const bodyText = svc.body ? JSON.stringify(svc.body) : '';
+          const result = await runServiceRequest({ svc, method: svc.method, path: svc.path, bodyText });
+          results.push({ service: svc.name, ...result });
+        }
+
+        setOutput({
+          batchTotal: results.length,
+          batchOk: results.filter(r => r.ok).length,
+          batchFailed: results.filter(r => !r.ok).length,
+          results
+        });
+      } catch (error) {
+        setOutput({ error: error.message });
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('jwt_username');
+      localStorage.removeItem('jwt_role');
+      statusUser.textContent = '-';
+      statusRole.textContent = '-';
+      statusToken.textContent = 'Not loaded';
+      setOutput('Session closed.');
+    }
+
+    loadSession();
+    initServiceCatalog();
+    filterServicesByModule();
+  </script>
+</body>
+</html>
+
