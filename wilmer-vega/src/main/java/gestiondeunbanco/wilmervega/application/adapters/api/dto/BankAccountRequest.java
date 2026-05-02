@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.NotBlank;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BankAccountRequest {
+    @NotBlank(message = "el numero de cuenta es obligatorio")
     private String accountNumber;
     private String accountType; // SAVINGS, CHECKING, PERSONAL, BUSINESS
     private String currency; // USD, COP, EUR
