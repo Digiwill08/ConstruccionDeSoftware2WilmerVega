@@ -59,6 +59,13 @@ public class AuthUseCase {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getSystemRole().name());
         claims.put("userId", user.getUserId());
+        
+        // Add clientId to token if user is associated with a client
+        Long clientId = null;
+        if (user.getRelatedClient() != null && user.getRelatedClient().getId() != null) {
+            clientId = user.getRelatedClient().getId();
+            claims.put("clientId", clientId);
+        }
 
         String token = jwtService.generateToken(user.getUsername(), claims);
 
@@ -68,6 +75,7 @@ public class AuthUseCase {
                 user.getUsername(),
                 user.getSystemRole().name(),
                 user.getUserId(),
+                clientId,
                 jwtService.getExpirationMs()
         );
     }

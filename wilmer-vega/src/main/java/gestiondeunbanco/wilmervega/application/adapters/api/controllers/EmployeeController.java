@@ -3,6 +3,7 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.application.usecases.EmployeeUseCase;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/bank-accounts")
-    public ResponseEntity<Map<String, Object>> createBankAccount(@RequestBody BankAccount account) {
+    public ResponseEntity<Map<String, Object>> createBankAccount(@Valid @RequestBody BankAccount account) {
         BankAccount saved = employeeUseCase.saveBankAccount(account);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Cuenta bancaria creada correctamente");
@@ -52,7 +53,7 @@ public class EmployeeController {
 
     @PutMapping("/bank-accounts/{id}")
     public ResponseEntity<BankAccount> updateBankAccount(@PathVariable Long id,
-                                                          @RequestBody BankAccount account) {
+                                                          @Valid @RequestBody BankAccount account) {
         account.setId(id);
         return ResponseEntity.ok(employeeUseCase.updateBankAccount(account));
     }
@@ -76,7 +77,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/natural-clients")
-    public ResponseEntity<Map<String, Object>> createNaturalClient(@RequestBody NaturalClient client) {
+    public ResponseEntity<Map<String, Object>> createNaturalClient(@Valid @RequestBody NaturalClient client) {
         NaturalClient saved = employeeUseCase.saveNaturalClient(client);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Cliente natural creado correctamente");
@@ -88,7 +89,7 @@ public class EmployeeController {
 
     @PutMapping("/natural-clients/{id}")
     public ResponseEntity<NaturalClient> updateNaturalClient(@PathVariable Long id,
-                                                              @RequestBody NaturalClient client) {
+                                                              @Valid @RequestBody NaturalClient client) {
         client.setId(id);
         return ResponseEntity.ok(employeeUseCase.updateNaturalClient(client));
     }
@@ -112,7 +113,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/company-clients")
-    public ResponseEntity<Map<String, Object>> createCompanyClient(@RequestBody CompanyClient client) {
+    public ResponseEntity<Map<String, Object>> createCompanyClient(@Valid @RequestBody CompanyClient client) {
         CompanyClient saved = employeeUseCase.saveCompanyClient(client);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Cliente empresa creado correctamente");
@@ -124,7 +125,7 @@ public class EmployeeController {
 
     @PutMapping("/company-clients/{id}")
     public ResponseEntity<CompanyClient> updateCompanyClient(@PathVariable Long id,
-                                                              @RequestBody CompanyClient client) {
+                                                              @Valid @RequestBody CompanyClient client) {
         client.setId(id);
         return ResponseEntity.ok(employeeUseCase.updateCompanyClient(client));
     }
@@ -148,7 +149,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/loans")
-    public ResponseEntity<Map<String, Object>> createLoan(@RequestBody Loan loan) {
+    public ResponseEntity<Map<String, Object>> createLoan(@Valid @RequestBody Loan loan) {
         Loan saved = employeeUseCase.saveLoan(loan);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Prestamo creado correctamente");
@@ -158,7 +159,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/loans/{id}")
-    public ResponseEntity<Loan> updateLoan(@PathVariable Long id, @RequestBody Loan loan) {
+    public ResponseEntity<Loan> updateLoan(@PathVariable Long id, @Valid @RequestBody Loan loan) {
         loan.setLoanId(id);
         return ResponseEntity.ok(employeeUseCase.updateLoan(loan));
     }

@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,7 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Map<String, Object>> createUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody User user) {
         try {
             User saved = adminUseCase.saveUser(user);
             Map<String, Object> response = new LinkedHashMap<>();

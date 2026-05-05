@@ -30,7 +30,7 @@ public class CreateNaturalClient {
         if (Period.between(naturalClient.getBirthDate(), LocalDate.now()).getYears() < 18) {
             throw new IllegalArgumentException("Natural client must be at least 18 years old");
         }
-        if (naturalClient.getEmail() == null || naturalClient.getEmail().isBlank() || !naturalClient.getEmail().contains("@")) {
+        if (naturalClient.getEmail() == null || naturalClient.getEmail().isBlank() || !isValidEmail(naturalClient.getEmail())) {
             throw new IllegalArgumentException("Valid email is required");
         }
         if (naturalClient.getPhone() == null || naturalClient.getPhone().isBlank()) {
@@ -49,5 +49,13 @@ public class CreateNaturalClient {
             throw new IllegalArgumentException("A company client with this document number already exists");
         }
         return naturalClientPort.save(naturalClient);
+    }
+
+    /**
+     * Basic email validation: ensures format matches common email pattern.
+     * Full RFC 5322 validation is handled by @Email jakarta annotation in DTOs.
+     */
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$");
     }
 }

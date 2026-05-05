@@ -3,17 +3,19 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.ClientResponse;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.CompanyClientRequest;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.NaturalClientRequest;
+import gestiondeunbanco.wilmervega.application.adapters.api.mappers.CompanyClientMapper;
+import gestiondeunbanco.wilmervega.application.adapters.api.mappers.NaturalClientMapper;
 import gestiondeunbanco.wilmervega.application.usecases.CustomerUseCase;
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
-import gestiondeunbanco.wilmervega.domain.models.SystemRole;
+import gestiondeunbanco.wilmervega.domain.services.ClientAccessValidationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -22,6 +24,9 @@ import java.util.Map;
 public class CustomerController {
 
     private final CustomerUseCase customerUseCase;
+    private final NaturalClientMapper naturalClientMapper;
+    private final CompanyClientMapper companyClientMapper;
+    private final ClientAccessValidationService clientAccessValidation;
 
     // --- Natural clients ---
     @GetMapping("/natural")
@@ -31,17 +36,20 @@ public class CustomerController {
 
     @GetMapping("/natural/{id}")
     public ResponseEntity<ClientResponse> getNaturalClientById(@PathVariable Long id) {
+        clientAccessValidation.validateClientAccess(id);
         return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientById(id)));
     }
 
     @GetMapping("/natural/document/{documentNumber}")
     public ResponseEntity<ClientResponse> getNaturalClientByDocument(@PathVariable String documentNumber) {
-        return ResponseEntity.ok(toResponse(customerUseCase.findNaturalClientByDocumentNumber(documentNumber)));
+        NaturalClient client = customerUseCase.findNaturalClientByDocumentNumber(documentNumber);
+        clientAccessValidation.validateClientAccess(client.getId());
+        return ResponseEntity.ok(toResponse(client));
     }
 
     @PostMapping("/natural")
-    public ResponseEntity<Map<String, Object>> createNaturalClient(@RequestBody NaturalClientRequest request) {
-        NaturalClient saved = customerUseCase.saveNaturalClient(toNaturalModel(request));
+    public ResponseEntity<Map<String, Object>> createNaturalClient(@Valid @RequestBody NaturalClientRequest request) {
+        NaturalClient saved = customerUseCase.saveNaturalClient(naturalClientMapper.toModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "message", "Cliente natural creado correctamente",
                 "id", saved.getId(),
@@ -51,14 +59,16 @@ public class CustomerController {
     }
 
     @PutMapping("/natural/{id}")
-    public ResponseEntity<ClientResponse> updateNaturalClient(@PathVariable Long id, @RequestBody NaturalClientRequest request) {
-        NaturalClient model = toNaturalModel(request);
+    public ResponseEntity<ClientResponse> updateNaturalClient(@PathVariable Long id, @Valid @RequestBody NaturalClientRequest request) {
+        clientAccessValidation.validateClientAccess(id);
+        NaturalClient model = naturalClientMapper.toModel(request);
         model.setId(id);
         return ResponseEntity.ok(toResponse(customerUseCase.updateNaturalClient(model)));
     }
 
     @DeleteMapping("/natural/{id}")
     public ResponseEntity<Void> deleteNaturalClient(@PathVariable Long id) {
+        clientAccessValidation.validateClientAccess(id);
         customerUseCase.deleteNaturalClientById(id);
         return ResponseEntity.noContent().build();
     }
@@ -71,17 +81,20 @@ public class CustomerController {
 
     @GetMapping("/company/{id}")
     public ResponseEntity<ClientResponse> getCompanyClientById(@PathVariable Long id) {
+        clientAccessValidation.validateClientAccess(id);
         return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientById(id)));
     }
 
     @GetMapping("/company/document/{documentNumber}")
     public ResponseEntity<ClientResponse> getCompanyClientByDocument(@PathVariable String documentNumber) {
-        return ResponseEntity.ok(toResponse(customerUseCase.findCompanyClientByDocumentNumber(documentNumber)));
+        CompanyClient client = customerUseCase.findCompanyClientByDocumentNumber(documentNumber);
+        clientAccessValidation.validateClientAccess(client.getId());
+        return ResponseEntity.ok(toResponse(client));
     }
 
     @PostMapping("/company")
-    public ResponseEntity<Map<String, Object>> createCompanyClient(@RequestBody CompanyClientRequest request) {
-        CompanyClient saved = customerUseCase.saveCompanyClient(toCompanyModel(request));
+    public ResponseEntity<Map<String, Object>> createCompanyClient(@Valid @RequestBody CompanyClientRequest request) {
+        CompanyClient saved = customerUseCase.saveCompanyClient(companyClientMapper.toModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "message", "Cliente empresa creado correctamente",
                 "id", saved.getId(),
@@ -91,49 +104,21 @@ public class CustomerController {
     }
 
     @PutMapping("/company/{id}")
-    public ResponseEntity<ClientResponse> updateCompanyClient(@PathVariable Long id, @RequestBody CompanyClientRequest request) {
-        CompanyClient model = toCompanyModel(request);
+    public ResponseEntity<ClientResponse> updateCompanyClient(@PathVariable Long id, @Valid @RequestBody CompanyClientRequest request) {
+        clientAccessValidation.validateClientAccess(id);
+        CompanyClient model = companyClientMapper.toModel(request);
         model.setId(id);
         return ResponseEntity.ok(toResponse(customerUseCase.updateCompanyClient(model)));
     }
 
     @DeleteMapping("/company/{id}")
     public ResponseEntity<Void> deleteCompanyClient(@PathVariable Long id) {
+        clientAccessValidation.validateClientAccess(id);
         customerUseCase.deleteCompanyClientById(id);
         return ResponseEntity.noContent().build();
     }
 
-    private NaturalClient toNaturalModel(NaturalClientRequest request) {
-        NaturalClient model = new NaturalClient();
-        model.setDocumentNumber(request.getDocumentNumber());
-        model.setEmail(request.getEmail());
-        model.setPhone(request.getPhone());
-        model.setAddress(request.getAddress());
-        model.setFullName(request.getFullName());
-        model.setBirthDate(request.getBirthDate());
-        if (request.getRole() != null && !request.getRole().isBlank()) {
-            model.setRole(SystemRole.valueOf(request.getRole().trim().toUpperCase(Locale.ROOT)));
-        } else {
-            model.setRole(SystemRole.NATURAL_CLIENT);
-        }
-        return model;
-    }
-
-    private CompanyClient toCompanyModel(CompanyClientRequest request) {
-        CompanyClient model = new CompanyClient();
-        model.setDocumentNumber(request.getDocumentNumber());
-        model.setEmail(request.getEmail());
-        model.setPhone(request.getPhone());
-        model.setAddress(request.getAddress());
-        model.setBusinessName(request.getBusinessName());
-        if (request.getLegalRepresentativeId() != null) {
-            NaturalClient representative = new NaturalClient();
-            representative.setId(request.getLegalRepresentativeId());
-            model.setLegalRepresentative(representative);
-        }
-        return model;
-    }
-
+    
     private ClientResponse toResponse(NaturalClient model) {
         return new ClientResponse(
                 model.getId(),

@@ -2,9 +2,12 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import com.mongodb.MongoException;
 import com.mongodb.MongoTimeoutException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import jakarta.validation.ConstraintViolationException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.exceptions.BusinessException;
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
+import gestiondeunbanco.wilmervega.domain.exceptions.UnauthorizedAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
@@ -50,11 +53,38 @@ public class GlobalExceptionHandler {
                 .body(errorBody(400, ex.getMessage()));
     }
 
+        /** 400 — Bean validation errors on @RequestBody */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        String message = "Validation failed for request body";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(errorBody(400, message + ": " + ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + "=" + fe.getDefaultMessage())
+                .reduce((a, b) -> a + ", " + b).orElse("")));
+        }
+
+        /** 400 — Constraint violations on path/params */
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = "Validation failed for request parameters";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(errorBody(400, message + ": " + ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + "=" + cv.getMessage())
+                .reduce((a, b) -> a + ", " + b).orElse("")));
+        }
+
     /** 403 — Access denied */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(errorBody(403, "Acceso denegado: no tiene permisos para este recurso"));
+    }
+
+    /** 403 — Unauthorized client access */
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(errorBody(403, ex.getMessage()));
     }
 
     /** 401 — Not authenticated */
@@ -83,6 +113,7 @@ public class GlobalExceptionHandler {
         return Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", status,
+                "message", message != null ? message : "Error desconocido",
                 "error", message != null ? message : "Error desconocido"
         );
     }

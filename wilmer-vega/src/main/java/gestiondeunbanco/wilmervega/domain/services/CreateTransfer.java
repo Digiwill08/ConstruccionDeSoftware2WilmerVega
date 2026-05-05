@@ -60,48 +60,60 @@ public class CreateTransfer {
             throw new IllegalStateException("Source account is not ACTIVE. Status: " + sourceAccount.getAccountStatus());
         }
 
-        // 5. Set creation time
-        transfer.setCreationDateTime(LocalDateTime.now());
+        // 5. Validate user has permission on source account
+        if (sourceAccount.getHolder() == null || !sourceAccount.getHolder().getId().equals(transfer.getCreatorUserId())) {
+            throw new UnauthorizedAccessException("User does not have permission to transfer from account: " + transfer.getSourceAccount().getAccountNumber());
+        }
 
-        // 6. Determine if transfer needs approval (enterprise threshold)
+        // 6. Validate destination account exists and is ACTIVE (if specified)
+        BankAccount destinationAccount = null;
+        if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
+            destinationAccount = bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
+                    .orElseThrow(() -> new NotFoundException("Destination account not found: " + transfer.getDestinationAccount().getAccountNumber()));
+            
+            if (destinationAccount.getAccountStatus() != AccountStatus.ACTIVE) {
+                throw new IllegalStateException("Destination account is not ACTIVE. Status: " + destinationAccount.getAccountStatus());
+            }
+        }
+
+        // 7. Set creation time
+        transfer.setCreationDateTime(LocalDateTime.now());
+        // 8. Determine if transfer needs approval (enterprise threshold)
         if (transfer.getAmount().compareTo(ENTERPRISE_THRESHOLD) > 0) {
             // High amount: goes to awaiting approval
             transfer.setTransferStatus(TransferStatus.AWAITING_APPROVAL);
             Transfer saved = transferPort.save(transfer);
-
             registerAuditLog(saved, sourceAccount, null, "PENDING",
                     "AWAITING_APPROVAL", null, null, transfer.getCreatorUserId(), "COMPANY_EMPLOYEE");
 
             return saved;
-        } else {
-            // Low amount: execute immediately
-            if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
-                throw new IllegalStateException("Insufficient balance in source account. Available: "
-                        + sourceAccount.getCurrentBalance() + ", Required: " + transfer.getAmount());
-            }
-
-            BigDecimal originBalanceBefore = sourceAccount.getCurrentBalance();
-            sourceAccount.setCurrentBalance(originBalanceBefore.subtract(transfer.getAmount()));
-            bankAccountPort.save(sourceAccount);
-
-            // If destination account is internal, update its balance
-            if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
-                bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
-                        .ifPresent(dest -> {
-                            dest.setCurrentBalance(dest.getCurrentBalance().add(transfer.getAmount()));
-                            bankAccountPort.save(dest);
-                        });
-            }
-
-            transfer.setTransferStatus(TransferStatus.EXECUTED);
-            Transfer saved = transferPort.save(transfer);
-
-            registerAuditLog(saved, sourceAccount, null, "PENDING", "EXECUTED",
-                    originBalanceBefore, sourceAccount.getCurrentBalance(),
-                    transfer.getCreatorUserId(), "CLIENT");
-
-            return saved;
         }
+
+        // Low amount: execute immediately
+        if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
+            throw new IllegalStateException("Insufficient balance in source account. Available: "
+                    + sourceAccount.getCurrentBalance() + ", Required: " + transfer.getAmount());
+        }
+
+        BigDecimal originBalanceBefore = sourceAccount.getCurrentBalance();
+        sourceAccount.setCurrentBalance(originBalanceBefore.subtract(transfer.getAmount()));
+        bankAccountPort.save(sourceAccount);
+
+        // If destination account is internal, update its balance
+        if (destinationAccount != null) {
+            destinationAccount.setCurrentBalance(destinationAccount.getCurrentBalance().add(transfer.getAmount()));
+            bankAccountPort.save(destinationAccount);
+        }
+
+        transfer.setTransferStatus(TransferStatus.EXECUTED);
+        Transfer saved = transferPort.save(transfer);
+
+        registerAuditLog(saved, sourceAccount, destinationAccount, "PENDING", "EXECUTED",
+                originBalanceBefore, sourceAccount.getCurrentBalance(),
+                transfer.getCreatorUserId(), "CLIENT");
+
+        return saved;
+        
     }
 
     private void registerAuditLog(Transfer transfer, BankAccount sourceAccount,
