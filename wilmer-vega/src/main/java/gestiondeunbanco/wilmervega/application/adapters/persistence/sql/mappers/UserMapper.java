@@ -50,9 +50,13 @@ public final class UserMapper {
     }
 
     private static SystemRole resolveRole(String role) {
-        if ("ADMINISTRATOR".equalsIgnoreCase(role)) {
-            return SystemRole.INTERNAL_ANALYST;
+        try {
+            return SystemRole.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                "Unknown system role stored in database: '" + role + "'. "
+                + "Valid roles: NATURAL_CLIENT, COMPANY_CLIENT, TELLER_EMPLOYEE, "
+                + "COMMERCIAL_EMPLOYEE, COMPANY_EMPLOYEE, COMPANY_SUPERVISOR, INTERNAL_ANALYST");
         }
-        return SystemRole.valueOf(role);
     }
 }

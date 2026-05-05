@@ -94,6 +94,34 @@ public class LoanPersistenceAdapter implements LoanPort {
         model.setApprovalDate(entity.getApprovalDate());
         model.setDisbursementDate(entity.getDisbursementDate());
         model.setApprovedByUserId(entity.getApprovedByUserId());
+
+        // Reconstruct clientApplicant from stored entity
+        if (entity.getClientApplicant() != null) {
+            gestiondeunbanco.wilmervega.domain.models.NaturalClient applicant =
+                    new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
+            applicant.setId(entity.getClientApplicant().getId());
+            applicant.setDocumentNumber(entity.getClientApplicant().getDocumentNumber());
+            applicant.setEmail(entity.getClientApplicant().getEmail());
+            applicant.setPhone(entity.getClientApplicant().getPhone());
+            applicant.setAddress(entity.getClientApplicant().getAddress());
+            model.setClientApplicant(applicant);
+        }
+
+        // Reconstruct disbursementAccount from stored entity
+        if (entity.getDisbursementAccount() != null) {
+            gestiondeunbanco.wilmervega.domain.models.BankAccount account =
+                    new gestiondeunbanco.wilmervega.domain.models.BankAccount();
+            account.setId(entity.getDisbursementAccount().getId());
+            account.setAccountNumber(entity.getDisbursementAccount().getAccountNumber());
+            account.setCurrentBalance(entity.getDisbursementAccount().getCurrentBalance());
+            if (entity.getDisbursementAccount().getAccountStatus() != null) {
+                account.setAccountStatus(
+                    gestiondeunbanco.wilmervega.domain.models.AccountStatus
+                        .valueOf(entity.getDisbursementAccount().getAccountStatus()));
+            }
+            model.setDisbursementAccount(account);
+        }
+
         return model;
     }
 }

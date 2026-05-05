@@ -86,11 +86,38 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
         if (entity.getCurrency() != null) model.setCurrency(Currency.valueOf(entity.getCurrency()));
         if (entity.getAccountStatus() != null) model.setAccountStatus(AccountStatus.valueOf(entity.getAccountStatus()));
         model.setOpeningDate(entity.getOpeningDate());
-        if (entity.getHolder() != null) {
-            gestiondeunbanco.wilmervega.domain.models.NaturalClient c = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
-            c.setId(entity.getHolder().getId());
-            model.setHolder(c);
+
+        // Reconstruct holder respecting real type (JOINED inheritance)
+        if (entity.getHolder() instanceof gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.CompanyClientEntity companyEntity) {
+            gestiondeunbanco.wilmervega.domain.models.CompanyClient company =
+                    new gestiondeunbanco.wilmervega.domain.models.CompanyClient();
+            company.setId(companyEntity.getId());
+            company.setDocumentNumber(companyEntity.getDocumentNumber());
+            company.setEmail(companyEntity.getEmail());
+            company.setPhone(companyEntity.getPhone());
+            company.setAddress(companyEntity.getAddress());
+            company.setBusinessName(companyEntity.getBusinessName());
+            model.setHolder(company);
+        } else if (entity.getHolder() != null) {
+            gestiondeunbanco.wilmervega.domain.models.NaturalClient natural =
+                    new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
+            natural.setId(entity.getHolder().getId());
+            natural.setDocumentNumber(entity.getHolder().getDocumentNumber());
+            natural.setEmail(entity.getHolder().getEmail());
+            natural.setPhone(entity.getHolder().getPhone());
+            natural.setAddress(entity.getHolder().getAddress());
+            if (entity.getHolder() instanceof gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.NaturalClientEntity naturalEntity) {
+                natural.setFullName(naturalEntity.getFullName());
+                natural.setBirthDate(naturalEntity.getBirthDate());
+                if (naturalEntity.getRole() != null) {
+                    try {
+                        natural.setRole(gestiondeunbanco.wilmervega.domain.models.SystemRole.valueOf(naturalEntity.getRole()));
+                    } catch (IllegalArgumentException ignored) { }
+                }
+            }
+            model.setHolder(natural);
         }
+
         return model;
     }
 }
