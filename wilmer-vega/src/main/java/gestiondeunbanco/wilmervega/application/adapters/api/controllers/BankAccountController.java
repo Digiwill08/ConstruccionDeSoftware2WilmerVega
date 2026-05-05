@@ -4,14 +4,17 @@ import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountReque
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountResponse;
 import gestiondeunbanco.wilmervega.application.usecases.BankAccountUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
+import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
-import lombok.RequiredArgsConstructor;
+import gestiondeunbanco.wilmervega.domain.models.Currency;
+import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
 import jakarta.validation.Valid;
-import gestiondeunbanco.wilmervega.application.adapters.api.mappers.BankAccountMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -24,12 +27,11 @@ import java.util.stream.Collectors;
 public class BankAccountController {
 
     private final BankAccountUseCase bankAccountUseCase;
-    private final BankAccountMapper bankAccountMapper;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createBankAccount(@Valid @RequestBody BankAccountRequest request) {
         try {
-            BankAccount created = bankAccountUseCase.create(bankAccountMapper.toModel(request));
+            BankAccount created = bankAccountUseCase.create(toModel(request));
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Cuenta creada correctamente");
             response.put("id", created.getId());
@@ -71,7 +73,26 @@ public class BankAccountController {
         }
     }
 
-    
+    private BankAccount toModel(BankAccountRequest request) {
+        if (request.getAccountType() == null || request.getAccountType().isBlank()) {
+            throw new IllegalArgumentException("El tipo de cuenta es obligatorio (SAVINGS, CHECKING, PERSONAL, BUSINESS)");
+        }
+        if (request.getCurrency() == null || request.getCurrency().isBlank()) {
+            throw new IllegalArgumentException("La moneda es obligatoria (USD, COP, EUR)");
+        }
+        BankAccount model = new BankAccount();
+        model.setAccountNumber(request.getAccountNumber());
+        model.setAccountType(AccountType.valueOf(request.getAccountType().trim().toUpperCase(Locale.ROOT)));
+        model.setCurrency(Currency.valueOf(request.getCurrency().trim().toUpperCase(Locale.ROOT)));
+        model.setCurrentBalance(request.getInitialBalance());
+        model.setAccountStatus(AccountStatus.ACTIVE);
+        model.setOpeningDate(LocalDate.now());
+
+        NaturalClient holder = new NaturalClient();
+        holder.setId(request.getHolderId());
+        model.setHolder(holder);
+        return model;
+    }
 
     private BankAccountResponse toResponse(BankAccount model) {
         return new BankAccountResponse(

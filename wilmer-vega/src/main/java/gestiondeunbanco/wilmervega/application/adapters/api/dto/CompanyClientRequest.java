@@ -1,6 +1,8 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,26 +11,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyClientRequest {
-    @NotBlank(message = "Business name is required")
-    @Size(min = 3, max = 150, message = "Business name must be between 3 and 150 characters")
+
+    @NotBlank(message = "El nombre de la empresa es obligatorio")
     private String businessName;
 
-    @NotBlank(message = "Document number is required")
-    @Pattern(regexp = "^[0-9]{6,20}$", message = "Document must be 6-20 numeric digits")
+    @NotBlank(message = "El numero de documento es obligatorio")
     private String documentNumber;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Valid email format is required")
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El formato del email es invalido")
     private String email;
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Phone must be 7-15 digits, optionally starting with +")
+    @NotBlank(message = "El telefono es obligatorio")
     private String phone;
 
-    @NotBlank(message = "Address is required")
-    @Size(min = 5, max = 255, message = "Address must be between 5 and 255 characters")
+    @NotBlank(message = "La direccion es obligatoria")
     private String address;
 
-    @NotNull(message = "Legal representative ID is required")
+    @NotNull(message = "El representante legal es obligatorio")
     private Long legalRepresentativeId;
 }

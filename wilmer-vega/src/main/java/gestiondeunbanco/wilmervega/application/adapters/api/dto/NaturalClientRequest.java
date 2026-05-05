@@ -1,38 +1,39 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
-import jakarta.validation.constraints.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class NaturalClientRequest {
-    @NotBlank(message = "Full name is required")
-    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+
+    @NotBlank(message = "El nombre completo es obligatorio")
     private String fullName;
 
-    @NotBlank(message = "Document number is required")
-    @Pattern(regexp = "^[0-9]{6,20}$", message = "Document must be 6-20 numeric digits")
+    @NotBlank(message = "El numero de documento es obligatorio")
     private String documentNumber;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Valid email format is required")
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El formato del email es invalido")
     private String email;
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Phone must be 7-15 digits, optionally starting with +")
+    @NotBlank(message = "El telefono es obligatorio")
     private String phone;
 
-    @NotNull(message = "Birth date is required")
-    @Past(message = "Birth date must be in the past")
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @Past(message = "La fecha de nacimiento debe ser en el pasado")
     private LocalDate birthDate;
 
-    @NotBlank(message = "Address is required")
-    @Size(min = 5, max = 255, message = "Address must be between 5 and 255 characters")
+    @NotBlank(message = "La direccion es obligatoria")
     private String address;
 
+    // Opcional: default NATURAL_CLIENT si se omite
     private String role;
 }

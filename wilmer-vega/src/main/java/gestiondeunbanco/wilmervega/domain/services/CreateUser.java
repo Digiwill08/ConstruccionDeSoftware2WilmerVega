@@ -15,7 +15,16 @@ public class CreateUser {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
-        if (user.getUsername() != null && userPort.existsByUsername(user.getUsername())) {
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        if (user.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters long");
+        }
+        if (userPort.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
         return userPort.save(user);
