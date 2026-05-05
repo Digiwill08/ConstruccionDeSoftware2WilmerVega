@@ -5,6 +5,7 @@ public enum OperationType {
     ACCOUNT_CLOSURE("Bank account closure"),
     DEPOSIT("Account deposit"),
     WITHDRAWAL("Account withdrawal"),
+    TRANSFER_INITIATED("Transfer initiated - awaiting approval"),
     TRANSFER_EXECUTED("Transfer executed"),
     TRANSFER_REJECTED("Transfer rejected"),
     TRANSFER_EXPIRED("Transfer expired due to lack of approval"),

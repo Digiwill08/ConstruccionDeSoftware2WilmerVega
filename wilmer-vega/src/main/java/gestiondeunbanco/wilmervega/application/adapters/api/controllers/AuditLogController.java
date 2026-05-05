@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/audit-logs")
 @RequiredArgsConstructor
 public class AuditLogController {
 
@@ -32,10 +32,12 @@ public class AuditLogController {
     }
 
     @GetMapping("/my-operations")
-    public ResponseEntity<List<AuditLog>> getMyOperationLogs(@RequestParam String username) {
+    public ResponseEntity<List<AuditLog>> getMyOperations(@RequestParam String username) {
         Long userId = adminUseCase.findUserByUsername(username).getUserId();
         return executeWithTimeout(() -> analystUseCase.findAuditLogsByUser(userId));
     }
+
+
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<AuditLog>> getLogsByProduct(@PathVariable String productId) {
