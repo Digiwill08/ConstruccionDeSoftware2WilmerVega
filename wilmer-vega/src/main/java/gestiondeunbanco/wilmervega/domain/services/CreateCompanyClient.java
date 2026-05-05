@@ -30,10 +30,13 @@ public class CreateCompanyClient {
         if (companyClient.getAddress() == null || companyClient.getAddress().isBlank()) {
             throw new IllegalArgumentException("Address is required");
         }
-        if (companyClient.getDocumentNumber() != null && companyClientPort.existsByDocumentNumber(companyClient.getDocumentNumber())) {
+        if (companyClient.getDocumentNumber() == null || companyClient.getDocumentNumber().isBlank()) {
+            throw new IllegalArgumentException("Company document number is required");
+        }
+        if (companyClientPort.existsByDocumentNumber(companyClient.getDocumentNumber())) {
             throw new IllegalArgumentException("A company client with this document number already exists");
         }
-        if (companyClient.getDocumentNumber() != null && naturalClientPort.existsByDocumentNumber(companyClient.getDocumentNumber())) {
+        if (naturalClientPort.existsByDocumentNumber(companyClient.getDocumentNumber())) {
             throw new IllegalArgumentException("A natural client with this document number already exists");
         }
         if (companyClient.getLegalRepresentative() == null || companyClient.getLegalRepresentative().getId() == null) {

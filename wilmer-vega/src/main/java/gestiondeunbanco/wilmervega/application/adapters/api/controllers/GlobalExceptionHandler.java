@@ -2,6 +2,7 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import com.mongodb.MongoException;
 import com.mongodb.MongoTimeoutException;
+import gestiondeunbanco.wilmervega.application.adapters.api.dto.ErrorResponse;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.exceptions.BusinessException;
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
@@ -11,79 +12,84 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 
 /**
- * Global exception handler — centralizes all HTTP error responses.
- * Covers: domain exceptions, security, MongoDB failures, and generic errors.
+ * Global exception handler — centraliza todas las respuestas de error HTTP.
+ * Cubre: excepciones de dominio, seguridad, fallos de MongoDB y errores genéricos.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /** 404 — Resource not found */
+    /** 404 — Recurso no encontrado */
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(404, ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(404, ex.getMessage()));
     }
 
-    /** 409 — Business rule violation */
+    /** 409 — Violación de regla de negocio */
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(409, ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(409, ex.getMessage()));
     }
 
-    /** 401 — Invalid credentials */
+    /** 401 — Credenciales inválidas */
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(errorBody(401, "No autenticado: credenciales invalidas"));
+                .body(new ErrorResponse(401, "No autenticado: credenciales invalidas"));
     }
 
-    /** 400 — Invalid argument / bad state */
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<Map<String, Object>> handleBadRequest(RuntimeException ex) {
+    /** 400 — Errores de validación Bean Validation (@Valid) */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(f -> f.getField() + ": " + f.getDefaultMessage())
+                .toList();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(errorBody(400, ex.getMessage()));
+                .body(new ErrorResponse(400, "Error de validacion en los campos de entrada", errors));
     }
 
-    /** 403 — Access denied */
+    /** 400 — Argumento inválido / estado ilegal */
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, ex.getMessage()));
+    }
+
+    /** 403 — Acceso denegado */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(errorBody(403, "Acceso denegado: no tiene permisos para este recurso"));
+                .body(new ErrorResponse(403, "Acceso denegado: no tiene permisos para este recurso"));
     }
 
-    /** 401 — Not authenticated */
+    /** 401 — No autenticado */
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Map<String, Object>> handleAuthException(AuthenticationException ex) {
+    public ResponseEntity<ErrorResponse> handleAuthException(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(errorBody(401, "No autenticado: " + ex.getMessage()));
+                .body(new ErrorResponse(401, "No autenticado: " + ex.getMessage()));
     }
 
-    /** 503 — MongoDB / DataSource unavailable */
+    /** 503 — MongoDB / DataSource no disponible */
     @ExceptionHandler({DataAccessResourceFailureException.class, MongoTimeoutException.class,
                        MongoException.class, DataAccessException.class})
-    public ResponseEntity<Map<String, Object>> handleMongoFailures(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleMongoFailures(Exception ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(errorBody(503, "Servicio de auditoría temporalmente no disponible"));
+                .body(new ErrorResponse(503, "Servicio de auditoria temporalmente no disponible"));
     }
 
-    /** 500 — Unexpected server error */
+    /** 500 — Error inesperado del servidor */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorBody(500, "Error interno del servidor: " + ex.getMessage()));
-    }
-
-    private Map<String, Object> errorBody(int status, String message) {
-        return Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", status,
-                "error", message != null ? message : "Error desconocido"
-        );
+                .body(new ErrorResponse(500, "Ocurrio un error interno en el servidor: " + ex.getMessage()));
     }
 }

@@ -8,6 +8,7 @@ import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.Currency;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class BankAccountController {
     private final BankAccountUseCase bankAccountUseCase;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createBankAccount(@RequestBody BankAccountRequest request) {
+    public ResponseEntity<Map<String, Object>> createBankAccount(@Valid @RequestBody BankAccountRequest request) {
         try {
             BankAccount created = bankAccountUseCase.create(toModel(request));
             Map<String, Object> response = new LinkedHashMap<>();
@@ -73,6 +74,12 @@ public class BankAccountController {
     }
 
     private BankAccount toModel(BankAccountRequest request) {
+        if (request.getAccountType() == null || request.getAccountType().isBlank()) {
+            throw new IllegalArgumentException("El tipo de cuenta es obligatorio (SAVINGS, CHECKING, PERSONAL, BUSINESS)");
+        }
+        if (request.getCurrency() == null || request.getCurrency().isBlank()) {
+            throw new IllegalArgumentException("La moneda es obligatoria (USD, COP, EUR)");
+        }
         BankAccount model = new BankAccount();
         model.setAccountNumber(request.getAccountNumber());
         model.setAccountType(AccountType.valueOf(request.getAccountType().trim().toUpperCase(Locale.ROOT)));

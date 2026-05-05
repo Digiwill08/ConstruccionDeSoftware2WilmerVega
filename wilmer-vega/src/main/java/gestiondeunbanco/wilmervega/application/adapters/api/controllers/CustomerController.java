@@ -7,6 +7,7 @@ import gestiondeunbanco.wilmervega.application.usecases.CustomerUseCase;
 import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class CustomerController {
     }
 
     @PostMapping("/natural")
-    public ResponseEntity<Map<String, Object>> createNaturalClient(@RequestBody NaturalClientRequest request) {
+    public ResponseEntity<Map<String, Object>> createNaturalClient(@Valid @RequestBody NaturalClientRequest request) {
         NaturalClient saved = customerUseCase.saveNaturalClient(toNaturalModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "message", "Cliente natural creado correctamente",
@@ -51,7 +52,7 @@ public class CustomerController {
     }
 
     @PutMapping("/natural/{id}")
-    public ResponseEntity<ClientResponse> updateNaturalClient(@PathVariable Long id, @RequestBody NaturalClientRequest request) {
+    public ResponseEntity<ClientResponse> updateNaturalClient(@PathVariable Long id, @Valid @RequestBody NaturalClientRequest request) {
         NaturalClient model = toNaturalModel(request);
         model.setId(id);
         return ResponseEntity.ok(toResponse(customerUseCase.updateNaturalClient(model)));
@@ -80,7 +81,7 @@ public class CustomerController {
     }
 
     @PostMapping("/company")
-    public ResponseEntity<Map<String, Object>> createCompanyClient(@RequestBody CompanyClientRequest request) {
+    public ResponseEntity<Map<String, Object>> createCompanyClient(@Valid @RequestBody CompanyClientRequest request) {
         CompanyClient saved = customerUseCase.saveCompanyClient(toCompanyModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "message", "Cliente empresa creado correctamente",
@@ -91,7 +92,7 @@ public class CustomerController {
     }
 
     @PutMapping("/company/{id}")
-    public ResponseEntity<ClientResponse> updateCompanyClient(@PathVariable Long id, @RequestBody CompanyClientRequest request) {
+    public ResponseEntity<ClientResponse> updateCompanyClient(@PathVariable Long id, @Valid @RequestBody CompanyClientRequest request) {
         CompanyClient model = toCompanyModel(request);
         model.setId(id);
         return ResponseEntity.ok(toResponse(customerUseCase.updateCompanyClient(model)));
