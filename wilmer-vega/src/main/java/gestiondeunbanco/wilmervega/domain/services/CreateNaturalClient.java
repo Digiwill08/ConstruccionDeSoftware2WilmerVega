@@ -42,6 +42,12 @@ public class CreateNaturalClient {
         if (naturalClient.getRole() == null) {
             throw new IllegalArgumentException("Natural client role is required");
         }
+        if (naturalClient.getDocumentNumber() == null || naturalClient.getDocumentNumber().isBlank()) {
+            throw new IllegalArgumentException("Document number is required");
+        }
+        if (!naturalClient.getDocumentNumber().matches("^\\d+$")) {
+            throw new IllegalArgumentException("Document number must be strictly numeric");
+        }
         if (naturalClient.getDocumentNumber() != null && naturalClientPort.existsByDocumentNumber(naturalClient.getDocumentNumber())) {
             throw new IllegalArgumentException("A natural client with this document number already exists");
         }

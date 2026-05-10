@@ -17,4 +17,6 @@ public interface TransferRepository extends JpaRepository<TransferEntity, Long> 
     List<TransferEntity> findAwaitingApprovalOlderThan(@Param("cutoffTime") LocalDateTime cutoffTime);
 
     List<TransferEntity> findBySourceAccount_AccountNumber(String accountNumber);
+
+    List<TransferEntity> findBySourceAccount_Holder_Id(Long holderId);
 }

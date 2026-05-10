@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.ports.CompanyClientPort;
 import gestiondeunbanco.wilmervega.domain.ports.NaturalClientPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
+import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 
 import java.math.BigDecimal;
 
@@ -12,13 +13,16 @@ public class CreateBankAccount {
     private final BankAccountPort bankAccountPort;
     private final NaturalClientPort naturalClientPort;
     private final CompanyClientPort companyClientPort;
+    private final UserPort userPort;
 
     public CreateBankAccount(BankAccountPort bankAccountPort,
                              NaturalClientPort naturalClientPort,
-                             CompanyClientPort companyClientPort) {
+                             CompanyClientPort companyClientPort,
+                             UserPort userPort) {
         this.bankAccountPort = bankAccountPort;
         this.naturalClientPort = naturalClientPort;
         this.companyClientPort = companyClientPort;
+        this.userPort = userPort;
     }
 
     public BankAccount save(BankAccount bankAccount) {
@@ -50,6 +54,9 @@ public class CreateBankAccount {
         boolean holderExists = naturalClientPort.findById(holderId).isPresent() || companyClientPort.findById(holderId).isPresent();
         if (!holderExists) {
             throw new IllegalArgumentException("Holder does not exist");
+        }
+        if (!userPort.existsActiveByRelatedClientId(holderId)) {
+            throw new IllegalArgumentException("Holder must have at least one ACTIVE user linked before account creation");
         }
         if (bankAccount.getAccountNumber() != null && bankAccountPort.existsByAccountNumber(bankAccount.getAccountNumber())) {
             throw new IllegalArgumentException("A BankAccount with this account number already exists");

@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import gestiondeunbanco.wilmervega.application.usecases.AnalystUseCase;
+import gestiondeunbanco.wilmervega.config.security.ClientAccessContext;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,10 @@ public class AnalystController {
     }
 
     @PostMapping("/loans/{id}/approve")
-    public ResponseEntity<Map<String, Object>> approveLoan(@PathVariable Long id,
-                                             @RequestParam Long analystUserId,
-                                             @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
+    public ResponseEntity<Map<String, Object>> approveLoan(@PathVariable Long id) {
         try {
+            Long analystUserId = requireCurrentUserId();
+            String role = requireCurrentRole();
             Loan saved = analystUseCase.approveLoan(id, analystUserId, role);
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Prestamo aprobado correctamente");
@@ -52,10 +53,10 @@ public class AnalystController {
 
     @PostMapping("/loans/{id}/reject")
     public ResponseEntity<Map<String, Object>> rejectLoan(@PathVariable Long id,
-                                            @RequestParam Long analystUserId,
-                                            @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
                                             @RequestBody(required = false) Map<String, String> body) {
         try {
+            Long analystUserId = requireCurrentUserId();
+            String role = requireCurrentRole();
             String reason = body != null ? body.get("reason") : null;
             Loan saved = analystUseCase.rejectLoan(id, analystUserId, role, reason);
             Map<String, Object> response = new LinkedHashMap<>();
@@ -70,10 +71,10 @@ public class AnalystController {
 
     @PostMapping("/loans/{id}/disburse")
     public ResponseEntity<Map<String, Object>> disburseLoan(@PathVariable Long id,
-                                              @RequestParam Long disbursementAccountId,
-                                              @RequestParam Long analystUserId,
-                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
+                                              @RequestParam Long disbursementAccountId) {
         try {
+            Long analystUserId = requireCurrentUserId();
+            String role = requireCurrentRole();
             Loan saved = analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role);
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Prestamo desembolsado correctamente");
@@ -100,5 +101,21 @@ public class AnalystController {
     @GetMapping("/audit-logs/user/{userId}")
     public ResponseEntity<List<AuditLog>> getAuditLogsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(analystUseCase.findAuditLogsByUser(userId));
+    }
+
+    private Long requireCurrentUserId() {
+        Long userId = ClientAccessContext.getCurrentUserId();
+        if (userId == null) {
+            throw new IllegalStateException("No se pudo determinar el usuario autenticado");
+        }
+        return userId;
+    }
+
+    private String requireCurrentRole() {
+        String role = ClientAccessContext.getCurrentRole();
+        if (role == null || role.isBlank()) {
+            throw new IllegalStateException("No se pudo determinar el rol autenticado");
+        }
+        return role;
     }
 }

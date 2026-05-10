@@ -33,6 +33,9 @@ public class CreateCompanyClient {
         if (companyClient.getDocumentNumber() == null || companyClient.getDocumentNumber().isBlank()) {
             throw new IllegalArgumentException("Company document number is required");
         }
+        if (!companyClient.getDocumentNumber().matches("^\\d+$")) {
+            throw new IllegalArgumentException("Company document number must be strictly numeric");
+        }
         if (companyClientPort.existsByDocumentNumber(companyClient.getDocumentNumber())) {
             throw new IllegalArgumentException("A company client with this document number already exists");
         }

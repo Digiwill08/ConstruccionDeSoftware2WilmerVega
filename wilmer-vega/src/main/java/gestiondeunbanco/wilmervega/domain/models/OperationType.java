@@ -16,7 +16,8 @@ public enum OperationType {
     USER_CREATION("New user creation"),
     USER_BLOCKING("User blocked"),
     LOGIN("Login"),
-    LOGOUT("Logout");
+    LOGOUT("Logout"),
+    SECURITY_VALIDATION_FAILURE("Security or validation failed operation");
 
     private final String description;
 

@@ -27,38 +27,72 @@ public class RejectTransferService {
 
     @Transactional
     public Transfer reject(Long transferId, Long supervisorUserId, String supervisorRole, String reason) {
-        Transfer transfer = transferPort.findById(transferId)
-                .orElseThrow(() -> new NotFoundException("Transfer not found with ID: " + transferId));
+        try {
+            validateSupervisorRole(supervisorRole);
 
-        if (transfer.getTransferStatus() != TransferStatus.AWAITING_APPROVAL) {
-            throw new IllegalStateException("Transfer cannot be rejected. Current status: "
-                    + transfer.getTransferStatus() + ". Expected: AWAITING_APPROVAL");
+            Transfer transfer = transferPort.findById(transferId)
+                    .orElseThrow(() -> new NotFoundException("Transfer not found with ID: " + transferId));
+
+            if (transfer.getTransferStatus() != TransferStatus.AWAITING_APPROVAL) {
+                throw new IllegalStateException("Transfer cannot be rejected. Current status: "
+                        + transfer.getTransferStatus() + ". Expected: AWAITING_APPROVAL");
+            }
+
+            transfer.setTransferStatus(TransferStatus.REJECTED);
+            transfer.setApprovalDateTime(LocalDateTime.now());
+            transfer.setApproverUserId(supervisorUserId);
+            Transfer savedTransfer = transferPort.save(transfer);
+
+            AuditLog log = new AuditLog();
+            log.setOperationType(OperationType.TRANSFER_REJECTED);
+            log.setOperationDateTime(LocalDateTime.now());
+            log.setUserId(supervisorUserId);
+            log.setUserRole(supervisorRole);
+            log.setAffectedProductId(String.valueOf(transferId));
+
+            Map<String, Object> details = new HashMap<>();
+            details.put("transferId", transferId);
+            details.put("supervisorUserId", supervisorUserId);
+            details.put("previousStatus", "AWAITING_APPROVAL");
+            details.put("newStatus", "REJECTED");
+            details.put("rejectionDateTime", LocalDateTime.now().toString());
+            details.put("reason", reason != null ? reason : "No reason provided");
+            log.setDetails(details);
+
+            auditLogMongoPort.save(log);
+            return savedTransfer;
+        } catch (RuntimeException ex) {
+            registerFailure(transferId, supervisorUserId, supervisorRole, ex);
+            throw ex;
         }
+    }
 
-        transfer.setTransferStatus(TransferStatus.REJECTED);
-        transfer.setApprovalDateTime(LocalDateTime.now());
-        transfer.setApproverUserId(supervisorUserId);
-        Transfer savedTransfer = transferPort.save(transfer);
+    private void validateSupervisorRole(String supervisorRole) {
+        if (supervisorRole == null || !SystemRole.COMPANY_SUPERVISOR.name().equals(supervisorRole)) {
+            throw new IllegalStateException("Only COMPANY_SUPERVISOR can approve or reject high-value transfers");
+        }
+    }
 
-        // Register in audit log
-        AuditLog log = new AuditLog();
-        log.setOperationType(OperationType.TRANSFER_REJECTED);
-        log.setOperationDateTime(LocalDateTime.now());
-        log.setUserId(supervisorUserId);
-        log.setUserRole(supervisorRole);
-        log.setAffectedProductId(String.valueOf(transferId));
+    private void registerFailure(Long transferId, Long supervisorUserId, String supervisorRole, RuntimeException ex) {
+        try {
+            AuditLog log = new AuditLog();
+            log.setOperationType(OperationType.SECURITY_VALIDATION_FAILURE);
+            log.setOperationDateTime(LocalDateTime.now());
+            log.setUserId(supervisorUserId);
+            log.setUserRole(supervisorRole);
+            log.setAffectedProductId(String.valueOf(transferId));
 
-        Map<String, Object> details = new HashMap<>();
-        details.put("transferId", transferId);
-        details.put("supervisorUserId", supervisorUserId);
-        details.put("previousStatus", "AWAITING_APPROVAL");
-        details.put("newStatus", "REJECTED");
-        details.put("rejectionDateTime", LocalDateTime.now().toString());
-        details.put("reason", reason != null ? reason : "No reason provided");
-        log.setDetails(details);
+            Map<String, Object> details = new HashMap<>();
+            details.put("operation", "TRANSFER_REJECTION");
+            details.put("transferId", transferId);
+            details.put("success", false);
+            details.put("errorType", ex.getClass().getSimpleName());
+            details.put("errorMessage", ex.getMessage());
+            log.setDetails(details);
 
-        auditLogMongoPort.save(log);
-
-        return savedTransfer;
+            auditLogMongoPort.save(log);
+        } catch (Exception ignored) {
+            // Do not block rollback flow if audit persistence fails.
+        }
     }
 }

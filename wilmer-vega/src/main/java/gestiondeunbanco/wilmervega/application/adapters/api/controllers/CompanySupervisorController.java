@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import gestiondeunbanco.wilmervega.application.usecases.CompanySupervisorUseCase;
+import gestiondeunbanco.wilmervega.config.security.ClientAccessContext;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +33,10 @@ public class CompanySupervisorController {
     }
 
     @PostMapping("/transfers/{id}/approve")
-    public ResponseEntity<Map<String, Object>> approveTransfer(@PathVariable Long id,
-                                                     @RequestParam Long supervisorUserId,
-                                                     @RequestParam(defaultValue = "COMPANY_SUPERVISOR") String role) {
+    public ResponseEntity<Map<String, Object>> approveTransfer(@PathVariable Long id) {
         try {
+            Long supervisorUserId = requireCurrentUserId();
+            String role = requireCurrentRole();
             Transfer saved = companySupervisorUseCase.approveTransfer(id, supervisorUserId, role);
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Transferencia aprobada correctamente");
@@ -49,10 +50,10 @@ public class CompanySupervisorController {
 
     @PostMapping("/transfers/{id}/reject")
     public ResponseEntity<Map<String, Object>> rejectTransfer(@PathVariable Long id,
-                                                    @RequestParam Long supervisorUserId,
-                                                    @RequestParam(defaultValue = "COMPANY_SUPERVISOR") String role,
                                                     @RequestBody(required = false) Map<String, String> body) {
         try {
+            Long supervisorUserId = requireCurrentUserId();
+            String role = requireCurrentRole();
             String reason = body != null ? body.get("reason") : null;
             Transfer saved = companySupervisorUseCase.rejectTransfer(id, supervisorUserId, role, reason);
             Map<String, Object> response = new LinkedHashMap<>();
@@ -63,5 +64,21 @@ public class CompanySupervisorController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    private Long requireCurrentUserId() {
+        Long userId = ClientAccessContext.getCurrentUserId();
+        if (userId == null) {
+            throw new IllegalStateException("No se pudo determinar el usuario autenticado");
+        }
+        return userId;
+    }
+
+    private String requireCurrentRole() {
+        String role = ClientAccessContext.getCurrentRole();
+        if (role == null || role.isBlank()) {
+            throw new IllegalStateException("No se pudo determinar el rol autenticado");
+        }
+        return role;
     }
 }
