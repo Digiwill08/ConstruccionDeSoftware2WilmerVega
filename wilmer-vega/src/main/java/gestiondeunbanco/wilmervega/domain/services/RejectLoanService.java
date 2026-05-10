@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.LoanPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class RejectLoanService {
         this.auditLogMongoPort = auditLogMongoPort;
     }
 
+    @Transactional
     public Loan reject(Long loanId, Long analystUserId, String analystRole, String reason) {
         Loan loan = loanPort.findById(loanId)
                 .orElseThrow(() -> new NotFoundException("Loan not found with ID: " + loanId));
@@ -39,7 +41,6 @@ public class RejectLoanService {
 
         Loan savedLoan = loanPort.save(loan);
 
-        // Register in audit log (NoSQL)
         AuditLog log = new AuditLog();
         log.setOperationType(OperationType.LOAN_REJECTION);
         log.setOperationDateTime(LocalDateTime.now());
@@ -50,14 +51,14 @@ public class RejectLoanService {
         Map<String, Object> details = new HashMap<>();
         details.put("loanId", loanId);
         details.put("analystUserId", analystUserId);
-        details.put("previousStatus", "UNDER_REVIEW");
-        details.put("newStatus", "REJECTED");
-        details.put("rejectionDate", LocalDate.now().toString());
-        details.put("reason", reason != null ? reason : "No reason provided");
+        details.put("analystRole", analystRole);
+        details.put("estadoAnterior", "UNDER_REVIEW");
+        details.put("estadoNuevo", "REJECTED");
+        details.put("fechaRechazo", LocalDate.now().toString());
+        details.put("motivo", reason != null ? reason : "Sin motivo especificado");
         log.setDetails(details);
 
         auditLogMongoPort.save(log);
-
         return savedLoan;
     }
 }

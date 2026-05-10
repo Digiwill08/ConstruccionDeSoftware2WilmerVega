@@ -30,17 +30,13 @@ public class BankAccountController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createBankAccount(@Valid @RequestBody BankAccountRequest request) {
-        try {
-            BankAccount created = bankAccountUseCase.create(toModel(request));
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("message", "Cuenta creada correctamente");
-            response.put("id", created.getId());
-            response.put("accountNumber", created.getAccountNumber());
-            response.put("status", created.getAccountStatus() != null ? created.getAccountStatus().name() : null);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
-        }
+        BankAccount created = bankAccountUseCase.create(toModel(request));
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Cuenta creada correctamente");
+        response.put("id", created.getId());
+        response.put("accountNumber", created.getAccountNumber());
+        response.put("status", created.getAccountStatus() != null ? created.getAccountStatus().name() : null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -64,13 +60,8 @@ public class BankAccountController {
     public ResponseEntity<?> updateAccountStatus(
             @PathVariable Long accountId,
             @RequestParam String newStatus) {
-        try {
-            AccountStatus status = AccountStatus.valueOf(newStatus.trim().toUpperCase(Locale.ROOT));
-            BankAccount updated = bankAccountUseCase.updateStatus(accountId, status);
-            return ResponseEntity.ok(toResponse(updated));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body("Invalid status");
-        }
+        AccountStatus status = AccountStatus.valueOf(newStatus.trim().toUpperCase(Locale.ROOT));
+        return ResponseEntity.ok(toResponse(bankAccountUseCase.updateStatus(accountId, status)));
     }
 
     private BankAccount toModel(BankAccountRequest request) {
