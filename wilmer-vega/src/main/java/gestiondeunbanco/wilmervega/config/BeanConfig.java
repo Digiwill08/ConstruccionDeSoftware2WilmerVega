@@ -40,8 +40,9 @@ public class BeanConfig {
 
     // ─── Domain Services ────────────────────────────────────────────────────
 
-    @Bean public CreateBankAccount createBankAccount(BankAccountPort bankAccountPort, NaturalClientPort naturalClientPort, CompanyClientPort companyClientPort) {
-        return new CreateBankAccount(bankAccountPort, naturalClientPort, companyClientPort);
+    @Bean public CreateBankAccount createBankAccount(BankAccountPort bankAccountPort, NaturalClientPort naturalClientPort,
+                                                     CompanyClientPort companyClientPort, UserPort userPort) {
+        return new CreateBankAccount(bankAccountPort, naturalClientPort, companyClientPort, userPort);
     }
     @Bean public FindBankAccount findBankAccount(BankAccountPort p) { return new FindBankAccount(p); }
     @Bean public DeleteBankAccount deleteBankAccount(BankAccountPort p) { return new DeleteBankAccount(p); }

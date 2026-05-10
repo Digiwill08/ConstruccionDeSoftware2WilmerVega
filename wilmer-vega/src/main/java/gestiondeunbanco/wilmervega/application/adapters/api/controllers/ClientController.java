@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.application.usecases.ClientUseCase;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class ClientController {
     }
 
     @PostMapping("/transfers")
-    public ResponseEntity<Map<String, Object>> executeTransfer(@RequestBody Transfer transfer) {
+    public ResponseEntity<Map<String, Object>> executeTransfer(@Valid @RequestBody Transfer transfer) {
         try {
             Transfer saved = clientUseCase.executeTransfer(transfer);
             Map<String, Object> response = new LinkedHashMap<>();

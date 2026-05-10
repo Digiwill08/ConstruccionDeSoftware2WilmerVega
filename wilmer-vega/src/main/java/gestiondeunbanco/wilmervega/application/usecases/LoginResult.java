@@ -11,5 +11,6 @@ public class LoginResult {
     private String username;
     private String role;
     private Long userId;
+    private Long clientId;
     private long expiresInMs;
 }

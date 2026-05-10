@@ -57,6 +57,12 @@ public class TransferPersistenceAdapter implements TransferPort {
                 .map(this::toModel).toList();
     }
 
+    @Override
+    public List<Transfer> findBySourceHolderId(Long holderId) {
+        return repository.findBySourceAccount_Holder_Id(holderId).stream()
+                .map(this::toModel).toList();
+    }
+
     private TransferEntity toEntity(Transfer model) {
         TransferEntity entity = new TransferEntity();
         entity.setTransferId(model.getTransferId());
@@ -87,6 +93,11 @@ public class TransferPersistenceAdapter implements TransferPort {
             o.setId(entity.getSourceAccount().getId());
             o.setAccountNumber(entity.getSourceAccount().getAccountNumber());
             o.setCurrentBalance(entity.getSourceAccount().getCurrentBalance());
+            if (entity.getSourceAccount().getHolder() != null) {
+                gestiondeunbanco.wilmervega.domain.models.NaturalClient holder = new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
+                holder.setId(entity.getSourceAccount().getHolder().getId());
+                o.setHolder(holder);
+            }
             if (entity.getSourceAccount().getAccountStatus() != null) {
                 o.setAccountStatus(gestiondeunbanco.wilmervega.domain.models.AccountStatus
                         .valueOf(entity.getSourceAccount().getAccountStatus()));

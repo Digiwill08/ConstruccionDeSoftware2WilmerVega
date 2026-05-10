@@ -37,6 +37,14 @@ public class UserPersistenceAdapter implements UserPort {
     }
 
     @Override
+    public boolean existsActiveByRelatedClientId(Long clientId) {
+        if (clientId == null) {
+            return false;
+        }
+        return repository.existsByClient_IdAndStatus(clientId, "ACTIVE");
+    }
+
+    @Override
     public User save(User user) {
         return UserMapper.toModel(repository.save(UserMapper.toEntity(user)));
     }

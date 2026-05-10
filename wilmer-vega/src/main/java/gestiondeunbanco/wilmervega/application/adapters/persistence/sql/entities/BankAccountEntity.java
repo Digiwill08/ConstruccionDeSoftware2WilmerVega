@@ -33,6 +33,6 @@ public class BankAccountEntity {
 
     // Simplificado
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity holder;
 }

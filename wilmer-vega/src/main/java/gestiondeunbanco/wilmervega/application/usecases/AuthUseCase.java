@@ -4,6 +4,7 @@ import gestiondeunbanco.wilmervega.config.security.JwtService;
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.domain.models.User;
+import gestiondeunbanco.wilmervega.domain.models.UserStatus;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,7 @@ public class AuthUseCase {
         user.setUsername(username.trim());
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setSystemRole(role);
+        user.setUserStatus(UserStatus.ACTIVE);
         userPort.save(user);
 
         return login(username, rawPassword);
@@ -52,6 +54,10 @@ public class AuthUseCase {
             throw new InvalidCredentialsException(INVALID_CREDENTIALS);
         }
 
+        if (user.getUserStatus() != null && user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new InvalidCredentialsException(INVALID_CREDENTIALS);
+        }
+
         if (user.getSystemRole() == null) {
             throw new InvalidCredentialsException(INVALID_CREDENTIALS);
         }
@@ -59,6 +65,13 @@ public class AuthUseCase {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getSystemRole().name());
         claims.put("userId", user.getUserId());
+        
+        // Add clientId to token if user is associated with a client
+        Long clientId = null;
+        if (user.getRelatedClient() != null && user.getRelatedClient().getId() != null) {
+            clientId = user.getRelatedClient().getId();
+            claims.put("clientId", clientId);
+        }
 
         String token = jwtService.generateToken(user.getUsername(), claims);
 
@@ -68,6 +81,7 @@ public class AuthUseCase {
                 user.getUsername(),
                 user.getSystemRole().name(),
                 user.getUserId(),
+                clientId,
                 jwtService.getExpirationMs()
         );
     }

@@ -27,4 +27,8 @@ public class FindTransfer {
     public List<Transfer> findByStatus(TransferStatus status) {
         return transferPort.findByStatus(status);
     }
+
+    public List<Transfer> findBySourceHolderId(Long holderId) {
+        return transferPort.findBySourceHolderId(holderId);
+    }
 }

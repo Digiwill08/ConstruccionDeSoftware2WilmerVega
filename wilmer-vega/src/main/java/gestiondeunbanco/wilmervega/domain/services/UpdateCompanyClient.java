@@ -16,6 +16,12 @@ public class UpdateCompanyClient {
         if (companyClient == null || companyClient.getId() == null) {
             throw new IllegalArgumentException("CompanyClient or ID cannot be null for update");
         }
+        if (companyClient.getDocumentNumber() == null || companyClient.getDocumentNumber().isBlank()) {
+            throw new IllegalArgumentException("Company document number is required");
+        }
+        if (!companyClient.getDocumentNumber().matches("^\\d+$")) {
+            throw new IllegalArgumentException("Company document number must be strictly numeric");
+        }
         if (companyClientPort.findById(companyClient.getId()).isEmpty()) {
             throw new NotFoundException("CompanyClient not found for update");
         }

@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.domain.models.User;
+import gestiondeunbanco.wilmervega.domain.models.UserStatus;
 
 public final class UserMapper {
 
@@ -19,6 +20,7 @@ public final class UserMapper {
         if (model.getSystemRole() != null) {
             entity.setRole(model.getSystemRole().name());
         }
+        entity.setStatus((model.getUserStatus() != null ? model.getUserStatus() : UserStatus.ACTIVE).name());
 
         if (model.getRelatedClient() != null) {
             ClientEntity client = new ClientEntity();
@@ -35,6 +37,11 @@ public final class UserMapper {
         model.setPassword(entity.getPassword());
         if (entity.getRole() != null) {
             model.setSystemRole(resolveRole(entity.getRole()));
+        }
+        if (entity.getStatus() != null && !entity.getStatus().isBlank()) {
+            model.setUserStatus(resolveStatus(entity.getStatus()));
+        } else {
+            model.setUserStatus(UserStatus.ACTIVE);
         }
 
         if (entity.getClient() != null) {
@@ -57,6 +64,16 @@ public final class UserMapper {
                 "Unknown system role stored in database: '" + role + "'. "
                 + "Valid roles: NATURAL_CLIENT, COMPANY_CLIENT, TELLER_EMPLOYEE, "
                 + "COMMERCIAL_EMPLOYEE, COMPANY_EMPLOYEE, COMPANY_SUPERVISOR, INTERNAL_ANALYST");
+        }
+    }
+
+    private static UserStatus resolveStatus(String status) {
+        try {
+            return UserStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                "Unknown user status stored in database: '" + status + "'. "
+                + "Valid statuses: ACTIVE, INACTIVE, BLOCKED");
         }
     }
 }

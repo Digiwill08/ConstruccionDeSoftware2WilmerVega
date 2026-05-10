@@ -15,12 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Creates and potentially executes a transfer with full business logic:
- * - Validates amount > 0
- * - Validates source account exists and is ACTIVE
- * - Validates sufficient balance for immediate execution
- * - Transfers below ENTERPRISE_THRESHOLD are executed immediately (EXECUTED)
- * - Transfers above the threshold go to AWAITING_APPROVAL
+ * Crea y ejecuta (o encola) transferencias con logica de negocio completa:
+ * - Monto > 0
+ * - Cuenta origen ACTIVA
+ * - Saldo suficiente para ejecucion inmediata
+ * - Transferencias < umbral: ejecucion inmediata (EXECUTED)
+ * - Transferencias >= umbral: pendiente de aprobacion (AWAITING_APPROVAL)
  */
 public class CreateTransfer {
 
@@ -39,80 +39,87 @@ public class CreateTransfer {
 
     @Transactional
     public Transfer save(Transfer transfer) {
-        // 1. Validate transfer is not null
         if (transfer == null) {
-            throw new IllegalArgumentException("Transfer cannot be null.");
+            throw new IllegalArgumentException("La transferencia no puede ser nula.");
         }
-
-        // 2. Validate amount > 0
         if (transfer.getAmount() == null || transfer.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Transfer amount must be greater than zero.");
+            throw new IllegalArgumentException("El monto de la transferencia debe ser mayor a cero.");
         }
-
-        // 3. Validate source account exists
         if (transfer.getSourceAccount() == null || transfer.getSourceAccount().getAccountNumber() == null) {
-            throw new IllegalArgumentException("Source account must be specified.");
+            throw new IllegalArgumentException("Se debe especificar la cuenta origen.");
         }
 
         BankAccount sourceAccount = bankAccountPort.findByAccountNumber(transfer.getSourceAccount().getAccountNumber())
-                .orElseThrow(() -> new NotFoundException("Source account not found: " + transfer.getSourceAccount().getAccountNumber()));
+                .orElseThrow(() -> new NotFoundException("Cuenta origen no encontrada: " + transfer.getSourceAccount().getAccountNumber()));
 
-        // 4. Validar que la cuenta origen este ACTIVA (no bloqueada ni cancelada)
+        // Cuenta origen debe estar ACTIVA
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new AccountBlockedException(
                     sourceAccount.getAccountNumber(), sourceAccount.getAccountStatus().name());
         }
 
-        // 5. Set creation time
+        // Cuenta destino (si aplica)
+        BankAccount destinationAccount = null;
+        if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
+            destinationAccount = bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
+                    .orElseThrow(() -> new NotFoundException("Cuenta destino no encontrada: " + transfer.getDestinationAccount().getAccountNumber()));
+
+            if (destinationAccount.getAccountStatus() != AccountStatus.ACTIVE) {
+                throw new AccountBlockedException(
+                        destinationAccount.getAccountNumber(), destinationAccount.getAccountStatus().name());
+            }
+        }
+
         transfer.setCreationDateTime(LocalDateTime.now());
 
-        // 6. Determine if transfer needs approval (enterprise threshold)
+        // Montos grandes: pendiente de aprobacion del supervisor
         if (transfer.getAmount().compareTo(ENTERPRISE_THRESHOLD) > 0) {
-            // High amount: goes to awaiting approval
             transfer.setTransferStatus(TransferStatus.AWAITING_APPROVAL);
             Transfer saved = transferPort.save(transfer);
-
-            registerAuditLog(saved, sourceAccount, null, "PENDING",
-                    "AWAITING_APPROVAL", null, null, transfer.getCreatorUserId(), "COMPANY_EMPLOYEE");
-
-            return saved;
-        } else {
-            // Monto bajo: ejecutar inmediatamente - validar saldo suficiente
-            if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
-                throw new InsufficientBalanceException(
-                        sourceAccount.getCurrentBalance(), transfer.getAmount());
-            }
-
-            BigDecimal originBalanceBefore = sourceAccount.getCurrentBalance();
-            sourceAccount.setCurrentBalance(originBalanceBefore.subtract(transfer.getAmount()));
-            bankAccountPort.save(sourceAccount);
-
-            // If destination account is internal, update its balance
-            if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
-                bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
-                        .ifPresent(dest -> {
-                            dest.setCurrentBalance(dest.getCurrentBalance().add(transfer.getAmount()));
-                            bankAccountPort.save(dest);
-                        });
-            }
-
-            transfer.setTransferStatus(TransferStatus.EXECUTED);
-            Transfer saved = transferPort.save(transfer);
-
-            registerAuditLog(saved, sourceAccount, null, "PENDING", "EXECUTED",
-                    originBalanceBefore, sourceAccount.getCurrentBalance(),
-                    transfer.getCreatorUserId(), "CLIENT");
-
+            registerAuditLog(saved, sourceAccount, destinationAccount,
+                    "PENDING", "AWAITING_APPROVAL",
+                    null, null, null, null,
+                    transfer.getCreatorUserId(), "COMPANY_EMPLOYEE");
             return saved;
         }
+
+        // Monto bajo: ejecutar inmediatamente — validar saldo suficiente
+        if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
+            throw new InsufficientBalanceException(
+                    sourceAccount.getCurrentBalance(), transfer.getAmount());
+        }
+
+        BigDecimal originBalanceBefore = sourceAccount.getCurrentBalance();
+        BigDecimal destinationBalanceBefore = destinationAccount != null ? destinationAccount.getCurrentBalance() : null;
+
+        sourceAccount.setCurrentBalance(originBalanceBefore.subtract(transfer.getAmount()));
+        bankAccountPort.save(sourceAccount);
+
+        if (destinationAccount != null) {
+            BigDecimal safeDestBefore = destinationBalanceBefore != null ? destinationBalanceBefore : BigDecimal.ZERO;
+            destinationAccount.setCurrentBalance(safeDestBefore.add(transfer.getAmount()));
+            bankAccountPort.save(destinationAccount);
+        }
+
+        transfer.setTransferStatus(TransferStatus.EXECUTED);
+        Transfer saved = transferPort.save(transfer);
+
+        registerAuditLog(saved, sourceAccount, destinationAccount,
+                "PENDING", "EXECUTED",
+                originBalanceBefore, sourceAccount.getCurrentBalance(),
+                destinationBalanceBefore,
+                destinationAccount != null ? destinationAccount.getCurrentBalance() : null,
+                transfer.getCreatorUserId(), "CLIENT");
+
+        return saved;
     }
 
     private void registerAuditLog(Transfer transfer, BankAccount sourceAccount,
                                    BankAccount destAccount, String prevStatus, String newStatus,
-                                   BigDecimal balanceBefore, BigDecimal balanceAfter,
+                                   BigDecimal sourceBalanceBefore, BigDecimal sourceBalanceAfter,
+                                   BigDecimal destinationBalanceBefore, BigDecimal destinationBalanceAfter,
                                    Long userId, String role) {
         AuditLog log = new AuditLog();
-        // Use TRANSFER_INITIATED for pending approvals, TRANSFER_EXECUTED for immediate ones
         boolean isExecuted = "EXECUTED".equals(newStatus);
         log.setOperationType(isExecuted ? OperationType.TRANSFER_EXECUTED : OperationType.TRANSFER_INITIATED);
         log.setOperationDateTime(LocalDateTime.now());
@@ -124,15 +131,16 @@ public class CreateTransfer {
         details.put("transferId", transfer.getTransferId());
         details.put("monto", transfer.getAmount());
         details.put("cuentaOrigen", sourceAccount.getAccountNumber());
+        details.put("cuentaDestino", destAccount != null ? destAccount.getAccountNumber() : null);
         details.put("estadoAnterior", prevStatus);
         details.put("estadoNuevo", newStatus);
-        // ── Snapshot de Saldos (obligatorio) ──
-        if (balanceBefore != null) details.put("saldoOrigen_Antes", balanceBefore);
-        if (balanceAfter != null) details.put("saldoOrigen_Despues", balanceAfter);
+        if (sourceBalanceBefore != null)      details.put("saldoOrigen_Antes", sourceBalanceBefore);
+        if (sourceBalanceAfter != null)       details.put("saldoOrigen_Despues", sourceBalanceAfter);
+        if (destinationBalanceBefore != null) details.put("saldoDestino_Antes", destinationBalanceBefore);
+        if (destinationBalanceAfter != null)  details.put("saldoDestino_Despues", destinationBalanceAfter);
         details.put("fechaHoraOperacion", LocalDateTime.now().toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);
     }
 }
-

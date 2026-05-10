@@ -15,10 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Approves a high-value transfer that is AWAITING_APPROVAL.
- * Only a COMPANY_SUPERVISOR should invoke this service.
- * Validates: not expired, sufficient balance.
- * Transitions: AWAITING_APPROVAL -> EXECUTED
+ * Aprueba una transferencia empresarial en estado AWAITING_APPROVAL.
+ * Solo el rol COMPANY_SUPERVISOR puede invocar este servicio.
+ * Transicion: AWAITING_APPROVAL -> EXECUTED
  */
 public class ApproveTransferService {
 
@@ -37,63 +36,64 @@ public class ApproveTransferService {
 
     @Transactional
     public Transfer approve(Long transferId, Long supervisorUserId, String supervisorRole) {
-        // 1. Find transfer
-        Transfer transfer = transferPort.findById(transferId)
-                .orElseThrow(() -> new NotFoundException("Transfer not found with ID: " + transferId));
 
-        // 2. Validate status is AWAITING_APPROVAL
+        Transfer transfer = transferPort.findById(transferId)
+                .orElseThrow(() -> new NotFoundException("Transferencia no encontrada con ID: " + transferId));
+
         if (transfer.getTransferStatus() != TransferStatus.AWAITING_APPROVAL) {
-            throw new IllegalStateException("Transfer cannot be approved. Current status: "
-                    + transfer.getTransferStatus() + ". Expected: AWAITING_APPROVAL");
+            throw new IllegalStateException("La transferencia no puede ser aprobada. Estado actual: "
+                    + transfer.getTransferStatus() + ". Estado requerido: AWAITING_APPROVAL");
         }
 
-        // 3. Check if not expired (must be within 60 minutes)
+        // Ventana de aprobacion de 60 minutos
         LocalDateTime expirationTime = transfer.getCreationDateTime().plusMinutes(APPROVAL_TIMEOUT_MINUTES);
         if (LocalDateTime.now().isAfter(expirationTime)) {
-            // Auto-expire
             transfer.setTransferStatus(TransferStatus.EXPIRED);
             transferPort.save(transfer);
-            throw new IllegalStateException("Transfer has expired. It was created at "
-                    + transfer.getCreationDateTime() + " and the 60-minute window has passed.");
+            throw new IllegalStateException("La transferencia ha expirado. Fue creada en "
+                    + transfer.getCreationDateTime() + " y ya paso la ventana de 60 minutos.");
         }
 
-        // 4. Find source account and validate balance
         BankAccount sourceAccount = bankAccountPort.findByAccountNumber(
                         transfer.getSourceAccount().getAccountNumber())
-                .orElseThrow(() -> new NotFoundException("Source account not found."));
+                .orElseThrow(() -> new NotFoundException("Cuenta origen no encontrada."));
 
+        // Cuenta debe estar ACTIVA
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new AccountBlockedException(
                     sourceAccount.getAccountNumber(), sourceAccount.getAccountStatus().name());
         }
 
+        // Saldo suficiente
         if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
             throw new InsufficientBalanceException(
                     sourceAccount.getCurrentBalance(), transfer.getAmount());
         }
 
         BigDecimal sourceBalanceBefore = sourceAccount.getCurrentBalance();
-
-        // 5. Execute: deduct from source
         sourceAccount.setCurrentBalance(sourceBalanceBefore.subtract(transfer.getAmount()));
         bankAccountPort.save(sourceAccount);
 
-        // 6. Add to destination (if internal)
+        BigDecimal destinationBalanceBefore = null;
+        BigDecimal destinationBalanceAfter = null;
+        String destinationAccountNumber = null;
+
         if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
-            bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
-                    .ifPresent(dest -> {
-                        dest.setCurrentBalance(dest.getCurrentBalance().add(transfer.getAmount()));
-                        bankAccountPort.save(dest);
-                    });
+            BankAccount destination = bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
+                    .orElseThrow(() -> new NotFoundException("Cuenta destino no encontrada."));
+            destinationBalanceBefore = destination.getCurrentBalance();
+            destination.setCurrentBalance(destinationBalanceBefore.add(transfer.getAmount()));
+            bankAccountPort.save(destination);
+            destinationBalanceAfter = destination.getCurrentBalance();
+            destinationAccountNumber = destination.getAccountNumber();
         }
 
-        // 7. Update transfer
         transfer.setTransferStatus(TransferStatus.EXECUTED);
         transfer.setApprovalDateTime(LocalDateTime.now());
         transfer.setApproverUserId(supervisorUserId);
         Transfer savedTransfer = transferPort.save(transfer);
 
-        // 8. Register in audit log
+        // Bitacora NoSQL — snapshot de saldos obligatorio
         AuditLog log = new AuditLog();
         log.setOperationType(OperationType.TRANSFER_EXECUTED);
         log.setOperationDateTime(LocalDateTime.now());
@@ -109,14 +109,15 @@ public class ApproveTransferService {
         details.put("estadoNuevo", "EXECUTED");
         details.put("monto", transfer.getAmount());
         details.put("cuentaOrigen", sourceAccount.getAccountNumber());
-        // ── Snapshot de Saldos (obligatorio) ──
+        details.put("cuentaDestino", destinationAccountNumber);
         details.put("saldoOrigen_Antes", sourceBalanceBefore);
         details.put("saldoOrigen_Despues", sourceAccount.getCurrentBalance());
+        details.put("saldoDestino_Antes", destinationBalanceBefore);
+        details.put("saldoDestino_Despues", destinationBalanceAfter);
         details.put("fechaAprobacion", LocalDateTime.now().toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);
-
         return savedTransfer;
     }
 }

@@ -1,6 +1,8 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
 import gestiondeunbanco.wilmervega.domain.models.User;
+import gestiondeunbanco.wilmervega.domain.models.SystemRole;
+import gestiondeunbanco.wilmervega.domain.models.UserStatus;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 
 public class CreateUser {
@@ -27,6 +29,28 @@ public class CreateUser {
         if (userPort.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
+
+        if (user.getSystemRole() == null) {
+            throw new IllegalArgumentException("System role is required");
+        }
+
+        if (requiresRelatedClient(user.getSystemRole())) {
+            if (user.getRelatedClient() == null || user.getRelatedClient().getId() == null) {
+                throw new IllegalArgumentException("Related client ID is required for this role");
+            }
+        }
+
+        if (user.getUserStatus() == null) {
+            user.setUserStatus(UserStatus.ACTIVE);
+        }
+
         return userPort.save(user);
+    }
+
+    private boolean requiresRelatedClient(SystemRole role) {
+        return role == SystemRole.NATURAL_CLIENT
+                || role == SystemRole.COMPANY_CLIENT
+                || role == SystemRole.COMPANY_EMPLOYEE
+                || role == SystemRole.COMPANY_SUPERVISOR;
     }
 }

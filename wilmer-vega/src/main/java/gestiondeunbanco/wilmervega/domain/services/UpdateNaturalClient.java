@@ -16,6 +16,12 @@ public class UpdateNaturalClient {
         if (naturalClient == null || naturalClient.getId() == null) {
             throw new IllegalArgumentException("NaturalClient or ID cannot be null for update");
         }
+        if (naturalClient.getDocumentNumber() == null || naturalClient.getDocumentNumber().isBlank()) {
+            throw new IllegalArgumentException("Document number is required");
+        }
+        if (!naturalClient.getDocumentNumber().matches("^\\d+$")) {
+            throw new IllegalArgumentException("Document number must be strictly numeric");
+        }
         if (naturalClientPort.findById(naturalClient.getId()).isEmpty()) {
             throw new NotFoundException("NaturalClient not found for update");
         }

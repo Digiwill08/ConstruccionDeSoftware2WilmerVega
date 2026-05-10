@@ -33,7 +33,7 @@ public class CreateCompanyClient {
             throw new IllegalArgumentException("La direccion es obligatoria");
         }
 
-        // ── ID_Identificacion: obligatorio y estrictamente numerico ──
+        // ID_Identificacion: obligatorio y estrictamente numerico
         String docNum = companyClient.getDocumentNumber();
         if (docNum == null || docNum.isBlank()) {
             throw new IllegalArgumentException("El numero de documento de la empresa es obligatorio");
@@ -43,7 +43,7 @@ public class CreateCompanyClient {
                     "El numero de documento debe ser estrictamente numerico. Valor recibido: '" + docNum + "'");
         }
 
-        // ── Unicidad absoluta entre todos los tipos de cliente ──
+        // Unicidad absoluta entre todos los tipos de cliente
         if (companyClientPort.existsByDocumentNumber(docNum)) {
             throw new IllegalArgumentException("Ya existe una empresa con el numero de documento: " + docNum);
         }
@@ -51,7 +51,7 @@ public class CreateCompanyClient {
             throw new IllegalArgumentException("Ya existe un cliente natural con el numero de documento: " + docNum);
         }
 
-        // ── Representante legal obligatorio y existente ──
+        // Representante legal obligatorio y existente
         if (companyClient.getLegalRepresentative() == null
                 || companyClient.getLegalRepresentative().getId() == null) {
             throw new IllegalArgumentException("El representante legal es obligatorio");

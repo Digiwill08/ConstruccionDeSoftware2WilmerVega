@@ -3,6 +3,7 @@ package gestiondeunbanco.wilmervega.application.adapters.api.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class CompanyClientRequest {
     private String businessName;
 
     @NotBlank(message = "El numero de documento es obligatorio")
+    @Pattern(regexp = "^[0-9]+$", message = "El numero de documento debe contener solo numeros")
     private String documentNumber;
 
     @NotBlank(message = "El email es obligatorio")

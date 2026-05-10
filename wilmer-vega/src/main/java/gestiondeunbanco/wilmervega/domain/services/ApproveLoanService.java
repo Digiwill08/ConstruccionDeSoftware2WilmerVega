@@ -12,11 +12,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Approves a loan that is UNDER_REVIEW.
- * Only an INTERNAL_ANALYST should invoke this service.
- * Transitions: UNDER_REVIEW -> APPROVED
- */
 public class ApproveLoanService {
 
     private final LoanPort loanPort;
@@ -30,12 +25,12 @@ public class ApproveLoanService {
     @Transactional
     public Loan approve(Long loanId, Long analystUserId, String analystRole) {
         Loan loan = loanPort.findById(loanId)
-                .orElseThrow(() -> new NotFoundException("Loan not found with ID: " + loanId));
+                .orElseThrow(() -> new NotFoundException("Prestamo no encontrado con ID: " + loanId));
 
         if (loan.getLoanStatus() != LoanStatus.UNDER_REVIEW) {
             throw new IllegalStateException(
-                    "Loan cannot be approved. Current status: " + loan.getLoanStatus()
-                            + ". Expected: UNDER_REVIEW");
+                    "El prestamo no puede ser aprobado. Estado actual: " + loan.getLoanStatus()
+                    + ". Estado requerido: UNDER_REVIEW");
         }
 
         if (loan.getApprovedAmount() == null
@@ -46,7 +41,6 @@ public class ApproveLoanService {
         loan.setLoanStatus(LoanStatus.APPROVED);
         loan.setApprovalDate(LocalDate.now());
         loan.setApprovedByUserId(analystUserId);
-
         Loan savedLoan = loanPort.save(loan);
 
         AuditLog log = new AuditLog();

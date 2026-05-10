@@ -15,4 +15,5 @@ public interface TransferPort {
     List<Transfer> findByStatus(TransferStatus status);
     List<Transfer> findAwaitingApprovalOlderThan(LocalDateTime cutoffTime);
     List<Transfer> findBySourceAccountNumber(String accountNumber);
+    List<Transfer> findBySourceHolderId(Long holderId);
 }

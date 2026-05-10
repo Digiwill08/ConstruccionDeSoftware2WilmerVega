@@ -44,6 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extractAllClaims(token);
             String username = claims.getSubject();
             String role = claims.get("role", String.class);
+            Long userId = claims.get("userId", Long.class);
+            Long clientId = claims.get("clientId", Long.class);
 
             if (username != null && role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken authentication =
@@ -55,11 +57,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                // Store client context for access control validation
+                ClientAccessContext.setContext(userId, clientId, role);
             }
         } catch (Exception ignored) {
             SecurityContextHolder.clearContext();
+            ClientAccessContext.clear();
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Clean up thread-local context after request processing
+            ClientAccessContext.clear();
+        }
     }
 }

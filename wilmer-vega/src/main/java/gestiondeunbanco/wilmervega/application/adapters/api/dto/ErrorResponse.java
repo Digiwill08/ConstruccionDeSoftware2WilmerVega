@@ -31,4 +31,9 @@ public class ErrorResponse {
         this.error = error;
         this.fields = fields;
     }
+
+    /** Alias para compatibilidad con clientes/pruebas que esperan la propiedad "message". */
+    public String getMessage() {
+        return error;
+    }
 }

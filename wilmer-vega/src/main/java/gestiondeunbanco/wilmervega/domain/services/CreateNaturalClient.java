@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.time.Period;
 
 /**
- * Domain service for creating Natural Person clients.
- * Security rules enforced here (Blindaje de Identidad):
- *  1. documentNumber must be strictly numeric (ID_Identificacion)
- *  2. documentNumber must be unique across ALL client types
- *  3. Client must be at least 18 years old
+ * Servicio de dominio para crear clientes Persona Natural.
+ * Reglas de seguridad (Blindaje de Identidad):
+ *  1. documentNumber debe ser estrictamente numerico
+ *  2. documentNumber unico en TODOS los tipos de cliente
+ *  3. Cliente debe ser mayor de 18 años
  */
 public class CreateNaturalClient {
 
@@ -32,7 +32,7 @@ public class CreateNaturalClient {
             throw new IllegalArgumentException("El nombre completo del cliente natural es obligatorio");
         }
 
-        // ── Regla 1: ID_Identificacion estrictamente numérico ──────────────────
+        // Regla 1: ID_Identificacion estrictamente numerico
         String docNum = naturalClient.getDocumentNumber();
         if (docNum == null || docNum.isBlank()) {
             throw new IllegalArgumentException("El numero de documento es obligatorio");
@@ -42,7 +42,7 @@ public class CreateNaturalClient {
                     "El numero de documento debe ser estrictamente numerico. Valor recibido: '" + docNum + "'");
         }
 
-        // ── Regla 2: Unicidad absoluta del documento en TODOS los tipos de cliente ──
+        // Regla 2: Unicidad absoluta del documento en TODOS los tipos de cliente
         if (naturalClientPort.existsByDocumentNumber(docNum)) {
             throw new IllegalArgumentException(
                     "Ya existe un cliente natural con el numero de documento: " + docNum);
@@ -52,17 +52,17 @@ public class CreateNaturalClient {
                     "Ya existe un cliente empresa con el numero de documento: " + docNum);
         }
 
-        // ── Regla 3: Restriccion de Edad (>= 18 años) ─────────────────────────
+        // Regla 3: Restriccion de Edad (>= 18 anos)
         if (naturalClient.getBirthDate() == null) {
             throw new IllegalArgumentException("La fecha de nacimiento del cliente natural es obligatoria");
         }
         int age = Period.between(naturalClient.getBirthDate(), LocalDate.now()).getYears();
         if (age < 18) {
             throw new IllegalArgumentException(
-                    "El cliente debe ser mayor de 18 años. Edad calculada: " + age + " años");
+                    "El cliente debe ser mayor de 18 anos. Edad calculada: " + age + " anos");
         }
 
-        // ── Campos de contacto obligatorios ────────────────────────────────────
+        // Campos de contacto obligatorios
         if (naturalClient.getEmail() == null || naturalClient.getEmail().isBlank()
                 || !naturalClient.getEmail().contains("@")) {
             throw new IllegalArgumentException("Se requiere un email valido");

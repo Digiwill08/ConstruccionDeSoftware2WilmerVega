@@ -1,5 +1,6 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
@@ -7,14 +8,13 @@ import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.ports.CompanyClientPort;
 import gestiondeunbanco.wilmervega.domain.ports.NaturalClientPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * Domain service for creating bank accounts.
- * Security rules (Vinculo de Propiedad):
+ * Servicio de dominio para crear cuentas bancarias.
+ * Reglas de seguridad (Vinculo de Propiedad):
  *  - ID_Titular obligatorio y debe referenciar a un cliente EXISTENTE y ACTIVO
  *  - Prohibida la creacion de cuentas sin dueno rastreable
  */
@@ -56,7 +56,7 @@ public class CreateBankAccount {
             throw new IllegalArgumentException("El saldo inicial debe ser mayor o igual a cero");
         }
 
-        // ── Vinculo de Propiedad: titular obligatorio y rastreable ──────────────
+        // Vinculo de Propiedad: titular obligatorio y rastreable
         if (bankAccount.getHolder() == null || bankAccount.getHolder().getId() == null) {
             throw new IllegalArgumentException(
                     "Toda cuenta bancaria debe tener un titular. Creacion sin dueno rastreable es prohibida.");
@@ -64,7 +64,6 @@ public class CreateBankAccount {
 
         Long holderId = bankAccount.getHolder().getId();
 
-        // Verifica existencia del titular (Natural o Empresa)
         Optional<NaturalClient> naturalOpt = naturalClientPort.findById(holderId);
         Optional<CompanyClient> companyOpt = companyClientPort.findById(holderId);
 
@@ -74,7 +73,7 @@ public class CreateBankAccount {
                     + ". No se puede crear una cuenta sin titular existente.");
         }
 
-        // ── Unicidad del numero de cuenta ──────────────────────────────────
+        // Unicidad del numero de cuenta
         if (bankAccountPort.existsByAccountNumber(bankAccount.getAccountNumber())) {
             throw new IllegalArgumentException(
                     "Ya existe una cuenta con el numero: " + bankAccount.getAccountNumber());

@@ -11,11 +11,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Rejects a loan that is UNDER_REVIEW.
- * Only an INTERNAL_ANALYST should invoke this service.
- * Transitions: UNDER_REVIEW -> REJECTED
- */
 public class RejectLoanService {
 
     private final LoanPort loanPort;
@@ -29,16 +24,15 @@ public class RejectLoanService {
     @Transactional
     public Loan reject(Long loanId, Long analystUserId, String analystRole, String reason) {
         Loan loan = loanPort.findById(loanId)
-                .orElseThrow(() -> new NotFoundException("Loan not found with ID: " + loanId));
+                .orElseThrow(() -> new NotFoundException("Prestamo no encontrado con ID: " + loanId));
 
         if (loan.getLoanStatus() != LoanStatus.UNDER_REVIEW) {
             throw new IllegalStateException(
-                    "Loan cannot be rejected. Current status: " + loan.getLoanStatus()
-                            + ". Expected: UNDER_REVIEW");
+                    "El prestamo no puede ser rechazado. Estado actual: " + loan.getLoanStatus()
+                    + ". Estado requerido: UNDER_REVIEW");
         }
 
         loan.setLoanStatus(LoanStatus.REJECTED);
-
         Loan savedLoan = loanPort.save(loan);
 
         AuditLog log = new AuditLog();

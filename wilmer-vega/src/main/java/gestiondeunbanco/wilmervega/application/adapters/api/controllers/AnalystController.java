@@ -1,6 +1,7 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
 import gestiondeunbanco.wilmervega.application.usecases.AnalystUseCase;
+import gestiondeunbanco.wilmervega.config.security.ClientAccessContext;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import lombok.RequiredArgsConstructor;
@@ -9,17 +10,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * REST controller para el rol INTERNAL_ANALYST.
  * Endpoints: /api/analyst/**
  *
- * Segregacion de Funciones (Seccion 3 - Prompt Maestro):
+ * Segregacion de Funciones:
  *  - Solo INTERNAL_ANALYST puede aprobar/rechazar/desembolsar prestamos
  *  - Solo INTERNAL_ANALYST puede consultar bitacoras de auditoria
- *  - TELLER_EMPLOYEE NO tiene acceso a estos endpoints
  */
 @RestController
 @RequestMapping("/api/analyst")
@@ -28,8 +27,6 @@ import java.util.Map;
 public class AnalystController {
 
     private final AnalystUseCase analystUseCase;
-
-    // --- Loans ---
 
     @GetMapping("/loans")
     public ResponseEntity<List<Loan>> getAllLoans() {
@@ -42,45 +39,46 @@ public class AnalystController {
     }
 
     @PostMapping("/loans/{id}/approve")
-    public ResponseEntity<Map<String, Object>> approveLoan(@PathVariable Long id,
-                                             @RequestParam Long analystUserId,
-                                             @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
+    public ResponseEntity<Map<String, Object>> approveLoan(
+            @PathVariable Long id,
+            @RequestParam Long analystUserId,
+            @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
         Loan saved = analystUseCase.approveLoan(id, analystUserId, role);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Prestamo aprobado correctamente");
-        response.put("id", saved.getLoanId());
-        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "message", "Prestamo aprobado correctamente",
+                "id", saved.getLoanId(),
+                "status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : ""
+        ));
     }
 
     @PostMapping("/loans/{id}/reject")
-    public ResponseEntity<Map<String, Object>> rejectLoan(@PathVariable Long id,
-                                            @RequestParam Long analystUserId,
-                                            @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
-                                            @RequestBody(required = false) Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> rejectLoan(
+            @PathVariable Long id,
+            @RequestParam Long analystUserId,
+            @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
+            @RequestBody(required = false) Map<String, String> body) {
         String reason = body != null ? body.get("reason") : null;
         Loan saved = analystUseCase.rejectLoan(id, analystUserId, role, reason);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Prestamo rechazado correctamente");
-        response.put("id", saved.getLoanId());
-        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "message", "Prestamo rechazado correctamente",
+                "id", saved.getLoanId(),
+                "status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : ""
+        ));
     }
 
     @PostMapping("/loans/{id}/disburse")
-    public ResponseEntity<Map<String, Object>> disburseLoan(@PathVariable Long id,
-                                              @RequestParam Long disbursementAccountId,
-                                              @RequestParam Long analystUserId,
-                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
+    public ResponseEntity<Map<String, Object>> disburseLoan(
+            @PathVariable Long id,
+            @RequestParam Long disbursementAccountId,
+            @RequestParam Long analystUserId,
+            @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
         Loan saved = analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("message", "Prestamo desembolsado correctamente");
-        response.put("id", saved.getLoanId());
-        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "message", "Prestamo desembolsado correctamente",
+                "id", saved.getLoanId(),
+                "status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : ""
+        ));
     }
-
-    // --- Audit Log ---
 
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {

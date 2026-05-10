@@ -3,11 +3,13 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountRequest;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.BankAccountResponse;
 import gestiondeunbanco.wilmervega.application.usecases.BankAccountUseCase;
+import gestiondeunbanco.wilmervega.config.security.ClientAccessContext;
 import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
 import gestiondeunbanco.wilmervega.domain.models.AccountType;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.Currency;
 import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
+import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,18 +43,24 @@ public class BankAccountController {
 
     @GetMapping
     public ResponseEntity<List<BankAccountResponse>> getAllMyAccounts(@RequestParam(required = false) Long holderId) {
-        List<BankAccount> accounts = holderId == null ? bankAccountUseCase.findAll() : bankAccountUseCase.findByHolderId(holderId);
+        Long effectiveHolderId = resolveEffectiveHolderId(holderId);
+        List<BankAccount> accounts = effectiveHolderId == null
+                ? bankAccountUseCase.findAll()
+                : bankAccountUseCase.findByHolderId(effectiveHolderId);
         return ResponseEntity.ok(accounts.stream().map(this::toResponse).collect(Collectors.toList()));
     }
 
     @GetMapping("/{accountNumber}")
     public ResponseEntity<BankAccountResponse> getAccountByNumber(@PathVariable String accountNumber) {
-        return ResponseEntity.ok(toResponse(bankAccountUseCase.findByAccountNumber(accountNumber)));
+        BankAccount account = bankAccountUseCase.findByAccountNumber(accountNumber);
+        enforceClientOwnership(account);
+        return ResponseEntity.ok(toResponse(account));
     }
 
     @GetMapping("/{accountId}/balance")
     public ResponseEntity<Object> getAccountBalance(@PathVariable Long accountId) {
         BankAccount account = bankAccountUseCase.findById(accountId);
+        enforceClientOwnership(account);
         return ResponseEntity.ok(account.getCurrentBalance());
     }
 
@@ -95,5 +103,38 @@ public class BankAccountController {
                 model.getAccountStatus() != null ? model.getAccountStatus().name() : null,
                 model.getOpeningDate() != null ? model.getOpeningDate().toString() : null
         );
+    }
+
+    private Long resolveEffectiveHolderId(Long requestedHolderId) {
+        if (!ClientAccessContext.isAuthenticated()) {
+            return requestedHolderId;
+        }
+
+        String role = ClientAccessContext.getCurrentRole();
+        if (role == null) {
+            return requestedHolderId;
+        }
+
+        boolean isClientRole = role.equals(SystemRole.NATURAL_CLIENT.name())
+                || role.equals(SystemRole.COMPANY_CLIENT.name())
+                || role.equals(SystemRole.COMPANY_EMPLOYEE.name());
+
+        if (isClientRole) {
+            Long currentClientId = ClientAccessContext.getCurrentClientId();
+            if (currentClientId == null) {
+                throw new IllegalStateException("Authenticated client does not have related client ID");
+            }
+            return currentClientId;
+        }
+
+        return requestedHolderId;
+    }
+
+    private void enforceClientOwnership(BankAccount account) {
+        Long effectiveHolderId = resolveEffectiveHolderId(account != null && account.getHolder() != null ? account.getHolder().getId() : null);
+        Long accountHolderId = account != null && account.getHolder() != null ? account.getHolder().getId() : null;
+        if (effectiveHolderId != null && accountHolderId != null && !effectiveHolderId.equals(accountHolderId)) {
+            throw new IllegalStateException("No autorizado para acceder a cuentas de otros titulares");
+        }
     }
 }
