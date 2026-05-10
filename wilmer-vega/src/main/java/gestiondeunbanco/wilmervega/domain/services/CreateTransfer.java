@@ -1,5 +1,7 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
+import gestiondeunbanco.wilmervega.domain.exceptions.InsufficientBalanceException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
@@ -55,9 +57,10 @@ public class CreateTransfer {
         BankAccount sourceAccount = bankAccountPort.findByAccountNumber(transfer.getSourceAccount().getAccountNumber())
                 .orElseThrow(() -> new NotFoundException("Source account not found: " + transfer.getSourceAccount().getAccountNumber()));
 
-        // 4. Validate source account is ACTIVE
+        // 4. Validar que la cuenta origen este ACTIVA (no bloqueada ni cancelada)
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
-            throw new IllegalStateException("Source account is not ACTIVE. Status: " + sourceAccount.getAccountStatus());
+            throw new AccountBlockedException(
+                    sourceAccount.getAccountNumber(), sourceAccount.getAccountStatus().name());
         }
 
         // 5. Set creation time
@@ -74,10 +77,10 @@ public class CreateTransfer {
 
             return saved;
         } else {
-            // Low amount: execute immediately
+            // Monto bajo: ejecutar inmediatamente - validar saldo suficiente
             if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
-                throw new IllegalStateException("Insufficient balance in source account. Available: "
-                        + sourceAccount.getCurrentBalance() + ", Required: " + transfer.getAmount());
+                throw new InsufficientBalanceException(
+                        sourceAccount.getCurrentBalance(), transfer.getAmount());
             }
 
             BigDecimal originBalanceBefore = sourceAccount.getCurrentBalance();
@@ -119,12 +122,14 @@ public class CreateTransfer {
 
         Map<String, Object> details = new HashMap<>();
         details.put("transferId", transfer.getTransferId());
-        details.put("amount", transfer.getAmount());
-        details.put("sourceAccount", sourceAccount.getAccountNumber());
-        details.put("previousStatus", prevStatus);
-        details.put("newStatus", newStatus);
-        if (balanceBefore != null) details.put("sourceBalanceBefore", balanceBefore);
-        if (balanceAfter != null) details.put("sourceBalanceAfter", balanceAfter);
+        details.put("monto", transfer.getAmount());
+        details.put("cuentaOrigen", sourceAccount.getAccountNumber());
+        details.put("estadoAnterior", prevStatus);
+        details.put("estadoNuevo", newStatus);
+        // ── Snapshot de Saldos (obligatorio) ──
+        if (balanceBefore != null) details.put("saldoOrigen_Antes", balanceBefore);
+        if (balanceAfter != null) details.put("saldoOrigen_Despues", balanceAfter);
+        details.put("fechaHoraOperacion", LocalDateTime.now().toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);

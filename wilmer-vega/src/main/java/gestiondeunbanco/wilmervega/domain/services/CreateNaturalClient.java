@@ -7,6 +7,13 @@ import gestiondeunbanco.wilmervega.domain.ports.NaturalClientPort;
 import java.time.LocalDate;
 import java.time.Period;
 
+/**
+ * Domain service for creating Natural Person clients.
+ * Security rules enforced here (Blindaje de Identidad):
+ *  1. documentNumber must be strictly numeric (ID_Identificacion)
+ *  2. documentNumber must be unique across ALL client types
+ *  3. Client must be at least 18 years old
+ */
 public class CreateNaturalClient {
 
     private final NaturalClientPort naturalClientPort;
@@ -19,35 +26,57 @@ public class CreateNaturalClient {
 
     public NaturalClient save(NaturalClient naturalClient) {
         if (naturalClient == null) {
-            throw new IllegalArgumentException("NaturalClient cannot be null");
+            throw new IllegalArgumentException("NaturalClient no puede ser nulo");
         }
         if (naturalClient.getFullName() == null || naturalClient.getFullName().isBlank()) {
-            throw new IllegalArgumentException("Natural client full name is required");
+            throw new IllegalArgumentException("El nombre completo del cliente natural es obligatorio");
         }
+
+        // ── Regla 1: ID_Identificacion estrictamente numérico ──────────────────
+        String docNum = naturalClient.getDocumentNumber();
+        if (docNum == null || docNum.isBlank()) {
+            throw new IllegalArgumentException("El numero de documento es obligatorio");
+        }
+        if (!docNum.matches("^\\d+$")) {
+            throw new IllegalArgumentException(
+                    "El numero de documento debe ser estrictamente numerico. Valor recibido: '" + docNum + "'");
+        }
+
+        // ── Regla 2: Unicidad absoluta del documento en TODOS los tipos de cliente ──
+        if (naturalClientPort.existsByDocumentNumber(docNum)) {
+            throw new IllegalArgumentException(
+                    "Ya existe un cliente natural con el numero de documento: " + docNum);
+        }
+        if (companyClientPort.existsByDocumentNumber(docNum)) {
+            throw new IllegalArgumentException(
+                    "Ya existe un cliente empresa con el numero de documento: " + docNum);
+        }
+
+        // ── Regla 3: Restriccion de Edad (>= 18 años) ─────────────────────────
         if (naturalClient.getBirthDate() == null) {
-            throw new IllegalArgumentException("Natural client birth date is required");
+            throw new IllegalArgumentException("La fecha de nacimiento del cliente natural es obligatoria");
         }
-        if (Period.between(naturalClient.getBirthDate(), LocalDate.now()).getYears() < 18) {
-            throw new IllegalArgumentException("Natural client must be at least 18 years old");
+        int age = Period.between(naturalClient.getBirthDate(), LocalDate.now()).getYears();
+        if (age < 18) {
+            throw new IllegalArgumentException(
+                    "El cliente debe ser mayor de 18 años. Edad calculada: " + age + " años");
         }
-        if (naturalClient.getEmail() == null || naturalClient.getEmail().isBlank() || !naturalClient.getEmail().contains("@")) {
-            throw new IllegalArgumentException("Valid email is required");
+
+        // ── Campos de contacto obligatorios ────────────────────────────────────
+        if (naturalClient.getEmail() == null || naturalClient.getEmail().isBlank()
+                || !naturalClient.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Se requiere un email valido");
         }
         if (naturalClient.getPhone() == null || naturalClient.getPhone().isBlank()) {
-            throw new IllegalArgumentException("Phone is required");
+            throw new IllegalArgumentException("El telefono es obligatorio");
         }
         if (naturalClient.getAddress() == null || naturalClient.getAddress().isBlank()) {
-            throw new IllegalArgumentException("Address is required");
+            throw new IllegalArgumentException("La direccion es obligatoria");
         }
         if (naturalClient.getRole() == null) {
-            throw new IllegalArgumentException("Natural client role is required");
+            throw new IllegalArgumentException("El rol del cliente natural es obligatorio");
         }
-        if (naturalClient.getDocumentNumber() != null && naturalClientPort.existsByDocumentNumber(naturalClient.getDocumentNumber())) {
-            throw new IllegalArgumentException("A natural client with this document number already exists");
-        }
-        if (naturalClient.getDocumentNumber() != null && companyClientPort.existsByDocumentNumber(naturalClient.getDocumentNumber())) {
-            throw new IllegalArgumentException("A company client with this document number already exists");
-        }
+
         return naturalClientPort.save(naturalClient);
     }
 }

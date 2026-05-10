@@ -1,5 +1,7 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
+import gestiondeunbanco.wilmervega.domain.exceptions.InsufficientBalanceException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
@@ -61,12 +63,13 @@ public class ApproveTransferService {
                 .orElseThrow(() -> new NotFoundException("Source account not found."));
 
         if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
-            throw new IllegalStateException("Source account is no longer ACTIVE.");
+            throw new AccountBlockedException(
+                    sourceAccount.getAccountNumber(), sourceAccount.getAccountStatus().name());
         }
 
         if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
-            throw new IllegalStateException("Insufficient balance. Available: "
-                    + sourceAccount.getCurrentBalance() + ", Required: " + transfer.getAmount());
+            throw new InsufficientBalanceException(
+                    sourceAccount.getCurrentBalance(), transfer.getAmount());
         }
 
         BigDecimal sourceBalanceBefore = sourceAccount.getCurrentBalance();
@@ -101,13 +104,15 @@ public class ApproveTransferService {
         Map<String, Object> details = new HashMap<>();
         details.put("transferId", transferId);
         details.put("supervisorUserId", supervisorUserId);
-        details.put("previousStatus", "AWAITING_APPROVAL");
-        details.put("newStatus", "EXECUTED");
-        details.put("amount", transfer.getAmount());
-        details.put("sourceAccount", sourceAccount.getAccountNumber());
-        details.put("sourceBalanceBefore", sourceBalanceBefore);
-        details.put("sourceBalanceAfter", sourceAccount.getCurrentBalance());
-        details.put("approvalDateTime", LocalDateTime.now().toString());
+        details.put("supervisorRole", supervisorRole);
+        details.put("estadoAnterior", "AWAITING_APPROVAL");
+        details.put("estadoNuevo", "EXECUTED");
+        details.put("monto", transfer.getAmount());
+        details.put("cuentaOrigen", sourceAccount.getAccountNumber());
+        // ── Snapshot de Saldos (obligatorio) ──
+        details.put("saldoOrigen_Antes", sourceBalanceBefore);
+        details.put("saldoOrigen_Despues", sourceAccount.getCurrentBalance());
+        details.put("fechaAprobacion", LocalDateTime.now().toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);

@@ -1,6 +1,8 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
+import gestiondeunbanco.wilmervega.domain.exceptions.OwnershipViolationException;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
@@ -14,13 +16,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Disburses an APPROVED loan to the client's bank account.
- * Transitions: APPROVED -> DISBURSED
- * Business rules:
- *   - Loan must be APPROVED
- *   - disbursementAccount must be defined and ACTIVE
- *   - approvedAmount must be > 0
- *   - Increases the balance of the destination account
+ * Desembolsa un prestamo APROBADO a la cuenta bancaria del cliente.
+ * Transicion de estado: APPROVED -> DISBURSED
+ *
+ * Reglas de negocio (Prompt Maestro - Seccion 2):
+ *   - El prestamo debe estar en estado 'APPROVED'
+ *   - El monto aprobado debe ser mayor a cero
+ *   - La Cuenta_Destino_Desembolso debe pertenecer al cliente solicitante
+ *   - La cuenta destino debe estar en estado ACTIVO
+ *   - Operacion atomica con rollback automatico (@Transactional)
+ *   - Snapshot de saldos antes/despues registrado en bitacora NoSQL
  */
 public class DisburseLoanService {
 
@@ -37,43 +42,61 @@ public class DisburseLoanService {
 
     @Transactional
     public Loan disburse(Long loanId, Long disbursementAccountId, Long analystUserId, String analystRole) {
-        // 1. Find loan
-        Loan loan = loanPort.findById(loanId)
-                .orElseThrow(() -> new NotFoundException("Loan not found with ID: " + loanId));
 
-        // 2. Validate status is APPROVED
+        // 1. Buscar prestamo
+        Loan loan = loanPort.findById(loanId)
+                .orElseThrow(() -> new NotFoundException("Prestamo no encontrado con ID: " + loanId));
+
+        // 2. Validar estado APPROVED
         if (loan.getLoanStatus() != LoanStatus.APPROVED) {
             throw new IllegalStateException(
-                    "Loan cannot be disbursed. Current status: " + loan.getLoanStatus()
-                            + ". Expected: APPROVED");
+                    "El prestamo no puede ser desembolsado. Estado actual: " + loan.getLoanStatus()
+                    + ". Estado requerido: APPROVED");
         }
 
-        // 3. Validate approvedAmount > 0
+        // 3. Validar monto aprobado > 0
         if (loan.getApprovedAmount() == null || loan.getApprovedAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Approved amount must be greater than zero for disbursement.");
+            throw new IllegalArgumentException(
+                    "El monto aprobado debe ser mayor a cero para poder realizar el desembolso.");
         }
 
-        // 4. Find and validate disbursement account
+        // 4. Buscar y validar cuenta de desembolso
         BankAccount account = bankAccountPort.findById(disbursementAccountId)
-                .orElseThrow(() -> new NotFoundException("Disbursement account not found with ID: " + disbursementAccountId));
+                .orElseThrow(() -> new NotFoundException(
+                        "Cuenta de desembolso no encontrada con ID: " + disbursementAccountId));
 
+        // 5. Validar que la cuenta pertenezca al cliente solicitante del prestamo
+        //    (Cuenta_Destino_Desembolso debe ser del cliente solicitante)
+        if (loan.getClient() != null && loan.getClient().getId() != null
+                && account.getHolder() != null && account.getHolder().getId() != null) {
+            if (!loan.getClient().getId().equals(account.getHolder().getId())) {
+                throw new OwnershipViolationException(
+                        "La cuenta de desembolso (ID: " + disbursementAccountId
+                        + ") no pertenece al cliente solicitante del prestamo (Cliente ID: "
+                        + loan.getClient().getId() + "). Operacion rechazada.");
+            }
+        }
+
+        // 6. Validar que la cuenta este ACTIVA (no bloqueada ni cancelada)
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
-            throw new IllegalStateException("Disbursement account is not ACTIVE. Status: " + account.getAccountStatus());
+            throw new AccountBlockedException(
+                    account.getAccountNumber(), account.getAccountStatus().name());
         }
 
         BigDecimal balanceBefore = account.getCurrentBalance();
 
-        // 5. Increase account balance
+        // 7. Acreditar saldo en la cuenta destino (operacion atomica)
         account.setCurrentBalance(balanceBefore.add(loan.getApprovedAmount()));
         bankAccountPort.save(account);
 
-        // 6. Update loan
+        // 8. Actualizar estado del prestamo
         loan.setLoanStatus(LoanStatus.DISBURSED);
         loan.setDisbursementDate(LocalDate.now());
         loan.setDisbursementAccount(account);
         Loan savedLoan = loanPort.save(loan);
 
-        // 7. Register in audit log (NoSQL)
+        // 9. Registrar en bitacora NoSQL (Trazabilidad Inmutable)
+        //    Incluye snapshot de saldos antes/despues
         AuditLog log = new AuditLog();
         log.setOperationType(OperationType.LOAN_DISBURSEMENT);
         log.setOperationDateTime(LocalDateTime.now());
@@ -84,13 +107,17 @@ public class DisburseLoanService {
         Map<String, Object> details = new HashMap<>();
         details.put("loanId", loanId);
         details.put("analystUserId", analystUserId);
-        details.put("previousStatus", "APPROVED");
-        details.put("newStatus", "DISBURSED");
-        details.put("disbursedAmount", loan.getApprovedAmount());
-        details.put("destinationAccount", account.getAccountNumber());
-        details.put("balanceBefore", balanceBefore);
-        details.put("balanceAfter", account.getCurrentBalance());
-        details.put("disbursementDate", LocalDate.now().toString());
+        details.put("analystRole", analystRole);
+        details.put("estadoAnterior", "APPROVED");
+        details.put("estadoNuevo", "DISBURSED");
+        details.put("montoDesembolsado", loan.getApprovedAmount());
+        details.put("cuentaDestino", account.getAccountNumber());
+        details.put("titularCuentaId", account.getHolder() != null ? account.getHolder().getId() : null);
+        // ── Snapshot de Saldos (obligatorio por Prompt Maestro) ──
+        details.put("saldoAntes", balanceBefore);
+        details.put("saldoDespues", account.getCurrentBalance());
+        details.put("fechaDesembolso", LocalDate.now().toString());
+        details.put("fechaHoraOperacion", LocalDateTime.now().toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);

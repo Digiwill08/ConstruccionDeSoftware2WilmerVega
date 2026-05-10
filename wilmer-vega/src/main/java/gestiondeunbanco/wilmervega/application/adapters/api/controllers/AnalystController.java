@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,12 +13,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * REST controller for the INTERNAL_ANALYST role.
+ * REST controller para el rol INTERNAL_ANALYST.
  * Endpoints: /api/analyst/**
+ *
+ * Segregacion de Funciones (Seccion 3 - Prompt Maestro):
+ *  - Solo INTERNAL_ANALYST puede aprobar/rechazar/desembolsar prestamos
+ *  - Solo INTERNAL_ANALYST puede consultar bitacoras de auditoria
+ *  - TELLER_EMPLOYEE NO tiene acceso a estos endpoints
  */
 @RestController
 @RequestMapping("/api/analyst")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('INTERNAL_ANALYST')")
 public class AnalystController {
 
     private final AnalystUseCase analystUseCase;
@@ -38,16 +45,12 @@ public class AnalystController {
     public ResponseEntity<Map<String, Object>> approveLoan(@PathVariable Long id,
                                              @RequestParam Long analystUserId,
                                              @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        try {
-            Loan saved = analystUseCase.approveLoan(id, analystUserId, role);
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("message", "Prestamo aprobado correctamente");
-            response.put("id", saved.getLoanId());
-            response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-            return ResponseEntity.ok(response);
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+        Loan saved = analystUseCase.approveLoan(id, analystUserId, role);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Prestamo aprobado correctamente");
+        response.put("id", saved.getLoanId());
+        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/loans/{id}/reject")
@@ -55,17 +58,13 @@ public class AnalystController {
                                             @RequestParam Long analystUserId,
                                             @RequestParam(defaultValue = "INTERNAL_ANALYST") String role,
                                             @RequestBody(required = false) Map<String, String> body) {
-        try {
-            String reason = body != null ? body.get("reason") : null;
-            Loan saved = analystUseCase.rejectLoan(id, analystUserId, role, reason);
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("message", "Prestamo rechazado correctamente");
-            response.put("id", saved.getLoanId());
-            response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-            return ResponseEntity.ok(response);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+        String reason = body != null ? body.get("reason") : null;
+        Loan saved = analystUseCase.rejectLoan(id, analystUserId, role, reason);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Prestamo rechazado correctamente");
+        response.put("id", saved.getLoanId());
+        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/loans/{id}/disburse")
@@ -73,16 +72,12 @@ public class AnalystController {
                                               @RequestParam Long disbursementAccountId,
                                               @RequestParam Long analystUserId,
                                               @RequestParam(defaultValue = "INTERNAL_ANALYST") String role) {
-        try {
-            Loan saved = analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role);
-            Map<String, Object> response = new LinkedHashMap<>();
-            response.put("message", "Prestamo desembolsado correctamente");
-            response.put("id", saved.getLoanId());
-            response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
-            return ResponseEntity.ok(response);
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+        Loan saved = analystUseCase.disburseLoan(id, disbursementAccountId, analystUserId, role);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", "Prestamo desembolsado correctamente");
+        response.put("id", saved.getLoanId());
+        response.put("status", saved.getLoanStatus() != null ? saved.getLoanStatus().name() : null);
+        return ResponseEntity.ok(response);
     }
 
     // --- Audit Log ---

@@ -3,9 +3,12 @@ package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 import com.mongodb.MongoException;
 import com.mongodb.MongoTimeoutException;
 import gestiondeunbanco.wilmervega.application.adapters.api.dto.ErrorResponse;
-import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
+import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
 import gestiondeunbanco.wilmervega.domain.exceptions.BusinessException;
+import gestiondeunbanco.wilmervega.domain.exceptions.InsufficientBalanceException;
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
+import gestiondeunbanco.wilmervega.domain.exceptions.OwnershipViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
@@ -62,6 +65,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(400, ex.getMessage()));
+    }
+
+    /** 403 — Violacion de propiedad: el recurso no pertenece al usuario autenticado */
+    @ExceptionHandler(OwnershipViolationException.class)
+    public ResponseEntity<ErrorResponse> handleOwnershipViolation(OwnershipViolationException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(403, ex.getMessage()));
+    }
+
+    /** 422 — Saldo insuficiente para completar la operacion */
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientBalance(InsufficientBalanceException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse(422, ex.getMessage()));
+    }
+
+    /** 409 — Cuenta bloqueada o cancelada */
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountBlocked(AccountBlockedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(409, ex.getMessage()));
     }
 
     /** 403 — Acceso denegado */

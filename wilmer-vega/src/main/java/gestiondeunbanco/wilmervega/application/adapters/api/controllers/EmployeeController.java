@@ -5,6 +5,7 @@ import gestiondeunbanco.wilmervega.application.usecases.EmployeeUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,12 +13,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * REST controller for TELLER_EMPLOYEE / COMMERCIAL_EMPLOYEE / INTERNAL_ANALYST roles.
- * Full CRUD for bank accounts, clients and loans.
+ * REST controller para roles TELLER_EMPLOYEE / COMMERCIAL_EMPLOYEE / INTERNAL_ANALYST.
+ * CRUD completo de cuentas bancarias, clientes y prestamos.
+ *
+ * Segregacion de Funciones (Prompt Maestro - Seccion 3):
+ *  - TELLER_EMPLOYEE: acceso a clientes y cuentas (SIN acceso a bitacoras ni datos de riesgo)
+ *  - COMMERCIAL_EMPLOYEE: acceso a clientes y cuentas
+ *  - INTERNAL_ANALYST: acceso completo incluido gestion de prestamos
+ *  - Modificacion de estados de prestamos: SOLO INTERNAL_ANALYST
  */
 @RestController
 @RequestMapping("/api/employee")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('TELLER_EMPLOYEE','COMMERCIAL_EMPLOYEE','INTERNAL_ANALYST')")
 public class EmployeeController {
 
     private final EmployeeUseCase employeeUseCase;
@@ -135,8 +143,9 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    // ── Loans ─────────────────────────────────────────────────────────────────
+    // ═ Loans ────────────────────────────────────────────────────────
 
+    /** Consulta de prestamos: todos los roles con acceso a empleados */
     @GetMapping("/loans")
     public ResponseEntity<List<Loan>> getAllLoans() {
         return ResponseEntity.ok(employeeUseCase.findAllLoans());
@@ -147,6 +156,11 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeUseCase.findLoanById(id));
     }
 
+    /**
+     * Creacion de prestamos: TELLER_EMPLOYEE puede iniciar solicitudes.
+     * La modificacion de ESTADOS (aprobar/rechazar/desembolsar) es exclusiva del INTERNAL_ANALYST
+     * y se realiza a traves del AnalystController (/api/analyst).
+     */
     @PostMapping("/loans")
     public ResponseEntity<Map<String, Object>> createLoan(@RequestBody Loan loan) {
         Loan saved = employeeUseCase.saveLoan(loan);
@@ -157,13 +171,17 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /** Modificacion directa de prestamos: SOLO INTERNAL_ANALYST */
     @PutMapping("/loans/{id}")
+    @PreAuthorize("hasRole('INTERNAL_ANALYST')")
     public ResponseEntity<Loan> updateLoan(@PathVariable Long id, @RequestBody Loan loan) {
         loan.setLoanId(id);
         return ResponseEntity.ok(employeeUseCase.updateLoan(loan));
     }
 
+    /** Eliminacion de prestamos: SOLO INTERNAL_ANALYST */
     @DeleteMapping("/loans/{id}")
+    @PreAuthorize("hasRole('INTERNAL_ANALYST')")
     public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
         employeeUseCase.deleteLoanById(id);
         return ResponseEntity.noContent().build();
