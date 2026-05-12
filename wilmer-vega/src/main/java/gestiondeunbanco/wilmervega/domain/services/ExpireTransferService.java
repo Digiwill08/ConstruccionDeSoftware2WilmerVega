@@ -31,13 +31,14 @@ public class ExpireTransferService {
         List<Transfer> expiredTransfers = transferPort.findAwaitingApprovalOlderThan(cutoffTime);
 
         for (Transfer transfer : expiredTransfers) {
+            LocalDateTime operationDateTime = LocalDateTime.now();
             transfer.setTransferStatus(TransferStatus.EXPIRED);
             transferPort.save(transfer);
 
             // Register expiration in audit log (NoSQL)
             AuditLog log = new AuditLog();
             log.setOperationType(OperationType.TRANSFER_EXPIRED);
-            log.setOperationDateTime(LocalDateTime.now());
+            log.setOperationDateTime(operationDateTime);
             log.setUserId(transfer.getCreatorUserId());
             log.setUserRole("SYSTEM");
             log.setAffectedProductId(String.valueOf(transfer.getTransferId()));
@@ -47,7 +48,7 @@ public class ExpireTransferService {
             details.put("previousStatus", "AWAITING_APPROVAL");
             details.put("newStatus", "EXPIRED");
             details.put("createdAt", transfer.getCreationDateTime() != null ? transfer.getCreationDateTime().toString() : "N/A");
-            details.put("expiredAt", LocalDateTime.now().toString());
+            details.put("expiredAt", operationDateTime.toString());
             details.put("reason", "Vencida por falta de aprobación en el tiempo establecido (60 minutos)");
             details.put("amount", transfer.getAmount());
             details.put("creatorUserId", transfer.getCreatorUserId());

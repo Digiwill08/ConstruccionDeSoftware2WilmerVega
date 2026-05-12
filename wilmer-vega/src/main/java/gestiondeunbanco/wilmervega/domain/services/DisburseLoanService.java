@@ -1,9 +1,17 @@
 package gestiondeunbanco.wilmervega.domain.services;
 
 import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
+import gestiondeunbanco.wilmervega.domain.exceptions.InvalidApprovedAmountException;
+import gestiondeunbanco.wilmervega.domain.exceptions.InvalidDisbursementBalanceException;
+import gestiondeunbanco.wilmervega.domain.exceptions.LoanNotDisbursableException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.exceptions.OwnershipViolationException;
-import gestiondeunbanco.wilmervega.domain.models.*;
+import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
+import gestiondeunbanco.wilmervega.domain.models.AuditLog;
+import gestiondeunbanco.wilmervega.domain.models.BankAccount;
+import gestiondeunbanco.wilmervega.domain.models.Loan;
+import gestiondeunbanco.wilmervega.domain.models.LoanStatus;
+import gestiondeunbanco.wilmervega.domain.models.OperationType;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import gestiondeunbanco.wilmervega.domain.ports.LoanPort;
@@ -42,6 +50,8 @@ public class DisburseLoanService {
 
     @Transactional
     public Loan disburse(Long loanId, Long disbursementAccountId, Long analystUserId, String analystRole) {
+        LocalDateTime operationDateTime = LocalDateTime.now();
+        LocalDate operationDate = operationDateTime.toLocalDate();
 
         // 1. Buscar prestamo — falla rapido si no existe
         Loan loan = loanPort.findById(loanId)
@@ -49,14 +59,14 @@ public class DisburseLoanService {
 
         // 2. Estado debe ser APPROVED
         if (loan.getLoanStatus() != LoanStatus.APPROVED) {
-            throw new IllegalStateException(
+            throw new LoanNotDisbursableException(
                     "El prestamo no puede ser desembolsado. Estado actual: " + loan.getLoanStatus()
                     + ". Estado requerido: APPROVED");
         }
 
         // 3. Monto aprobado > 0
         if (loan.getApprovedAmount() == null || loan.getApprovedAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException(
+            throw new InvalidApprovedAmountException(
                     "El monto aprobado debe ser mayor a cero para poder realizar el desembolso.");
         }
 
@@ -66,14 +76,19 @@ public class DisburseLoanService {
                         "Cuenta de desembolso no encontrada con ID: " + disbursementAccountId));
 
         // 5. La cuenta debe pertenecer al cliente solicitante del prestamo
-        if (loan.getClientApplicant() != null && loan.getClientApplicant().getId() != null
-                && account.getHolder() != null && account.getHolder().getId() != null) {
-            if (!loan.getClientApplicant().getId().equals(account.getHolder().getId())) {
-                throw new OwnershipViolationException(
-                        "La cuenta de desembolso (ID: " + disbursementAccountId
-                        + ") no pertenece al cliente solicitante del prestamo (Cliente ID: "
-                        + loan.getClientApplicant().getId() + "). Operacion rechazada.");
-            }
+        Long applicantId = loan.getClientApplicant() != null ? loan.getClientApplicant().getId() : null;
+        Long accountHolderId = account.getHolder() != null ? account.getHolder().getId() : null;
+
+        if (applicantId == null || accountHolderId == null) {
+            throw new OwnershipViolationException(
+                    "No se puede validar titularidad para el desembolso: cliente solicitante o titular de cuenta inexistente.");
+        }
+
+        if (!applicantId.equals(accountHolderId)) {
+            throw new OwnershipViolationException(
+                    "La cuenta de desembolso (ID: " + disbursementAccountId
+                    + ") no pertenece al cliente solicitante del prestamo (Cliente ID: "
+                    + applicantId + "). Operacion rechazada.");
         }
 
         // 6. Cuenta debe estar ACTIVA
@@ -83,6 +98,10 @@ public class DisburseLoanService {
         }
 
         BigDecimal balanceBefore = account.getCurrentBalance();
+        if (balanceBefore == null) {
+            throw new InvalidDisbursementBalanceException(
+                "La cuenta de desembolso no tiene un saldo valido para acreditar fondos.");
+        }
 
         // 7. Acreditar saldo (operacion atomica)
         account.setCurrentBalance(balanceBefore.add(loan.getApprovedAmount()));
@@ -90,14 +109,14 @@ public class DisburseLoanService {
 
         // 8. Actualizar estado del prestamo
         loan.setLoanStatus(LoanStatus.DISBURSED);
-        loan.setDisbursementDate(LocalDate.now());
+        loan.setDisbursementDate(operationDate);
         loan.setDisbursementAccount(account);
         Loan savedLoan = loanPort.save(loan);
 
         // 9. Bitacora NoSQL — snapshot de saldos obligatorio
         AuditLog log = new AuditLog();
         log.setOperationType(OperationType.LOAN_DISBURSEMENT);
-        log.setOperationDateTime(LocalDateTime.now());
+        log.setOperationDateTime(operationDateTime);
         log.setUserId(analystUserId);
         log.setUserRole(analystRole);
         log.setAffectedProductId(String.valueOf(loanId));
@@ -113,8 +132,8 @@ public class DisburseLoanService {
         details.put("titularCuentaId", account.getHolder() != null ? account.getHolder().getId() : null);
         details.put("saldoAntes", balanceBefore);
         details.put("saldoDespues", account.getCurrentBalance());
-        details.put("fechaDesembolso", LocalDate.now().toString());
-        details.put("fechaHoraOperacion", LocalDateTime.now().toString());
+        details.put("fechaDesembolso", operationDate.toString());
+        details.put("fechaHoraOperacion", operationDateTime.toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);

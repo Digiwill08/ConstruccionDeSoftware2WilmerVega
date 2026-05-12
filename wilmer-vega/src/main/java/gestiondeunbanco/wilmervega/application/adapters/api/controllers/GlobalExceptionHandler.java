@@ -9,6 +9,7 @@ import gestiondeunbanco.wilmervega.domain.exceptions.InsufficientBalanceExceptio
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.exceptions.OwnershipViolationException;
+import gestiondeunbanco.wilmervega.domain.exceptions.UnauthorizedAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
@@ -70,6 +71,13 @@ public class GlobalExceptionHandler {
     /** 403 — Violacion de propiedad: el recurso no pertenece al usuario autenticado */
     @ExceptionHandler(OwnershipViolationException.class)
     public ResponseEntity<ErrorResponse> handleOwnershipViolation(OwnershipViolationException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(403, ex.getMessage()));
+    }
+
+    /** 403 — Acceso no autorizado a recurso/operacion */
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(403, ex.getMessage()));
     }

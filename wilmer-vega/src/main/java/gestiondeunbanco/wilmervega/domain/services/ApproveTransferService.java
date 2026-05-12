@@ -3,7 +3,13 @@ package gestiondeunbanco.wilmervega.domain.services;
 import gestiondeunbanco.wilmervega.domain.exceptions.AccountBlockedException;
 import gestiondeunbanco.wilmervega.domain.exceptions.InsufficientBalanceException;
 import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
-import gestiondeunbanco.wilmervega.domain.models.*;
+import gestiondeunbanco.wilmervega.domain.exceptions.TransferNotApprovableException;
+import gestiondeunbanco.wilmervega.domain.models.AccountStatus;
+import gestiondeunbanco.wilmervega.domain.models.AuditLog;
+import gestiondeunbanco.wilmervega.domain.models.BankAccount;
+import gestiondeunbanco.wilmervega.domain.models.OperationType;
+import gestiondeunbanco.wilmervega.domain.models.Transfer;
+import gestiondeunbanco.wilmervega.domain.models.TransferStatus;
 import gestiondeunbanco.wilmervega.domain.ports.AuditLogMongoPort;
 import gestiondeunbanco.wilmervega.domain.ports.BankAccountPort;
 import gestiondeunbanco.wilmervega.domain.ports.TransferPort;
@@ -37,21 +43,23 @@ public class ApproveTransferService {
     @Transactional
     public Transfer approve(Long transferId, Long supervisorUserId, String supervisorRole) {
 
+        LocalDateTime operationDateTime = LocalDateTime.now();
+
         Transfer transfer = transferPort.findById(transferId)
                 .orElseThrow(() -> new NotFoundException("Transferencia no encontrada con ID: " + transferId));
 
         if (transfer.getTransferStatus() != TransferStatus.AWAITING_APPROVAL) {
-            throw new IllegalStateException("La transferencia no puede ser aprobada. Estado actual: "
-                    + transfer.getTransferStatus() + ". Estado requerido: AWAITING_APPROVAL");
+            throw new TransferNotApprovableException("La transferencia no puede ser aprobada. Estado actual: "
+                + transfer.getTransferStatus() + ". Estado requerido: AWAITING_APPROVAL");
         }
 
         // Ventana de aprobacion de 60 minutos
         LocalDateTime expirationTime = transfer.getCreationDateTime().plusMinutes(APPROVAL_TIMEOUT_MINUTES);
-        if (LocalDateTime.now().isAfter(expirationTime)) {
+        if (operationDateTime.isAfter(expirationTime)) {
             transfer.setTransferStatus(TransferStatus.EXPIRED);
             transferPort.save(transfer);
-            throw new IllegalStateException("La transferencia ha expirado. Fue creada en "
-                    + transfer.getCreationDateTime() + " y ya paso la ventana de 60 minutos.");
+            throw new TransferNotApprovableException("La transferencia ha expirado. Fue creada en "
+                + transfer.getCreationDateTime() + " y ya paso la ventana de 60 minutos.");
         }
 
         BankAccount sourceAccount = bankAccountPort.findByAccountNumber(
@@ -64,10 +72,11 @@ public class ApproveTransferService {
                     sourceAccount.getAccountNumber(), sourceAccount.getAccountStatus().name());
         }
 
-        // Saldo suficiente
-        if (sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
+        // Saldo suficiente (validar null-safe)
+        if (sourceAccount.getCurrentBalance() == null
+            || sourceAccount.getCurrentBalance().compareTo(transfer.getAmount()) < 0) {
             throw new InsufficientBalanceException(
-                    sourceAccount.getCurrentBalance(), transfer.getAmount());
+                sourceAccount.getCurrentBalance(), transfer.getAmount());
         }
 
         BigDecimal sourceBalanceBefore = sourceAccount.getCurrentBalance();
@@ -80,8 +89,8 @@ public class ApproveTransferService {
 
         if (transfer.getDestinationAccount() != null && transfer.getDestinationAccount().getAccountNumber() != null) {
             BankAccount destination = bankAccountPort.findByAccountNumber(transfer.getDestinationAccount().getAccountNumber())
-                    .orElseThrow(() -> new NotFoundException("Cuenta destino no encontrada."));
-            destinationBalanceBefore = destination.getCurrentBalance();
+                .orElseThrow(() -> new NotFoundException("Cuenta destino no encontrada."));
+            destinationBalanceBefore = destination.getCurrentBalance() != null ? destination.getCurrentBalance() : BigDecimal.ZERO;
             destination.setCurrentBalance(destinationBalanceBefore.add(transfer.getAmount()));
             bankAccountPort.save(destination);
             destinationBalanceAfter = destination.getCurrentBalance();
@@ -89,14 +98,14 @@ public class ApproveTransferService {
         }
 
         transfer.setTransferStatus(TransferStatus.EXECUTED);
-        transfer.setApprovalDateTime(LocalDateTime.now());
+        transfer.setApprovalDateTime(operationDateTime);
         transfer.setApproverUserId(supervisorUserId);
         Transfer savedTransfer = transferPort.save(transfer);
 
         // Bitacora NoSQL — snapshot de saldos obligatorio
         AuditLog log = new AuditLog();
         log.setOperationType(OperationType.TRANSFER_EXECUTED);
-        log.setOperationDateTime(LocalDateTime.now());
+        log.setOperationDateTime(operationDateTime);
         log.setUserId(supervisorUserId);
         log.setUserRole(supervisorRole);
         log.setAffectedProductId(String.valueOf(transferId));
@@ -114,7 +123,7 @@ public class ApproveTransferService {
         details.put("saldoOrigen_Despues", sourceAccount.getCurrentBalance());
         details.put("saldoDestino_Antes", destinationBalanceBefore);
         details.put("saldoDestino_Despues", destinationBalanceAfter);
-        details.put("fechaAprobacion", LocalDateTime.now().toString());
+        details.put("fechaAprobacion", operationDateTime.toString());
         log.setDetails(details);
 
         auditLogMongoPort.save(log);
