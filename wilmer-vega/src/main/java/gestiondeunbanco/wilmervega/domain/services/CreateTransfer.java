@@ -82,7 +82,7 @@ public class CreateTransfer {
         transfer.setCreationDateTime(operationDateTime);
 
         // Montos grandes: pendiente de aprobacion del supervisor
-        if (transfer.getAmount().compareTo(ENTERPRISE_THRESHOLD) > 0) {
+        if (transfer.getAmount().compareTo(ENTERPRISE_THRESHOLD) >= 0) {
             transfer.setTransferStatus(TransferStatus.AWAITING_APPROVAL);
             Transfer saved = transferPort.save(transfer);
             registerAuditLog(saved, sourceAccount, destinationAccount,

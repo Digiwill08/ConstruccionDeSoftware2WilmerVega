@@ -63,6 +63,7 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
     private BankAccountEntity toEntity(BankAccount model) {
         BankAccountEntity entity = new BankAccountEntity();
         entity.setId(model.getId());
+        entity.setVersion(model.getVersion());
         entity.setAccountNumber(model.getAccountNumber());
         entity.setAccountType(model.getAccountType() != null ? model.getAccountType().name() : null);
         entity.setCurrentBalance(model.getCurrentBalance());
@@ -80,6 +81,7 @@ public class BankAccountPersistenceAdapter implements BankAccountPort {
     private BankAccount toModel(BankAccountEntity entity) {
         BankAccount model = new BankAccount();
         model.setId(entity.getId());
+        model.setVersion(entity.getVersion());
         model.setAccountNumber(entity.getAccountNumber());
         if (entity.getAccountType() != null) model.setAccountType(AccountType.valueOf(entity.getAccountType()));
         model.setCurrentBalance(entity.getCurrentBalance());

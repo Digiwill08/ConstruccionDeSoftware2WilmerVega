@@ -22,12 +22,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         try {
             User user = findUser.findByUsername(username);
             
-            // Note: In a production app, we would use a PasswordEncoder. 
-            // For this project, we assume passwords stored as provided.
+            // Passwords are stored as encoded (BCrypt). Spring Security will verify them correctly.
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getUsername())
-                    .password("{noop}" + user.getPassword()) // {noop} is for plain text passwords (dev only)
-                    .roles(user.getSystemRole().name().replace("ROLE_", "")) // roles() adds ROLE_ prefix
+                    .password(user.getPassword()) // stored as BCrypt-encoded
+                    .roles(user.getSystemRole().name()) // roles() adds ROLE_ prefix automatically
                     .build();
         } catch (Exception e) {
             throw new UsernameNotFoundException("User not found: " + username);

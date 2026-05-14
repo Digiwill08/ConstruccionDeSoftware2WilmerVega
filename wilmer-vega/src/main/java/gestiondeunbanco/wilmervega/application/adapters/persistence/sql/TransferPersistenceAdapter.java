@@ -69,11 +69,13 @@ public class TransferPersistenceAdapter implements TransferPort {
         if (model.getSourceAccount() != null && model.getSourceAccount().getId() != null) {
             BankAccountEntity o = new BankAccountEntity();
             o.setId(model.getSourceAccount().getId());
+            o.setVersion(model.getSourceAccount().getVersion());
             entity.setSourceAccount(o);
         }
         if (model.getDestinationAccount() != null && model.getDestinationAccount().getId() != null) {
             BankAccountEntity d = new BankAccountEntity();
             d.setId(model.getDestinationAccount().getId());
+            d.setVersion(model.getDestinationAccount().getVersion());
             entity.setDestinationAccount(d);
         }
         entity.setAmount(model.getAmount());
@@ -91,6 +93,7 @@ public class TransferPersistenceAdapter implements TransferPort {
         if (entity.getSourceAccount() != null) {
             gestiondeunbanco.wilmervega.domain.models.BankAccount o = new gestiondeunbanco.wilmervega.domain.models.BankAccount();
             o.setId(entity.getSourceAccount().getId());
+            o.setVersion(entity.getSourceAccount().getVersion());
             o.setAccountNumber(entity.getSourceAccount().getAccountNumber());
             o.setCurrentBalance(entity.getSourceAccount().getCurrentBalance());
             if (entity.getSourceAccount().getHolder() != null) {
@@ -107,6 +110,7 @@ public class TransferPersistenceAdapter implements TransferPort {
         if (entity.getDestinationAccount() != null) {
             gestiondeunbanco.wilmervega.domain.models.BankAccount d = new gestiondeunbanco.wilmervega.domain.models.BankAccount();
             d.setId(entity.getDestinationAccount().getId());
+            d.setVersion(entity.getDestinationAccount().getVersion());
             d.setAccountNumber(entity.getDestinationAccount().getAccountNumber());
             model.setDestinationAccount(d);
         }

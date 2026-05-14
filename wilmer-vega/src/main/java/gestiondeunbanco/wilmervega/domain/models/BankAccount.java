@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BankAccount {
     private Long id;
+    private Long version;
 
     private BankingProduct bankingProduct;
 

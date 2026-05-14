@@ -1,5 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
+import gestiondeunbanco.wilmervega.application.adapters.api.dto.TransferRequest;
 import gestiondeunbanco.wilmervega.application.usecases.ClientUseCase;
 import gestiondeunbanco.wilmervega.domain.models.BankAccount;
 import gestiondeunbanco.wilmervega.domain.models.Transfer;
@@ -37,8 +38,16 @@ public class ClientController {
     }
 
     @PostMapping("/transfers")
-    public ResponseEntity<Map<String, Object>> executeTransfer(@Valid @RequestBody Transfer transfer) {
+    public ResponseEntity<Map<String, Object>> executeTransfer(@Valid @RequestBody TransferRequest transferRequest) {
         try {
+            // Map DTO to domain model
+            Transfer transfer = new Transfer();
+            transfer.setAmount(transferRequest.getAmount());
+            transfer.setSourceAccount(new BankAccount());
+            transfer.getSourceAccount().setAccountNumber(transferRequest.getSourceAccount().getAccountNumber());
+            transfer.setDestinationAccount(new BankAccount());
+            transfer.getDestinationAccount().setAccountNumber(transferRequest.getDestinationAccount().getAccountNumber());
+            
             Transfer saved = clientUseCase.executeTransfer(transfer);
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Transferencia ejecutada correctamente");

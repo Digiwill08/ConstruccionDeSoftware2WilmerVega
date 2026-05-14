@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class DataInitializer implements CommandLineRunner {
     private final NaturalClientPort naturalClientPort;
     private final BankAccountPort bankAccountPort;
     private final LoanPort loanPort;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
@@ -31,11 +33,11 @@ public class DataInitializer implements CommandLineRunner {
             User analyst = new User();
             analyst.setFullName("Analista Interno");
             analyst.setUsername("analista");
-            analyst.setPassword("pass123");
+            analyst.setPassword(passwordEncoder.encode("pass123"));
             analyst.setSystemRole(SystemRole.INTERNAL_ANALYST);
             analyst.setUserStatus(UserStatus.ACTIVE);
             userPort.save(analyst);
-            log.info("Created Analyst user: analista / pass123");
+            log.info("Created Analyst user: analista / pass123 (encoded)");
         }
 
         // 2. Create Company Supervisor if missing
@@ -43,11 +45,11 @@ public class DataInitializer implements CommandLineRunner {
             User supervisor = new User();
             supervisor.setFullName("Supervisor Empresa");
             supervisor.setUsername("supervisor");
-            supervisor.setPassword("pass123");
+            supervisor.setPassword(passwordEncoder.encode("pass123"));
             supervisor.setSystemRole(SystemRole.COMPANY_SUPERVISOR);
             supervisor.setUserStatus(UserStatus.ACTIVE);
             userPort.save(supervisor);
-            log.info("Created Supervisor user: supervisor / pass123");
+            log.info("Created Supervisor user: supervisor / pass123 (encoded)");
         }
 
         // 3. Reuse existing test client or create one
