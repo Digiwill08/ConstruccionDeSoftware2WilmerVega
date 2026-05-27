@@ -4,6 +4,8 @@ import gestiondeunbanco.wilmervega.config.security.JwtService;
 import gestiondeunbanco.wilmervega.domain.exceptions.InvalidCredentialsException;
 import gestiondeunbanco.wilmervega.domain.models.SystemRole;
 import gestiondeunbanco.wilmervega.domain.models.User;
+import gestiondeunbanco.wilmervega.domain.models.NaturalClient;
+import gestiondeunbanco.wilmervega.domain.models.CompanyClient;
 import gestiondeunbanco.wilmervega.domain.models.UserStatus;
 import gestiondeunbanco.wilmervega.domain.ports.UserPort;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ public class AuthUseCase {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public LoginResult register(String username, String rawPassword, String requestedRole) {
+    public LoginResult register(String username, String rawPassword, String requestedRole, Long relatedClientId) {
         if (username == null || username.isBlank() || rawPassword == null || rawPassword.isBlank()) {
             throw new IllegalArgumentException("Username and password are required");
         }
@@ -37,6 +39,18 @@ public class AuthUseCase {
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setSystemRole(role);
         user.setUserStatus(UserStatus.ACTIVE);
+        // If caller provided a related client id, associate it with the user
+        if (relatedClientId != null) {
+            if (role == SystemRole.NATURAL_CLIENT) {
+                NaturalClient client = new NaturalClient();
+                client.setId(relatedClientId);
+                user.setRelatedClient(client);
+            } else if (role == SystemRole.COMPANY_CLIENT || role == SystemRole.COMPANY_EMPLOYEE) {
+                CompanyClient client = new CompanyClient();
+                client.setId(relatedClientId);
+                user.setRelatedClient(client);
+            }
+        }
         userPort.save(user);
 
         return login(username, rawPassword);

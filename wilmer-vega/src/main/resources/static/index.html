@@ -317,7 +317,7 @@
       { name: 'Accounts - Create account', module: 'CUENTAS', method: 'POST', path: '/api/accounts', protected: true, body: { accountNumber: 'ACCVISUAL001', accountType: 'SAVINGS', currency: 'USD', holderId: 1, initialBalance: 25000000.0 } },
       { name: 'Accounts - List by holder', module: 'CUENTAS', method: 'GET', path: '/api/accounts?holderId=1', protected: true, body: null },
       { name: 'Accounts - Check balance', module: 'CUENTAS', method: 'GET', path: '/api/accounts/1/balance', protected: true, body: null },
-      { name: 'Loans - Create', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
+      { name: 'Loans - Create', module: 'PRESTAMOS', method: 'POST', path: '/api/employee/loans', protected: true, body: { loanType: 'CONSUMER', clientApplicant: { id: 1 }, requestedAmount: 3000000, approvedAmount: 2000000, interestRate: 1.8, termInMonths: 12, loanStatus: 'UNDER_REVIEW' } },
       { name: 'Loans - Approve', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/approve?analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
       { name: 'Loans - Disburse', module: 'PRESTAMOS', method: 'POST', path: '/api/analyst/loans/1/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST', protected: true, body: null },
       { name: 'Transfers - Create', module: 'TRANSFERENCIAS', method: 'POST', path: '/api/client/transfers', protected: true, body: { sourceAccount: { id: 1, accountNumber: 'ACCVISUAL001' }, destinationAccount: { id: 2, accountNumber: 'DSTVISUAL001' }, amount: 12000000, creatorUserId: 1 } },

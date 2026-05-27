@@ -18,4 +18,7 @@ public class RegisterRequest {
 
     // Optional: defaults to NATURAL_CLIENT when omitted
     private String role;
+
+    // Optional: associate this new user with an existing client by id
+    private Long relatedClientId;
 }

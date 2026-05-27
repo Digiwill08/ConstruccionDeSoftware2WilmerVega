@@ -1,5 +1,6 @@
 package gestiondeunbanco.wilmervega.application.adapters.persistence.sql;
 
+import gestiondeunbanco.wilmervega.domain.exceptions.NotFoundException;
 import gestiondeunbanco.wilmervega.domain.ports.LoanPort;
 import gestiondeunbanco.wilmervega.domain.models.Loan;
 import gestiondeunbanco.wilmervega.domain.models.LoanType;
@@ -7,9 +8,13 @@ import gestiondeunbanco.wilmervega.domain.models.LoanStatus;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.repositories.LoanRepository;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.LoanEntity;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.ClientEntity;
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.CompanyClientEntity;
+import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.NaturalClientEntity;
 import gestiondeunbanco.wilmervega.application.adapters.persistence.sql.entities.BankAccountEntity;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +24,7 @@ import java.util.Optional;
 public class LoanPersistenceAdapter implements LoanPort {
 
     private final LoanRepository repository;
+    private final EntityManager entityManager;
 
     @Override
     public List<Loan> findAll() {
@@ -31,7 +37,11 @@ public class LoanPersistenceAdapter implements LoanPort {
     }
 
     @Override
+    @Transactional
     public Loan save(Loan loan) {
+        if (loan == null) {
+            throw new IllegalArgumentException("Loan cannot be null");
+        }
         return toModel(repository.save(toEntity(loan)));
     }
 
@@ -70,9 +80,7 @@ public class LoanPersistenceAdapter implements LoanPort {
         entity.setDisbursementDate(model.getDisbursementDate());
         entity.setApprovedByUserId(model.getApprovedByUserId());
         if (model.getClientApplicant() != null && model.getClientApplicant().getId() != null) {
-            ClientEntity ce = new ClientEntity();
-            ce.setId(model.getClientApplicant().getId());
-            entity.setClientApplicant(ce);
+            entity.setClientApplicant(entityManager.getReference(ClientEntity.class, model.getClientApplicant().getId()));
         }
         if (model.getDisbursementAccount() != null && model.getDisbursementAccount().getId() != null) {
             BankAccountEntity ba = new BankAccountEntity();
@@ -97,14 +105,41 @@ public class LoanPersistenceAdapter implements LoanPort {
 
         // Reconstruct clientApplicant from stored entity
         if (entity.getClientApplicant() != null) {
-            gestiondeunbanco.wilmervega.domain.models.NaturalClient applicant =
-                    new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
-            applicant.setId(entity.getClientApplicant().getId());
-            applicant.setDocumentNumber(entity.getClientApplicant().getDocumentNumber());
-            applicant.setEmail(entity.getClientApplicant().getEmail());
-            applicant.setPhone(entity.getClientApplicant().getPhone());
-            applicant.setAddress(entity.getClientApplicant().getAddress());
-            model.setClientApplicant(applicant);
+            ClientEntity clientEntity = entity.getClientApplicant();
+            if (clientEntity instanceof CompanyClientEntity companyEntity) {
+                gestiondeunbanco.wilmervega.domain.models.CompanyClient applicant =
+                        new gestiondeunbanco.wilmervega.domain.models.CompanyClient();
+                applicant.setId(companyEntity.getId());
+                applicant.setDocumentNumber(companyEntity.getDocumentNumber());
+                applicant.setEmail(companyEntity.getEmail());
+                applicant.setPhone(companyEntity.getPhone());
+                applicant.setAddress(companyEntity.getAddress());
+                applicant.setBusinessName(companyEntity.getBusinessName());
+                model.setClientApplicant(applicant);
+            } else if (clientEntity instanceof NaturalClientEntity naturalEntity) {
+                gestiondeunbanco.wilmervega.domain.models.NaturalClient applicant =
+                        new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
+                applicant.setId(naturalEntity.getId());
+                applicant.setDocumentNumber(naturalEntity.getDocumentNumber());
+                applicant.setEmail(naturalEntity.getEmail());
+                applicant.setPhone(naturalEntity.getPhone());
+                applicant.setAddress(naturalEntity.getAddress());
+                applicant.setFullName(naturalEntity.getFullName());
+                applicant.setBirthDate(naturalEntity.getBirthDate());
+                if (naturalEntity.getRole() != null) {
+                    applicant.setRole(gestiondeunbanco.wilmervega.domain.models.SystemRole.valueOf(naturalEntity.getRole()));
+                }
+                model.setClientApplicant(applicant);
+            } else {
+                gestiondeunbanco.wilmervega.domain.models.NaturalClient applicant =
+                        new gestiondeunbanco.wilmervega.domain.models.NaturalClient();
+                applicant.setId(clientEntity.getId());
+                applicant.setDocumentNumber(clientEntity.getDocumentNumber());
+                applicant.setEmail(clientEntity.getEmail());
+                applicant.setPhone(clientEntity.getPhone());
+                applicant.setAddress(clientEntity.getAddress());
+                model.setClientApplicant(applicant);
+            }
         }
 
         // Reconstruct disbursementAccount from stored entity
