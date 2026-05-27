@@ -1,5 +1,7 @@
 package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
+import gestiondeunbanco.wilmervega.application.adapters.api.dto.LoanRequest;
+import gestiondeunbanco.wilmervega.application.adapters.api.mappers.LoanMapper;
 import gestiondeunbanco.wilmervega.domain.models.*;
 import gestiondeunbanco.wilmervega.application.usecases.EmployeeUseCase;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import java.util.Map;
 public class EmployeeController {
 
     private final EmployeeUseCase employeeUseCase;
+    private final LoanMapper loanMapper;
 
     // ── Bank Accounts ─────────────────────────────────────────────────────────
 
@@ -163,8 +166,8 @@ public class EmployeeController {
      * y se realiza a traves del AnalystController (/api/analyst).
      */
     @PostMapping("/loans")
-    public ResponseEntity<Map<String, Object>> createLoan(@Valid @RequestBody Loan loan) {
-        Loan saved = employeeUseCase.saveLoan(loan);
+    public ResponseEntity<Map<String, Object>> createLoan(@Valid @RequestBody LoanRequest loanRequest) {
+        Loan saved = employeeUseCase.saveLoan(loanMapper.toModel(loanRequest));
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Prestamo creado correctamente");
         response.put("id", saved.getLoanId());

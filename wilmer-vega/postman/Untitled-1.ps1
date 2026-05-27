@@ -1,0 +1,1 @@
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8083/api/analyst/loans/5/disburse?disbursementAccountId=1&analystUserId=1&role=INTERNAL_ANALYST" -Headers @{ Authorization = "Bearer <TU_TOKEN>" }
