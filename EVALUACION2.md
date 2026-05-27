@@ -2,10 +2,10 @@
 
 ## Informacion general
 - Estudiante(s): Wilmer Vega (usuario GitHub: Digiwill08)
-- Rama evaluada: origin/develop (rama remota mas reciente — la rama local `develop` no estaba creada)
+- Rama evaluada: origin/develop
 - Commit evaluado: c64f137a76f0a78e0c49e2b5a67a7c6ebe4a3f9c
 - Fecha: 2026-04-11
-- Nota: La rama `develop` existe en remoto (timestamp 1775785871) y es mas reciente que `main` (1774285966).
+- Nota: La evaluación corresponde al estado del dominio en ese commit.
 
 ---
 

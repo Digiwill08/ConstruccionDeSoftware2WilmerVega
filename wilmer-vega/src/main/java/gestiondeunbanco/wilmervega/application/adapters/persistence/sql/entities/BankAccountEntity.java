@@ -31,8 +31,12 @@ public class BankAccountEntity {
 
     private LocalDate openingDate;
 
+    // Optimistic locking: increment version on each update
+    @Version
+    private Long version;
+
     // Simplificado
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private ClientEntity holder;
 }

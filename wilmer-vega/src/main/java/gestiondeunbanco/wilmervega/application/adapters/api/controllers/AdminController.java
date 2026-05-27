@@ -1,22 +1,25 @@
-package gestiondeunbanco.wilmervega.application.adapters.api;
+package gestiondeunbanco.wilmervega.application.adapters.api.controllers;
 
+import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import gestiondeunbanco.wilmervega.domain.models.AuditLog;
 import gestiondeunbanco.wilmervega.domain.models.User;
-import gestiondeunbanco.wilmervega.application.usecases.AdminUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('INTERNAL_ANALYST')")
 public class AdminController {
 
     private final AdminUseCase adminUseCase;
 
-    // --- Users ---
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(adminUseCase.findAllUsers());
@@ -24,26 +27,23 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return adminUseCase.findUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(adminUseCase.findUserById(id));
     }
 
     @GetMapping("/users/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        return adminUseCase.findUserByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(adminUseCase.findUserByUsername(username));
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        try {
-            User saved = adminUseCase.saveUser(user);
-            return ResponseEntity.ok(saved);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Map<String, Object>> createUser(@RequestBody User user) {
+        User saved = adminUseCase.saveUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "message", "Usuario creado correctamente",
+                "id", saved.getUserId(),
+                "username", saved.getUsername(),
+                "role", saved.getSystemRole() != null ? saved.getSystemRole().name() : ""
+        ));
     }
 
     @DeleteMapping("/users/{id}")
@@ -52,7 +52,6 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // --- Audit Logs ---
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
         return ResponseEntity.ok(adminUseCase.findAllAuditLogs());

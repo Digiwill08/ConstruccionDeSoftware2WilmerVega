@@ -12,4 +12,5 @@ public interface UserPort {
     void deleteById(Long id);
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
+    boolean existsActiveByRelatedClientId(Long clientId);
 }

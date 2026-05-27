@@ -5,6 +5,7 @@ public enum OperationType {
     ACCOUNT_CLOSURE("Bank account closure"),
     DEPOSIT("Account deposit"),
     WITHDRAWAL("Account withdrawal"),
+    TRANSFER_INITIATED("Transfer initiated - awaiting approval"),
     TRANSFER_EXECUTED("Transfer executed"),
     TRANSFER_REJECTED("Transfer rejected"),
     TRANSFER_EXPIRED("Transfer expired due to lack of approval"),
@@ -15,7 +16,8 @@ public enum OperationType {
     USER_CREATION("New user creation"),
     USER_BLOCKING("User blocked"),
     LOGIN("Login"),
-    LOGOUT("Logout");
+    LOGOUT("Logout"),
+    SECURITY_VALIDATION_FAILURE("Security or validation failed operation");
 
     private final String description;
 

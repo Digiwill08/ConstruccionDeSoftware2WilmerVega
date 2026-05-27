@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface BankAccountPort {
     List<BankAccount> findAll();
     Optional<BankAccount> findById(Long id);
+    List<BankAccount> findByHolderId(Long holderId);
     BankAccount save(BankAccount bankAccount);
     void deleteById(Long id);
     Optional<BankAccount> findByAccountNumber(String accountNumber);

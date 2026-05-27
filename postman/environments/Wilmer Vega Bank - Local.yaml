@@ -1,0 +1,98 @@
+﻿name: Wilmer Vega Bank - Local
+values:
+  - key: baseUrl
+    value: 'http://127.0.0.1:8083'
+    enabled: true
+    type: default
+  - key: username
+    value: pancracio
+    enabled: true
+    type: default
+  - key: password
+    value: '123456'
+    enabled: true
+    type: default
+  - key: token
+    value: ''
+    enabled: true
+    type: default
+  - key: analystToken
+    value: ''
+    enabled: true
+    type: default
+  - key: analystUserId
+    value: ''
+    enabled: true
+    type: default
+  - key: loggedUserId
+    value: ''
+    enabled: true
+    type: default
+  - key: naturalClientId
+    value: ''
+    enabled: true
+    type: default
+  - key: companyClientId
+    value: ''
+    enabled: true
+    type: default
+  - key: accountId
+    value: ''
+    enabled: true
+    type: default
+  - key: accountNumber
+    value: ''
+    enabled: true
+    type: default
+  - key: sourceAccountNumber
+    value: ''
+    enabled: true
+    type: default
+  - key: destinationAccountId
+    value: ''
+    enabled: true
+    type: default
+  - key: destinationAccountNumber
+    value: ''
+    enabled: true
+    type: default
+  - key: loanId
+    value: ''
+    enabled: true
+    type: default
+  - key: companyEmployeeUsername
+    value: ''
+    enabled: true
+    type: default
+  - key: companyEmployeePassword
+    value: '123456'
+    enabled: true
+    type: default
+  - key: companyEmployeeToken
+    value: ''
+    enabled: true
+    type: default
+  - key: companyEmployeeUserId
+    value: ''
+    enabled: true
+    type: default
+  - key: supervisorUsername
+    value: ''
+    enabled: true
+    type: default
+  - key: supervisorPassword
+    value: '123456'
+    enabled: true
+    type: default
+  - key: supervisorToken
+    value: ''
+    enabled: true
+    type: default
+  - key: supervisorUserId
+    value: ''
+    enabled: true
+    type: default
+  - key: pendingTransferId
+    value: ''
+    enabled: true
+    type: default

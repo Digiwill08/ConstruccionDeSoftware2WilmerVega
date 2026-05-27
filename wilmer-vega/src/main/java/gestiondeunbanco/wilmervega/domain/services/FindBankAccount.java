@@ -29,6 +29,10 @@ public class FindBankAccount {
                 .orElseThrow(() -> new NotFoundException("Bank Account not found with account number: " + accountNumber));
     }
 
+    public List<BankAccount> findByHolderId(Long holderId) {
+        return bankAccountPort.findByHolderId(holderId);
+    }
+
     public List<BankAccount> findByAccountStatus(AccountStatus status) {
         return bankAccountPort.findByAccountStatus(status);
     }

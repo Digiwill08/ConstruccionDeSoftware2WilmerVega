@@ -1,4 +1,4 @@
-package gestiondeunbanco.wilmervega.exception;
+package gestiondeunbanco.wilmervega.domain.exceptions;
 
 public class BusinessException extends RuntimeException {
     public BusinessException(String message) {

@@ -1,53 +1,118 @@
-# Construcción de Software 2 - Wilmer Vega
+# Construcción de Software 2 — Wilmer Vega
 
 ## Información del Proyecto
 
-- **Materia:** Construcción de Software 2
-- **Estudiantes Integrantes:** Wilmer Vega (Digiwill08)
-- **Profesor:** Andrés Felipe Sánchez Aguiar
-- **Proyecto:** Sistema de Gestión Bancaria (API RESTful)
-- **Arquitectura:** Arquitectura Hexagonal Estricta (Puertos y Adaptadores)
+| Campo | Detalle |
+|---|---|
+| Materia | Construcción de Software 2 (220261) |
+| Estudiante | Wilmer Vega (GitHub: Digiwill08) |
+| Profesor | Andrés Felipe Sánchez Aguiar |
+| Proyecto | Aplicación de Gestión Bancaria con arquitectura hexagonal |
 
-## Descripción
+## Resumen
 
-Este repositorio contiene la implementación backend de un sistema bancario altamente escalable. El proyecto simula las operaciones cotidianas de un banco, incluyendo:
-- Gestión de clientes (Personas Naturales y Empresas).
-- Cuentas Bancarias y Préstamos.
-- Transferencias de fondos con validaciones de negocio.
-- Sistema puro de roles y usuarios.
-- Auditoría integral de operaciones.
+Sistema bancario orientado a servicios REST con autenticación JWT, roles por perfil, panel web visual para ejecutar servicios y bitácora de auditoría en MongoDB. La persistencia principal de negocio usa H2 en memoria para facilitar la ejecución local y la demostración de la entrega.
 
-## Estructura de Arquitectura Hexagonal
+## Arquitectura
 
-El proyecto ha sido refactorizado y diseñado siguiendo los principios de la **Arquitectura Hexagonal (Puertos y Adaptadores)** exigidos en clase, dividiéndose en 4 capas estrictas para cada entidad del sistema:
+El proyecto está organizado con arquitectura hexagonal:
 
-1. **Capa Web (`controller`):** Exposición de la API HTTP (REST). Recibe peticiones y se comunica exclusivamente con la capa de aplicación.
-2. **Capa de Aplicación (`application/usecases`):** Clases orquestadoras (`@Service`) que coordinan las transacciones y conectan los controladores con el dominio.
-3. **Capa de Dominio (`domain`):**
-   - **`services`:** Contiene la lógica pura de negocio (Java puro sin dependencias de frameworks).
-   - **`ports`:** Interfaces de salida que establecen los contratos de infraestructura.
-   - **`models`:** Entidades ricas y enumeraciones que definen las reglas base del banco.
-4. **Capa de Infraestructura (`infrastructure/adapters`):** Implementaciones reales conectadas a las bases de datos (`@Component` y `JpaRepository`), aislando a Spring Data de la lógica de negocio.
+- `domain/`: modelos, puertos y reglas del negocio.
+- `application/usecases/`: orquestación por caso de uso y por rol.
+- `application/adapters/api/`: controladores REST.
+- `application/adapters/persistence/`: adaptadores de persistencia para SQL y Mongo.
+- `config/`: seguridad, beans y verificación de conexión.
 
-## Tecnologías Utilizadas
-- **Java 17**
-- **Spring Boot 3** (Web, Data JPA)
-- **MySQL / Base de Datos Relacional**
-- **Maven** (Gestión de dependencias)
-- **Lombok** (Reducción de boilerplate)
+## Tecnologías
 
-## Instalación y Ejecución
+| Tecnología | Uso |
+|---|---|
+| Java 17 | Lenguaje principal |
+| Spring Boot 4.0.3 | Framework base |
+| Spring Web | API REST |
+| Spring Security + JWT | Autenticación y autorización |
+| Spring Data JPA | Persistencia relacional |
+| H2 | Base de datos transaccional local |
+| Spring Data MongoDB | Bitácora de auditoría |
+| Lombok | Reducción de boilerplate |
+| Maven | Construcción y dependencias |
 
-Para correr el proyecto localmente, asegúrese de tener Java 17 instalado:
+## Roles
+
+| Rol | Propósito |
+|---|---|
+| `ADMINISTRATOR` | Gestión total de usuarios y consulta de auditoría |
+| `NATURAL_CLIENT` | Cliente persona natural |
+| `COMPANY_CLIENT` | Cliente empresa |
+| `TELLER_EMPLOYEE` | Operaciones de ventanilla |
+| `COMMERCIAL_EMPLOYEE` | Gestión de clientes y préstamos |
+| `COMPANY_EMPLOYEE` | Operaciones de empresa |
+| `COMPANY_SUPERVISOR` | Aprobación o rechazo de transferencias |
+| `INTERNAL_ANALYST` | Aprobación, rechazo y desembolso de préstamos |
+
+## Funcionalidades clave
+
+- Login JWT y registro público limitado a roles permitidos.
+- Gestión de clientes naturales y empresas.
+- Gestión de cuentas bancarias, transferencias y préstamos.
+- Aprobación y rechazo de préstamos.
+- Aprobación, rechazo y vencimiento de transferencias.
+- Bitácora de operaciones consultable por rol.
+- Panel visual en la ruta raíz para ejecutar servicios desde el navegador.
+
+## Endpoints principales
+
+Autenticación:
+
+- `POST /auth/login`
+- `POST /auth/register`
+
+Clientes y cuentas:
+
+- `GET /api/customers/natural`
+- `GET /api/customers/company`
+- `GET /api/accounts`
+- `GET /api/accounts/{accountNumber}`
+- `POST /api/accounts`
+
+Transferencias:
+
+- `GET /api/transfers`
+- `GET /api/transfers/{transferId}`
+- `GET /api/transfers/status/{status}`
+- `POST /api/transfers`
+- `POST /api/transfers/approve`
+- `POST /api/transfers/reject`
+- `GET /api/transfers/pending-approval`
+
+Préstamos:
+
+- `GET /api/loans`
+- `GET /api/loans/{loanId}`
+- `POST /api/loans`
+- `POST /api/loans/approve`
+- `POST /api/loans/reject`
+- `POST /api/loans/disburse`
+
+Administración y auditoría:
+
+- `GET /api/admin/users`
+- `POST /api/admin/users`
+- `GET /api/audit-logs`
+- `GET /api/analyst/audit-logs`
+- `GET /api/supervisor/transfers/pending`
+
+## Ejecución local
 
 ```bash
-# Otorgar permisos al wrapper (Linux/Mac)
-chmod +x mvnw
-
-# Compilar el proyecto
-./mvnw clean compile
-
-# Ejecutar el servidor
+cd wilmer-vega
 ./mvnw spring-boot:run
 ```
-La aplicación se levantará exponiendo sus endpoints protegidos bajo la ruta `/api/**`.
+
+La aplicación expone la interfaz visual en `/` y la API en `http://localhost:8083` por configuración por defecto. Para escenarios con Mongo local o Atlas, también existe `run-with-mongo.ps1`.
+
+## Evidencia de entrega
+
+- Colección Postman actualizada en `postman/`.
+- Documentación de exposición y paso a paso alineada con la implementación real.
+- Diagramas de arquitectura y modelo actualizados.

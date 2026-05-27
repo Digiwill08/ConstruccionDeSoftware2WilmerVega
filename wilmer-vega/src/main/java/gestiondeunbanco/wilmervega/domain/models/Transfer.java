@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,12 +18,13 @@ public class Transfer {
 
     private BigDecimal amount;
 
-    private Date creationDateTime;
+    private LocalDateTime creationDateTime;
 
-    private Date approvalDateTime;
+    private LocalDateTime approvalDateTime;
 
     private TransferStatus transferStatus;
 
-    private SystemUser creatorUser;
-    private SystemUser approverUser;
+    private Long creatorUserId;
+
+    private Long approverUserId;
 }

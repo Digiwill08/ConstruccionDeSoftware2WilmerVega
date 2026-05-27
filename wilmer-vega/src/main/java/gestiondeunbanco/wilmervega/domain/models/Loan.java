@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -18,9 +18,7 @@ public class Loan {
 
     private LoanType loanType;
 
-    private NaturalClient naturalClientApplicant;
-
-    private CompanyClient companyClientApplicant;
+    private Client clientApplicant;
 
     private BigDecimal requestedAmount;
 
@@ -32,9 +30,11 @@ public class Loan {
 
     private LoanStatus loanStatus;
 
-    private Date approvalDate;
+    private LocalDate approvalDate;
 
-    private Date disbursementDate;
+    private LocalDate disbursementDate;
 
     private BankAccount disbursementAccount;
+
+    private Long approvedByUserId;
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "loans")
@@ -23,14 +23,15 @@ public class LoanEntity {
     private BigDecimal interestRate;
     private Integer termInMonths;
     private String loanStatus;
-    private Date approvalDate;
-    private Date disbursementDate;
-    
-    @ManyToOne
-    @JoinColumn(name = "natural_client_id")
-    private NaturalClientEntity naturalClientApplicant;
+    private LocalDate approvalDate;
+    private LocalDate disbursementDate;
+    private Long approvedByUserId;
 
     @ManyToOne
-    @JoinColumn(name = "company_client_id")
-    private CompanyClientEntity companyClientApplicant;
+    @JoinColumn(name = "client_id")
+    private ClientEntity clientApplicant;
+
+    @ManyToOne
+    @JoinColumn(name = "disbursement_account_id")
+    private BankAccountEntity disbursementAccount;
 }

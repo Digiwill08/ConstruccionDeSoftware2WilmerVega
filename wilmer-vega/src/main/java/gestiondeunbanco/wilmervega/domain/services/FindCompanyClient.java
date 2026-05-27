@@ -22,4 +22,9 @@ public class FindCompanyClient {
         return companyClientPort.findById(id)
                 .orElseThrow(() -> new NotFoundException("Company Client not found with ID: " + id));
     }
+
+    public CompanyClient findByDocumentNumber(String documentNumber) {
+        return companyClientPort.findByDocumentNumber(documentNumber)
+                .orElseThrow(() -> new NotFoundException("Company Client not found with document: " + documentNumber));
+    }
 }

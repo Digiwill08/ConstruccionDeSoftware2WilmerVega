@@ -32,5 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
+# Runtime artifacts
+.run/backend.pid
+
 ### Local Maven cache ###
 .m2/

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface CompanyClientPort {
     List<CompanyClient> findAll();
     Optional<CompanyClient> findById(Long id);
+    Optional<CompanyClient> findByDocumentNumber(String documentNumber);
+    boolean existsByDocumentNumber(String documentNumber);
     CompanyClient save(CompanyClient companyClient);
     void deleteById(Long id);
 }

@@ -2,7 +2,7 @@
 
 ## Información General
 - **Estudiante(s):** Wilmer Vega (Digiwill08 / WILMER)
-- **Rama evaluada:** main (checkout a develop falló por filenames largos; modelos están en main)
+- **Rama evaluada:** main
 - **Fecha de evaluación:** 2026-03-23
 
 ---
@@ -79,13 +79,13 @@ Arquitectura hexagonal completa: `domain/models`, `domain/ports`, `domain/servic
 - Todos los enums esperados implementados.
 - Uso correcto de `BigDecimal`.
 - Arquitectura hexagonal bien implementada.
-- Documentación adicional (diagramas, documentación de exposición) — valor añadido.
+- Documentación adicional alineada con la arquitectura y los flujos reales.
 - Lógica de negocio en `BankAccount`.
 
 ## Oportunidades de mejora
 - Crear una clase `Client` abstracta base para `NaturalClient` y `CompanyClient` (evitar la herencia `CompanyClient extends NaturalClient` que es semánticamente incorrecto).
 - Agregar `Map<String, Object>` en `AuditLog` para datos flexibles.
 - Referenciar `Client` (base) desde `User` en lugar de solo `NaturalClient`.
-- Mejorar README con info de materia e integrantes.
+- Mejorar README con info de materia, roles y rutas principales.
 - Agregar tag de entrega.
 - Usar `java.time.LocalDate` en lugar de `java.sql.Date`.
